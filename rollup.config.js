@@ -7,6 +7,10 @@ const main = {
   input: 'index.ts',
   output: [
     {
+      file: 'lib/index.es6.js',
+      format: 'es',
+    },
+    {
       file: 'lib/index.js',
       format: 'cjs',
     },

@@ -34,7 +34,7 @@ export const RegExpCompat = ((): typeof RegExp => {
   }
 
   const klass = function RegExpCompat(this: RegExpCompat, source: any, flags?: string): RegExp {
-    if (new.target === undefined) {
+    if (/*new.target === undefined*/ !this || this.constructor !== RegExpCompat) {
       if (isRegExp(source) && flags === undefined) {
         if (source.constructor === RegExpCompat) {
           return source;
@@ -325,3 +325,5 @@ export const RegExpCompat = ((): typeof RegExp => {
 
   return klass as any;
 })();
+
+window[ 'RegExpCompat' ] = RegExpCompat;
