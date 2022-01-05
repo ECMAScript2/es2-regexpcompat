@@ -341,7 +341,7 @@ class Program {
           case 'word_boundary_not': {
             const c = prevIndex(input, proc.pos, this.unicode);
             const d = index(input, proc.pos, this.unicode);
-            const set = this.unicode && this.ignoreCase ? unicodeWord : word;
+            const set = this.unicode && this.ignoreCase ? charSetUnicodeWord : charSetWord;
             const actual = set.has(c) !== set.has(d);
             const expected = code.op === 'word_boundary';
             if (actual !== expected) {

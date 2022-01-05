@@ -338,14 +338,14 @@ class Compiler {
    escapeClassToSet(node) {
     switch (node.kind) {
       case 'digit':
-        return node.invert ? invertDigit : digit;
+        return node.invert ? charSetInvertDigit : charSetDigit;
       case 'word':
         if (this.unicode && this.ignoreCase) {
-          return node.invert ? invertUnicodeWord : unicodeWord;
+          return node.invert ? charSetInvertUnicodeWord : charSetUnicodeWord;
         }
-        return node.invert ? invertWord : word;
+        return node.invert ? charSetInvertWord : charSetWord;
       case 'space':
-        return node.invert ? invertSpace : space;
+        return node.invert ? charSetInvertSpace : charSetSpace;
       case 'unicode_property': {
         const set =
           _nullishCoalesce$2(loadPropertyValue('General_Category', node.property), () => ( loadProperty(node.property)));

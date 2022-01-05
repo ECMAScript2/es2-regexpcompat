@@ -1,131 +1,158 @@
-function _nullishCoalesce$4(lhs, rhsFn) { if (lhs != null) { return lhs; } else { return rhsFn(); } }
+/** `Match` is result data of regular expression pattern matching.
+ *
+ * @constructor
+ *
+ * @param {string} input 
+ * @param {Array.<number>} caps 
+ * @param {Map} names 
+ */
+ Match = function(input, caps, names) {
+    /** An input string of this matching.
+     * @type {string}
+     */
+    this.input  = input;
+    this._caps  = caps;
+    this._names = names;
 
-/** `Match` is result data of regular expression pattern matching. */
-class Match {
-  /** An input string of this matching. */
-  
+    /** Return the initial index of this matching.
+     * @type {number}
+     */
+    this.index = caps[ 0 ];
+    /** Return the last index of this matching.
+     * @type {number}
+     */
+    this.lastIndex = caps[ 1 ];
+    /**
+     * Return number of capture group.
+     *
+     * This number contains capture `0` (whole matching) also.
+     * @type {number}
+     */
+    this.length = caps.length / 2;
+};
 
-  
-  
+/** Get the capture `k`.
+ * @param {(string|number)} k
+ * @return {(string|undefined)}
+ */
+Match.prototype.get = function( k ){
+    const result = Match_resolve( this, k ),
+          i      = result[ 0 ],
+          j      = result[ 1 ];
 
-  constructor(input, caps, names) {
-    this.input = input;
-    this.caps = caps;
-    this.names = names;
-  }
+    if( i < 0 || j < 0 ){
+        return undefined;
+    };
+    return this.input.slice( i, j );
+};
 
-  /** Return the initial index of this matching. */
-   get index() {
-    return this.caps[0];
-  }
+/** Get the begin index of the capture `k`.
+ * @param {(string|number)} k
+ * @return {(number|undefined)}
+ */
+Match.prototype.begin = function( k ){
+    const i = Match_resolve( this, k )[ 0 ];
 
-  /** Return the last index of this matching. */
-   get lastIndex() {
-    return this.caps[1];
-  }
-
-  /**
-   * Return number of capture group.
-   *
-   * This number contains capture `0` (whole matching) also.
-   */
-   get length() {
-    return this.caps.length / 2;
-  }
-
-  /** Get the capture `k`. */
-   get(k) {
-    const [i, j] = this.resolve(k);
-    if (i < 0 || j < 0) {
-      return undefined;
-    }
-
-    return this.input.slice(i, j);
-  }
-
-  /** Get the begin index of the capture `k`. */
-   begin(k) {
-    const i = this.resolve(k)[0];
     return i < 0 ? undefined : i;
-  }
+};
 
-  /** Get the end index of the capture `k`. */
-   end(k) {
-    const j = this.resolve(k)[1];
+/** Get the end index of the capture `k`.
+ * @param {(string|number)} k
+ * @return {(number|undefined)}
+ */
+Match.prototype.end = function( k ){
+    const j = Match_resolve( this, k )[ 1 ];
+
     return j < 0 ? undefined : j;
-  }
+};
 
-  /**
-   * Resolve name to capture index.
-   *
-   * If not resolved, it returns `-1`.
-   */
-   resolve(k) {
-    if (typeof k === 'string') {
-      k = _nullishCoalesce$4(this.names.get(k), () => ( -1));
-    }
-    return [_nullishCoalesce$4(this.caps[k * 2], () => ( -1)), _nullishCoalesce$4(this.caps[k * 2 + 1], () => ( -1))];
-  }
+/**
+ * Resolve name to capture index.
+ *
+ * If not resolved, it returns `-1`.
+ * 
+ * @param {Match} match
+ * @param {string} k 
+ * @return {Array.<number>}
+ */
+function Match_resolve( match, k ){
+    if( k === k + '' ){ // typeof k === 'string'
+        k = match._names.get( k );
+        k  = k !== undefined ? k : -1;
 
-  /** Convert this into `RegExp`'s result array. */
-   toArray() {
+    };
+    var i = match._caps[ k * 2 ],
+        j = match._caps[ k * 2 + 1 ];
+
+    return [ 0 <= i ? i : -1, 0 <= j ? j : -1 ];
+};
+
+/** Convert this into `RegExp`'s result array.
+ * @return {RegExpExecArray}
+ */
+Match.prototype.toArray = function(){
     // In TypeScript definition, `RegExpExecArray` extends `string[]`.
     // However the **real** `RegExpExecArray` can contain `undefined`.
     // So this method uses type casting to set properties.
 
-    const array = [];
-    (array ).index = this.index;
-    (array ).input = this.input;
-    array.length = this.length;
+    const l     = this.length;
+    const array = new Array( l );
+    array.index = this.index;
+    array.input = this.input;
 
-    for (let i = 0; i < this.length; i++) {
-      array[i] = this.get(i);
-    }
+    for( let i = 0; i < l; ++i ){
+        array[ i ] = this.get( i );
+    };
 
-    if (this.names.size > 0) {
-      const groups = Object.create(null);
-      for (const [name, i] of this.names) {
-        groups[name] = array[i];
-      }
+    if( this._names.size > 0 ){
+        const groups = {}, // <- Object.create( null ),
+              names  = this._names;
+        for( var name in names ){
+            groups[ name ] = array[ names[ name ] ];
+        };
 
-      // `RegExpExecArray`'s group does not accept `undefined` value, so cast to `any` for now.
-      (array ).groups = groups; // eslint-disable-line @typescript-eslint/no-explicit-any
+        // `RegExpExecArray`'s group does not accept `undefined` value, so cast to `any` for now.
+        (array).groups = groups; // eslint-disable-line @typescript-eslint/no-explicit-any
     } else {
-      (array ).groups = undefined;
-    }
+        // (array).groups = undefined;
+    };
 
-    return array ;
-  }
+    return array;
+};
 
-   toString() {
-    const array = this.toArray();
-    const show = (x) =>
-      x === undefined ? 'undefined' : JSON.stringify(x);
-    return `Match[${array.map(show).join(', ')}]`;
-  }
+if( DEFINE_REGEXP_COMPAT__DEBUG ){
+    Match.prototype.toString = function(){
+        const array = this.toArray();
 
-   [Symbol.for('nodejs.util.inspect.custom')](
-    depth,
-    options
-  ) {
-    let s = `${options.stylize('Match', 'special')} [\n`;
-    const inverseNames = new Map(Array.from(this.names).map(([k, i]) => [i, k]));
-    for (let i = 0; i < this.length; i++) {
-      const name = options.stylize(
-        JSON.stringify(_nullishCoalesce$4(inverseNames.get(i), () => ( i))),
-        inverseNames.has(i) ? 'string' : 'number'
-      );
-      let capture = this.get(i);
-      if (capture === undefined) {
-        s += `  ${name} => ${options.stylize('undefined', 'undefined')},\n`;
-        continue;
-      }
-      const begin = options.stylize(this.caps[i * 2].toString(), 'number');
-      const end = options.stylize(this.caps[i * 2 + 1].toString(), 'number');
-      capture = options.stylize(JSON.stringify(capture), 'string');
-      s += `  ${name} [${begin}:${end}] => ${capture},\n`;
-    }
-    s += ']';
-    return s;
-  }
-}
+        function show( x ){
+            return x === undefined ? 'undefined' : JSON.stringify( x );
+        };
+        return 'Match[' + array.map( show ).join( ', ' ) + ']';
+    };
+
+    if( DEFINE_REGEXP_COMPAT__NODEJS ){
+        Match.prototype[ Symbol.for( 'nodejs.util.inspect.custom' ) ] = function( depth, options ){
+            let s = options.stylize( 'Match', 'special' ) + ' [\n';
+            const inverseNames = new Map( Array.from(this._names).map(([k, i]) => [i, k]) );
+
+            for (let i = 0, _i; i < this.length; i++) {
+                _i = inverseNames.get( i );
+                const name = options.stylize(
+                  JSON.stringify( _i != null ? _i : i ),
+                  inverseNames.has( i ) ? 'string' : 'number'
+                );
+                let capture = this.get(i);
+                if (capture === undefined) {
+                  s += `  ${name} => ${options.stylize('undefined', 'undefined')},\n`;
+                  continue;
+                }
+                const begin = options.stylize(this._caps[i * 2].toString(), 'number');
+                const end = options.stylize(this._caps[i * 2 + 1].toString(), 'number');
+                capture = options.stylize(JSON.stringify(capture), 'string');
+                s += `  ${name} [${begin}:${end}] => ${capture},\n`;
+            }
+            s += ']';
+            return s;
+        };
+    };
+};
