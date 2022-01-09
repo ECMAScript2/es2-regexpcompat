@@ -52,6 +52,22 @@ function String_padStringWithZero( str, targetLength ){
 };
 
 /**
+ * original:
+ *   https://github.com/behnammodi/polyfill/blob/1a5965edc0e2eaf8e6d87902cc719462e2a889fb/string.polyfill.js#L264
+ *
+ * @param {string} str
+ * @param {number} targetLength
+ * @return {string}
+ */
+function String_padEndWithSpace( str, targetLength ){
+    if( targetLength <= str.length ){
+        return str;
+    } else {
+        return ( str + '             ' ).substr( 0, targetLength );
+    }
+};
+
+/**
  * @param {Array} array
  * @return {Array}
  */
@@ -63,4 +79,22 @@ function Array_from( array ){
         result[ --l ] = array[ l ];
     };
     return result;
+};
+
+/**
+ * original
+ *   https://github.com/behnammodi/polyfill/blob/1a5965edc0e2eaf8e6d87902cc719462e2a889fb/array.polyfill.js#L926
+ * 
+ * @param {Array} array
+ * @param {Function} callback
+ * @return {Array}
+ */
+ function Array_map( array, callback ){
+  var l = array.length,
+      result = [];
+
+  while( l ){
+      result[ --l ] = callback( array[ l ], l );
+  };
+  return result;
 };
