@@ -1,106 +1,143 @@
 function _nullishCoalesce$3(lhs, rhsFn) { if (lhs != null) { return lhs; } else { return rhsFn(); } }
 
-/** Get `s[i]` code point. */
-const index = (s, i, unicode) => {
-  if (unicode) {
-    return _nullishCoalesce$3(s.codePointAt(i), () => ( -1));
-  }
+/** Get `s[i]` code point.
+ * 
+ * @param {string} s 
+ * @param {number} i 
+ * @param {boolean=} unicode 
+ * @return {number}
+ */
+function getIndex( s, i, unicode ){
+    var c;
 
-  const c = s.charCodeAt(i);
-  return Number.isNaN(c) ? -1 : c;
+    if( unicode ){
+        c = String_codePointAt( s, i );
+        return c !== undefined ? c : -1;
+    };
+
+    c = s.charCodeAt( i );
+    return /* Number.isNaN( c ) */ c !== c ? -1 : c;
 };
 
-/** Get `s[i - 1]` code point. */
-const prevIndex = (s, i, unicode) => {
-  const c = index(s, i - 1, unicode);
-  if (!unicode) {
+/** Get `s[i - 1]` code point.
+ * 
+ * @param {string} s 
+ * @param {number} i 
+ * @param {boolean=} unicode 
+ * @return {number}
+ */
+function prevIndex( s, i, unicode ){
+    const c = getIndex( s, i - 1, unicode );
+
+    if( !unicode ){
+        return c;
+    };
+
+    if( 0xdc00 <= c && c <= 0xdfff ){
+        const d = getIndex( s, i - 2, unicode );
+        if( 0x10000 <= d && d <= 0x10ffff ){
+            return d;
+        };
+    };
     return c;
-  }
-
-  if (0xdc00 <= c && c <= 0xdfff) {
-    const d = index(s, i - 2, unicode);
-    if (0x10000 <= d && d <= 0x10ffff) {
-      return d;
-    }
-  }
-
-  return c;
 };
 
-/** Calculate code point size. */
-const size = (c) => (c >= 0x10000 ? 2 : 1);
-
-/** Check the code point is line terminator. */
-const isLineTerminator = (c) =>
-  c === 0x0a || c === 0x0d || c === 0x2028 || c === 0x2029;
-
-/** Calculate the maximum stack size without execution. */
-const calculateMaxStackSize = (codes) => {
-  let stackSize = 0;
-  let maxStackSize = 0;
-  for (const code of codes) {
-    switch (code.op) {
-      case 'push':
-      case 'push_pos':
-      case 'push_proc':
-        stackSize++;
-        break;
-      case 'empty_check':
-      case 'pop':
-      case 'restore_pos':
-      case 'rewind_proc':
-        stackSize--;
-        break;
-    }
-    maxStackSize = Math.max(stackSize, maxStackSize);
-  }
-  return maxStackSize;
+/** Calculate code point size.
+ * @param {number} c
+ * @return {number}
+ */
+function size( c ){
+    return c >= 0x10000 ? 2 : 1
 };
 
-/** `Proc` is execution state of VM. */
-class Proc {
-  /** A current position of `input` string. */
-  
+/** Check the code point is line terminator.
+ * @param {number} c
+ * @return {boolean}
+ */
+function isLineTerminator( c ){
+    return c === 0x0a || c === 0x0d || c === 0x2028 || c === 0x2029;
+};
 
-  /** A program counter. */
-  
+/** Calculate the maximum stack size without execution.
+ * @param {Array.<OpCode>} c
+ * @return {number}
+ */
+function calculateMaxStackSize( codes ){
+    var i = -1, code;
+    let stackSize = 0;
+    let maxStackSize = 0;
 
-  /**
-   * A stack for matching.
-   *
-   * This stack can contain a position, a counter and a `proc` id.
-   * Every values are integer value, so this type is an array of `number`.
-   *
-   * Note that this stack is allocated to available size before execution.
-   * So, the real stack size is managed by `stackSize` property.
-   */
-  
+    for( ; code = codes[ ++i ]; ){
+        switch( code.op ){
+            case 'push':
+            case 'push_pos':
+            case 'push_proc':
+                ++stackSize;
+                break;
+            case 'empty_check':
+            case 'pop':
+            case 'restore_pos':
+            case 'rewind_proc':
+                --stackSize;
+                break;
+        };
+        maxStackSize = Math.max( stackSize, maxStackSize );
+    };
+    return maxStackSize;
+};
 
-  /** A current stack size. */
-  
-
-  /** A capture indexes. */
-  
-
-  constructor(pos, pc, stack, stackSize, caps) {
+/** `Proc` is execution state of VM.
+ * @constructor
+ * 
+ * @param {number} pos
+ * @param {number} pc
+ * @param {Array.<number>} stack
+ * @param {number} stackSize
+ * @param {Array.<number>} caps
+ */
+function Proc( pos, pc, stack, stackSize, caps ){
+    /** A current position of `input` string.
+     * @type {number}
+     */
     this.pos = pos;
+    /** A program counter.
+     * @type {number}
+     */
     this.pc = pc;
+    /**
+     * A stack for matching.
+     *
+     * This stack can contain a position, a counter and a `proc` id.
+     * Every values are integer value, so this type is an array of `number`.
+     *
+     * Note that this stack is allocated to available size before execution.
+     * So, the real stack size is managed by `stackSize` property.
+     * 
+     * @type {Array.<number>}
+     */
     this.stack = stack;
+    /** A current stack size.
+     * @type {number}
+     */
     this.stackSize = stackSize;
+    /** A capture indexes.
+     * @type {Array.<number>}
+     */
     this.caps = caps;
-  }
+};
 
-  /** Clone this. */
-   clone() {
+/** Clone this.
+ * @return {Proc}
+ */
+Proc.prototype.clone = function(){
     return new Proc(
-      this.pos,
-      this.pc,
-      Array.from(this.stack),
-      this.stackSize,
-      Array.from(this.caps)
+        this.pos,
+        this.pc,
+        Array_from( this.stack ),
+        this.stackSize,
+        Array_from( this.caps )
     );
-  }
-}
+};
 
 /**
  * `Program` is a container of compiled regular expreession.
@@ -193,7 +230,7 @@ class Program {
 
         switch (code.op) {
           case 'any': {
-            const c = index(input, proc.pos, this.unicode);
+            const c = getIndex(input, proc.pos, this.unicode);
             if (c >= 0 && (this.dotAll || !isLineTerminator(c))) {
               proc.pos += size(c);
             } else {
@@ -227,7 +264,7 @@ class Program {
             break;
 
           case 'char': {
-            const c = index(input, proc.pos, this.unicode);
+            const c = getIndex(input, proc.pos, this.unicode);
             if (c < 0) {
               backtrack = true;
             }
@@ -242,7 +279,7 @@ class Program {
 
           case 'class':
           case 'class_not': {
-            const c = index(input, proc.pos, this.unicode);
+            const c = getIndex(input, proc.pos, this.unicode);
             if (c < 0) {
               backtrack = true;
               break;
@@ -307,7 +344,7 @@ class Program {
           }
 
           case 'line_end': {
-            const c = index(input, proc.pos, this.unicode);
+            const c = getIndex(input, proc.pos, this.unicode);
             if (proc.pos !== input.length && !(this.multiline && isLineTerminator(c))) {
               backtrack = true;
             }
@@ -347,8 +384,8 @@ class Program {
             const s = begin < 0 || end < 0 ? '' : input.slice(begin, end);
             let i = 0;
             while (i < s.length) {
-              const c = index(input, proc.pos, this.unicode);
-              const d = index(s, i, this.unicode);
+              const c = getIndex(input, proc.pos, this.unicode);
+              const d = getIndex(s, i, this.unicode);
 
               const cc = this.ignoreCase ? canonicalize(c, this.unicode) : c;
               const dc = this.ignoreCase ? canonicalize(d, this.unicode) : d;
@@ -399,7 +436,7 @@ class Program {
           case 'word_boundary':
           case 'word_boundary_not': {
             const c = prevIndex(input, proc.pos, this.unicode);
-            const d = index(input, proc.pos, this.unicode);
+            const d = getIndex(input, proc.pos, this.unicode);
             const set = this.unicode && this.ignoreCase ? charSetUnicodeWord : charSetWord;
             const actual = set.has(c) !== set.has(d);
             const expected = code.op === 'word_boundary';
@@ -419,7 +456,7 @@ class Program {
         break;
       }
 
-      pos += size(index(input, pos, this.unicode));
+      pos += size(getIndex(input, pos, this.unicode));
     }
 
     return null;

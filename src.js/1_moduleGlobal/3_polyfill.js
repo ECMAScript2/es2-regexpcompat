@@ -35,6 +35,36 @@ function String_fromCodePoint( codePoint ){
 
 /**
  * original:
+ *   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/codePointAt#polyfill
+ * @param {string} string 
+ * @param {number} index
+ * @return {number|undefined}
+ */
+function String_codePointAt( string, index ){
+    var size = string.length;
+
+    // Account for out-of-bounds indices:
+    if( index < 0 || index >= size ){
+        return undefined;
+    };
+    // Get the first code unit
+    var first = string.charCodeAt( index );
+    var second;
+    if( // check if it’s the start of a surrogate pair
+        first >= 0xD800 && first <= 0xDBFF && // high surrogate
+        size > index + 1 // there is a next code unit
+    ){
+        second = string.charCodeAt( index + 1 );
+        if( second >= 0xDC00 && second <= 0xDFFF ){ // low surrogate
+            // https://mathiasbynens.be/notes/javascript-encoding#surrogate-formulae
+            return ( first - 0xD800 ) * 0x400 + second - 0xDC00 + 0x10000;
+        };
+    };
+    return first;
+};
+
+/**
+ * original:
  *   https://github.com/behnammodi/polyfill/blob/1a5965edc0e2eaf8e6d87902cc719462e2a889fb/string.polyfill.js#L291
  *
  * @param {string} str

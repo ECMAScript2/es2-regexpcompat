@@ -1,320 +1,329 @@
-function _nullishCoalesce(lhs, rhsFn) { if (lhs != null) { return lhs; } else { return rhsFn(); } } function _optionalChain(ops) { let lastAccessLHS = undefined; let value = ops[0]; let i = 1; while (i < ops.length) { const op = ops[i]; const fn = ops[i + 1]; i += 2; if ((op === 'optionalAccess' || op === 'optionalCall') && value == null) { return undefined; } if (op === 'access' || op === 'optionalAccess') { lastAccessLHS = value; value = fn(value); } else if (op === 'call' || op === 'optionalCall') { value = fn((...args) => value.call(lastAccessLHS, ...args)); lastAccessLHS = undefined; } } return value; }/* eslint-disable @typescript-eslint/no-explicit-any */
-
-const isRegExp = (argument) => {
-  if (argument && typeof argument === 'object') {
-    return !!(argument )[Symbol.match];
-  }
-  return false;
+/**
+ * @param {*} argument 
+ * @return {boolean}
+ */
+function isRegExp( argument ){
+    if( argument && typeof argument === 'object' ){
+        return !!argument[ Symbol.match ];
+    };
+    return false;
 };
 
-const advance = (s, i, unicode) => {
-  if (!unicode || i + 1 >= s.length) {
+/**
+ * @param {string} s
+ * @param {number} i
+ * @param {boolean=} unicode
+ * @return {number}
+ */
+function advance( s, i, unicode ){
+    if( !unicode || i + 1 >= s.length ){
+        return i + 1;
+    };
+    var c = String_codePointAt( s, i );
+    c = c !== undefined ? c : 0;
+    if( 0x10000 <= c ){
+        return i + 2;
+    };
     return i + 1;
-  }
-  const c = _nullishCoalesce(s.codePointAt(i), () => ( 0));
-  if (0x10000 <= c) {
-    return i + 2;
-  }
-  return i + 1;
 };
 
-const RegExpCompat = (() => {
-  
+/**
+ * @constructor
+ * @param {string|RegExp|RegExpCompat} source 
+ * @param {string=} flags
+ */
+function RegExpCompat( source, flags ){
+    if( DEFINE_REGEXP_COMPAT__DEBUG ){
+        if( /*new.target === undefined*/ !this || this.constructor !== RegExpCompat ){
+            if( isRegExp( source ) && flags === undefined ){
+                if( source.constructor === RegExpCompat ){
+                    return source;
+                };
+            };
+            return new RegExpCompat( source, flags );
+        };
+    
+        if( source instanceof RegExp || source instanceof RegExpCompat ){
+            if( flags === undefined ){
+                flags = source.flags;
+            };
+            source = source.source;
+        };
+    };
 
-
-
-
-  const klass = function RegExpCompat( source, flags) {
-    if (/*new.target === undefined*/ !this || this.constructor !== RegExpCompat) {
-      if (isRegExp(source) && flags === undefined) {
-        if (source.constructor === RegExpCompat) {
-          return source;
-        }
-      }
-      return new (klass )(source, flags);
-    }
-
-    if (source instanceof RegExp || source instanceof RegExpCompat) {
-      if (flags === undefined) {
-        flags = (source ).flags;
-      }
-      source = (source ).source;
-    }
-    source = String(source);
-
-    const parser = new Parser(source, flags, true);
+    const parser = new Parser( source, flags, true );
+    const pattern =
+    /** @type {Pattern} */
     this.pattern = parser.parse();
-    const compiler = new Compiler(this.pattern);
+    const compiler = new Compiler( pattern );
+    /** @type {Program} */
     this.program = compiler.compile();
-    return this;
-  };
 
-  for (const name of ['$1', '$2', '$3', '$4', '$5', '$6', '$7', '$8', '$9', 'lastMatch']) {
-    Object.defineProperty(klass, name, {
-      get() {
-        throw new Error(`RegExpCompat does not support old RegExp.${name} method`);
-      },
-    });
-  }
+    const n = nodeToString( pattern.child );
 
-  klass[Symbol.species] = klass;
+    /** @type {string} */
+    this.source = n === '' ? '(?:)' : n;
 
-  Object.defineProperty(klass.prototype, 'source', {
-    get() {
-      const n = nodeToString(this.pattern.child);
-      return n === '' ? '(?:)' : n;
-    },
-  });
+    /** @type {string} */
+    this.flags = flagSetToString( pattern.flagSet );
 
-  Object.defineProperty(klass.prototype, 'flags', {
-    get() {
-      return flagSetToString(this.pattern.flagSet);
-    },
-  });
+    /** @type {boolean} */
+    this.global = pattern.flagSet.global;
 
-  for (const flag of [
-    'global',
-    'ignoreCase',
-    'multiline',
-    'dotAll',
-    'unicode',
-    'sticky',
-  ] ) {
-    Object.defineProperty(klass.prototype, flag, {
-      get() {
-        return this.pattern.flagSet[flag];
-      },
-    });
-  }
+    /** @type {boolean} */
+    this.ignoreCase = pattern.flagSet.ignoreCase;
 
-  klass.prototype.compile = function compile() {
-    return this;
-  };
+    /** @type {boolean} */
+    this.multiline = pattern.flagSet.multiline;
 
-  klass.prototype.toString = function toString() {
-    return patternToString(this.pattern);
-  };
+    /** @type {boolean} */
+    this.dotAll = pattern.flagSet.dotAll;
 
-  klass.prototype.exec = function exec( string) {
+    /** @type {boolean} */
+    this.unicode = pattern.flagSet.unicode;
+
+    /** @type {boolean} */
+    this.sticky = pattern.flagSet.sticky;
+};
+
+if( DEFINE_REGEXP_COMPAT__DEBUG ){
+    for( const name of [ '$1', '$2', '$3', '$4', '$5', '$6', '$7', '$8', '$9', 'lastMatch' ] ){
+        RegExpCompat.__defineGetter__(
+            name,
+            function(){
+                throw new Error(`RegExpCompat does not support old RegExp.${name} method`);
+            }
+        );
+    };
+
+    RegExpCompat[ Symbol.species ] = RegExpCompat;
+
+    RegExpCompat.prototype.toString = function(){
+        return patternToString( this.pattern );
+    };
+
+    RegExpCompat.prototype.compile = function(){
+        return this;
+    };
+};
+
+/**
+ * @param {string} string 
+ * @return {RegExpExecArray|null}
+ */
+RegExpCompat.prototype.exec = function( string ){
     const update = this.global || this.sticky;
 
     let pos = 0;
-    if (update) {
-      pos = this.lastIndex;
-    }
-    const match = this.program.exec(string, pos);
-    if (update) {
-      this.lastIndex = _nullishCoalesce(_optionalChain([match, 'optionalAccess', _ => _.lastIndex]), () => ( 0));
-    }
+    if( update ){
+        pos = this.lastIndex;
+    };
+    const match = this.program.exec( string, pos );
+    if( update ){
+        this.lastIndex = match ? match.lastIndex : 0;
+    };
 
-    return _nullishCoalesce(_optionalChain([match, 'optionalAccess', _2 => _2.toArray, 'call', _3 => _3()]), () => ( null));
-  };
+    return match ? match.toArray() : null;
+};
 
-  klass.prototype.test = function test( string) {
-    return !!this.exec(string);
-  };
+/**
+ * @param {string} string 
+ * @return {boolean}
+ */
+RegExpCompat.prototype.test = function( string ){
+    return !!this.exec( string );
+};
 
-  klass.prototype[Symbol.match] = function (
-    
-    string
-  ) {
-    if (this.global) {
-      this.lastIndex = 0;
-      const result = [];
-      for (;;) {
-        const r = this.exec(string);
-        if (r) {
-          result.push(r[0]);
-          if (r[0] === '') {
-            this.lastIndex = advance(string, this.lastIndex, this.unicode);
-          }
-        } else {
-          break;
-        }
-      }
-      return result.length === 0 ? null : result;
-    }
-    return this.exec(string);
-  };
+/**
+ * @param {*} string 
+ * @return {RegExpMatchArray|null}
+ */
+RegExpCompat.prototype[Symbol.match] = function( string ){
+    if( this.global ){
+        this.lastIndex = 0;
+        const result = [];
+        for( let r; r = this.exec( string ) ; ){
+            result.push( r[ 0 ] );
+            if( r[ 0 ] === '' ){
+                this.lastIndex = advance( string, this.lastIndex, this.unicode );
+            };
+        };
+        return result.length === 0 ? null : result;
+    };
+    return this.exec( string );
+};
 
-  klass.prototype[Symbol.replace] = function (
-    
-    string,
-    replacer
-  ) {
+RegExpCompat.prototype[Symbol.replace] = function( string, replacer ){
+    const replacerIsFunction = typeof replacer === 'function';
     const matches = [];
-    if (this.global) {
-      this.lastIndex = 0;
-    }
+    if( this.global ){
+        this.lastIndex = 0;
+    };
 
     // Collect matches to replace.
     // It must be done before building result string because
     // the replacer function calls `this.exec` and changes `this.lastIndex` maybe.
-    for (;;) {
-      const match = this.exec(string);
-      if (!match) {
-        break;
-      }
-      matches.push(match);
-      if (!this.global) {
-        break;
-      }
-      if (match[0] === '') {
-        this.lastIndex = advance(string, this.lastIndex, this.unicode);
-      }
-    }
+    for( let match; match = this.exec( string ); ){
+        matches.push( match );
+        if( !this.global ){
+            break;
+        };
+        if( match[ 0 ] === '' ){
+            this.lastIndex = advance( string, this.lastIndex, this.unicode );
+        };
+    };
 
     // Build a result string.
     let pos = 0;
     let result = '';
-    for (const match of matches) {
-      result += string.slice(pos, match.index);
-      pos = match.index + match[0].length;
-      if (typeof replacer === 'function') {
-        const args = [match[0], ...match.slice(1), match.index, string] ;
-        if (match.groups) {
-          args.push(match.groups);
-        }
-        result += String(replacer(...args));
-      } else {
-        let i = 0;
-        for (;;) {
-          const j = replacer.indexOf('$', i);
-          result += replacer.slice(i, j === -1 ? string.length : j);
-          if (j === -1) {
-            break;
-          }
-          const c = replacer[j + 1];
-          switch (c) {
-            case '$':
-              i = j + 2;
-              result += '$';
-              break;
-            case '&':
-              i = j + 2;
-              result += match[0];
-              break;
-            case '`':
-              i = j + 2;
-              result += string.slice(0, match.index);
-              break;
-            case "'":
-              i = j + 2;
-              result += string.slice(pos);
-              break;
-            case '<': {
-              const k = replacer.indexOf('>', j + 2);
-              if (this.pattern.names.size === 0 || k === -1) {
-                i = j + 2;
-                result += '$<';
-                break;
-              }
-              const name = replacer.slice(j + 2, k);
-              result += _nullishCoalesce((match.groups && match.groups[name]), () => ( ''));
-              i = k + 1;
-              break;
-            }
-            default: {
-              if ('0' <= c && c <= '9') {
-                const d = replacer[j + 2];
-                const s = '0' <= d && d <= '9' ? c + d : c;
-                let n = Number.parseInt(s, 10);
-                if (0 < n && n < match.length) {
-                  result += _nullishCoalesce(match[n], () => ( ''));
-                  i = j + 1 + s.length;
-                  break;
-                }
-                n = Math.floor(n / 10);
-                if (0 < n && n < match.length) {
-                  result += _nullishCoalesce(match[n], () => ( ''));
-                  i = j + s.length;
-                  break;
-                }
-              }
-              result += '$';
-              i = j + 1;
-              break;
-            }
-          }
-        }
-      }
-    }
+    const l = matches.length;
+    for( let index = 0, match; index < l; ++index ){
+        match = matches[ index ];
+        result += string.slice( pos, match.index );
+        pos = match.index + match[ 0 ].length;
+        if( replacerIsFunction ){
+            const args = Array_from( match );
+            args.push( match.index, string );
+            if( match.groups ){
+                args.push( match.groups );
+            };
+            result += '' + replacer.apply( null, args );
+        } else {
+            let i = 0;
+            for( ;; ){
+                const j = replacer.indexOf( '$', i );
+                result += replacer.slice( i, j === -1 ? string.length : j );
+                if( j === -1 ){
+                    break;
+                };
+                const c = replacer.charAt( j + 1 );
+                switch( c ){
+                    case '$':
+                        i = j + 2;
+                        result += '$';
+                        break;
+                    case '&':
+                        i = j + 2;
+                        result += match[ 0 ];
+                        break;
+                    case '`':
+                        i = j + 2;
+                        result += string.slice( 0, match.index );
+                        break;
+                    case "'":
+                        i = j + 2;
+                        result += string.slice( pos );
+                        break;
+                    case '<':
+                        const k = replacer.indexOf( '>', j + 2 );
+                        if( this.pattern.names.size === 0 || k === -1 ){ // TODO .size
+                            i = j + 2;
+                            result += '$<';
+                            break;
+                        };
+                        const name = replacer.slice( j + 2, k );
+                        result += match.groups && match.groups[ name ] || '';
+                        i = k + 1;
+                        break;
+                    default:
+                        if( '0' <= c && c <= '9' ){
+                            const d = replacer.charAt( j + 2 );
+                            const s = '0' <= d && d <= '9' ? c + d : c;
+                            let n = Number.parseInt( s, 10 );
+                            if( 0 < n && n < match.length ){
+                                result += match[ n ] || '';
+                                i = j + 1 + s.length;
+                                break;
+                            };
+                            n = Math.floor( n / 10 );
+                            if( 0 < n && n < match.length ){
+                                result += match[ n ] || '';
+                                i = j + s.length;
+                                break;
+                            };
+                        };
+                        result += '$';
+                        i = j + 1;
+                        break;
+                };
+            };
+        };
+    };
 
-    result += string.slice(pos);
+    result += string.slice( pos );
     return result;
-  };
+};
 
-  klass.prototype[Symbol.search] = function ( string) {
+RegExpCompat.prototype[Symbol.search] = function( string ){
     const prevLastIndex = this.lastIndex;
     this.lastIndex = 0;
-    const m = this.exec(string);
+    const m = this.exec( string );
     this.lastIndex = prevLastIndex;
-    return _nullishCoalesce((m && m.index), () => ( -1));
-  };
+    return m ? m.index : -1;
+};
 
-  klass.prototype[Symbol.split] = function (
-    
-    string,
-    limit
-  ) {
-    const flags = this.sticky ? this.flags : this.flags + 'y';
+/**
+ * @param {string} string
+ * @param {number=} limit
+ * @return {Array.<string>}
+ */
+RegExpCompat.prototype[Symbol.split] = function( string, limit ){
+    const flags       = this.sticky ? this.flags : this.flags + 'y';
     const constructor = this.constructor;
-    const species = _nullishCoalesce((constructor && constructor[Symbol.species]), () => ( klass));
-    const splitter = new species(this.source, flags);
-    limit = (_nullishCoalesce(limit, () => ( 2 ** 32 - 1))) >>> 0;
+    const species     = /* constructor && constructor[Symbol.species] || */ RegExpCompat;
+    const splitter    = new species( this.source, flags );
+    limit = ( limit !== undefined ? limit : 2 ** 32 - 1 ) >>> 0;
 
     const result = [];
-    if (limit === 0) {
-      return result;
-    }
+    if( limit === 0 ){
+        return result;
+    };
 
     // Special case for empty string.
-    if (string.length === 0) {
-      const match = splitter.exec(string);
-      if (match === null) {
-        result.push(string);
-      }
-      return result;
-    }
+    if( /* string.length === 0 */ string === '' ){
+        const match = splitter.exec( string );
+        if( match === null ){
+            result.push( string );
+        };
+        return result;
+    };
 
+    const len = string.length;
     let p = 0;
     let q = p;
-    while (q < string.length) {
-      splitter.lastIndex = q;
-      const match = splitter.exec(string);
-      if (match === null) {
-        q = advance(string, q, this.unicode);
-        continue;
-      }
+    while( q < len ){
+        splitter.lastIndex = q;
+        const match = splitter.exec( string );
+        if( !match ){
+            q = advance( string, q, this.unicode );
+            continue;
+        };
 
-      const e = Math.min(splitter.lastIndex, string.length);
-      if (e === p) {
-        q = advance(string, q, this.unicode);
-        continue;
-      }
+        const e = Math.min( splitter.lastIndex, len );
+        if( e === p ){
+            q = advance( string, q, this.unicode );
+            continue;
+        };
 
-      const t = string.slice(p, q);
-      result.push(t);
-      if (limit === result.length) {
-        return result;
-      }
-      p = e;
-      for (let i = 1; i < match.length; i++) {
-        result.push(match[i]);
-        if (limit === result.length) {
-          return result;
-        }
-      }
+        const t = string.slice( p, q );
+        result.push( t );
+        if( limit === result.length ){
+            return result;
+        };
+        p = e;
+        for( let i = 1, l = match.length; i < l; ++i ){
+            result.push( match[ i ] );
+            if( limit === result.length ){
+                return result;
+            };
+        };
 
-      q = p;
-    }
+        q = p;
+    };
 
-    const t = string.slice(p);
-    result.push(t);
+    const t = string.slice( p );
+    result.push( t );
     return result;
-  };
-
-  return klass ;
-})();
+};
 
 window[ 'RegExpCompat' ] = RegExpCompat;
