@@ -1,3 +1,6 @@
+var Compiler_DIRECTION_FORWARD  = DEFINE_REGEXP_COMPAT__MINIFY ? 1 : 'forward',
+    Compiler_DIRECTION_BACKWARD = DEFINE_REGEXP_COMPAT__MINIFY ? 2 : 'backward';
+
 /** `Compiler` is a compiler for `Pattern` to `Program`.
  * @constructor
  * @param {Pattern} pattern 
@@ -5,7 +8,7 @@
 function Compiler( pattern ){
     this.advance = false;
     this.captureParensIndex = 1;
-    this.direction = 'forward';
+    this.direction = Compiler_DIRECTION_FORWARD;
     this.pattern = pattern;
 
     this.ignoreCase = pattern.flagSet.ignoreCase;
@@ -119,7 +122,7 @@ Compiler.prototype.compileDisjunction = function( node ){
 Compiler.prototype.compileSequence = function( node ){
     const children = Array_from( node.children );
 
-    if( this.direction === 'backward' ){
+    if( this.direction === Compiler_DIRECTION_BACKWARD ){
         if( false || children.reverse ){
             children.reverse();
         } else {
@@ -161,9 +164,9 @@ Compiler.prototype.compileCapture = function( node ){
         throw new Error('BUG: invalid pattern');
     };
     return Compiler_spreadOperator(
-        { op: this.direction === 'backward' ? 'cap_end' : 'cap_begin', index: node.index },
+        { op: this.direction === Compiler_DIRECTION_BACKWARD ? 'cap_end' : 'cap_begin', index: node.index },
         /* ... */ /** @type {Array.<OpCode>} */ (codes0),
-        { op: this.direction === 'backward' ? 'cap_begin' : 'cap_end', index: node.index },
+        { op: this.direction === Compiler_DIRECTION_BACKWARD ? 'cap_begin' : 'cap_end', index: node.index },
     );
 };
 
@@ -352,7 +355,7 @@ Compiler.prototype.compileLineEnd = function( /* _node */ ){
  */
 Compiler.prototype.compileLookAhead = function( node ){
     const oldDirection = this.direction;
-    this.direction = 'forward';
+    this.direction = Compiler_DIRECTION_FORWARD;
     const codes = this.compileLookAround( node );
     this.direction = oldDirection;
     return codes;
@@ -364,7 +367,7 @@ Compiler.prototype.compileLookAhead = function( node ){
  */
 Compiler.prototype.compileLookBehind = function( node ){
     const oldDirection = this.direction;
-    this.direction = 'backward';
+    this.direction = Compiler_DIRECTION_BACKWARD;
     const codes = this.compileLookAround( node );
     this.direction = oldDirection;
     return codes;
@@ -501,7 +504,7 @@ Compiler.prototype.compileDot = function( /* _node */ ){
  * @return {Array.<OpCode>}
  */
 Compiler.prototype.insertBack = function( codes ){
-    if( this.direction === 'forward' ){
+    if( this.direction === Compiler_DIRECTION_FORWARD ){
         return codes;
     };
     return Compiler_spreadOperator(
@@ -520,7 +523,7 @@ Compiler.prototype.compileBackRef = function( node ){
         throw new Error('invalid back reference');
     };
     this.advance = false;
-    return [ { op: this.direction === 'backward' ? 'ref_back' : 'ref', index: node.index } ];
+    return [ { op: this.direction === Compiler_DIRECTION_BACKWARD ? 'ref_back' : 'ref', index: node.index } ];
 };
 
 /**
@@ -534,7 +537,7 @@ Compiler.prototype.compileNamedBackRef = function( node ){
         throw new Error('invalid named back reference');
     };
     this.advance = false;
-    return [ { op: this.direction === 'backward' ? 'ref_back' : 'ref', index } ];
+    return [ { op: this.direction === Compiler_DIRECTION_BACKWARD ? 'ref_back' : 'ref', index } ];
 };
 
 /**
