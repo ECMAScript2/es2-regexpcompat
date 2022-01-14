@@ -1,4 +1,4 @@
-var String_stringFromCharCode = String.fromCharCode;
+var String_fromCharCode = String.fromCharCode;
 var Math_floor = Math.floor;
 
 var CharSet;

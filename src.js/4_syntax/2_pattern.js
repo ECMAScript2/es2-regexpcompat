@@ -1,5 +1,3 @@
-function _nullishCoalesce$5(lhs, rhsFn) { if (lhs != null) { return lhs; } else { return rhsFn(); } }/** Type for whole regular expression pattern. */
-
 /** Types for regular expression flags.
  * @typedef {
  *   {

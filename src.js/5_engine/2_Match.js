@@ -88,7 +88,7 @@ function Match_resolve( match, k ){
 };
 
 /** Convert this into `RegExp`'s result array.
- * @return {RegExpExecArray}
+ * @return {RegExpResult}
  */
 Match.prototype.toArray = function(){
     // In TypeScript definition, `RegExpExecArray` extends `string[]`.

@@ -22,7 +22,7 @@ Compiler.prototype.compile = function(){
     const codes0 = this.compileNode( this.pattern.child );
     const codes1 = Compiler_spreadOperator(
         { op: 'cap_begin', index: 0 },
-        /* ... */ codes0,
+        /* ... */ /** @type {Array.<OpCode>} */ (codes0),
         { op: 'cap_end', index: 0 },
         { op: 'match' }
     );
@@ -105,9 +105,9 @@ Compiler.prototype.compileDisjunction = function( node ){
     function toOpCodeArray( codes, codes0 ){
         return Compiler_spreadOperator(
             { op: 'fork_cont', next: codes0.length + 1 },
-            /* ... */ codes0,
+            /* ... */ /** @type {Array.<OpCode>} */ (codes0),
             { op: 'jump', cont: codes.length },
-            /* ... */ codes,
+            /* ... */ /** @type {Array.<OpCode>} */ (codes),
         );
     };
 };
@@ -132,9 +132,9 @@ Compiler.prototype.compileSequence = function( node ){
 
     const codes = [];
     let advance = false;
-    for( const child of children ){
+    for( let i = -1, child; child = children[ ++i ]; ){
         const codes0 = this.compileNode( child );
-        Compiler_pushElementsToOpCodeList( codes, codes0 );
+        Compiler_pushElementsToOpCodeList( codes, /** @type {Array.<OpCode>} */ (codes0) );
         advance = advance || this.advance;
     };
     this.advance = advance;
@@ -162,7 +162,7 @@ Compiler.prototype.compileCapture = function( node ){
     };
     return Compiler_spreadOperator(
         { op: this.direction === 'backward' ? 'cap_end' : 'cap_begin', index: node.index },
-        /* ... */ codes0,
+        /* ... */ /** @type {Array.<OpCode>} */ (codes0),
         { op: this.direction === 'backward' ? 'cap_begin' : 'cap_end', index: node.index },
     );
 };
@@ -180,7 +180,7 @@ Compiler.prototype.compileNamedCapture = function( node ){
     };
     return Compiler_spreadOperator(
         { op: 'cap_begin', index },
-        /* ... */ codes0,
+        /* ... */ /** @type {Array.<OpCode>} */ (codes0),
         { op: 'cap_end', index }
     );
 };
@@ -191,8 +191,8 @@ Compiler.prototype.compileNamedCapture = function( node ){
  */
 Compiler.prototype.compileMany = function( node ){
     const from = this.captureParensIndex;
-    const codes0 = this.insertEmptyCheck(this.compileNode(node.child));
-    const codes1 = this.insertCapReset(from, codes0);
+    const codes0 = this.insertEmptyCheck( /** @type {Array.<OpCode>} */ (this.compileNode( node.child )) );
+    const codes1 = this.insertCapReset( from, /** @type {Array.<OpCode>} */ (codes0) );
     this.advance = false;
 
     return Compiler_spreadOperator(
@@ -208,11 +208,11 @@ Compiler.prototype.compileMany = function( node ){
  */
 Compiler.prototype.compileSome = function( node ){
     const from = this.captureParensIndex;
-    const codes0 = this.compileNode(node.child);
-    const codes1 = this.insertCapReset(from, this.insertEmptyCheck(codes0));
+    const codes0 = this.compileNode( node.child );
+    const codes1 = this.insertCapReset( from, this.insertEmptyCheck( /** @type {Array.<OpCode>} */ (codes0 ) ) );
 
     return Compiler_spreadOperator(
-        /* ... */ codes0,
+        /* ... */ /** @type {Array.<OpCode>} */ (codes0),
         { op: node.nonGreedy ? 'fork_next' : 'fork_cont', next: codes1.length + 1 },
         /* ... */ codes1,
         { op: 'jump', cont: -1 - codes1.length - 1 }
@@ -239,14 +239,14 @@ Compiler.prototype.compileOptional = function( node ){
  */
 Compiler.prototype.compileRepeat = function( node ){
     const from = this.captureParensIndex;
-    const codes0 = this.compileNode(node.child);
+    const codes0 = this.compileNode( node.child );
     const codes = [];
 
     if( node.min === 1 ){
-        Compiler_pushElementsToOpCodeList( codes, codes0 );
+        Compiler_pushElementsToOpCodeList( codes, /** @type {Array.<OpCode>} */ (codes0) );
         // codes.push(...codes0);
     } else if( node.min > 1 ){
-        const codes1 = this.insertCapReset( from, codes0 );
+        const codes1 = this.insertCapReset( from, /** @type {Array.<OpCode>} */ (codes0) );
         Compiler_pushElementsToOpCodeList(
             codes,
             { op: 'push', value: node.min },
@@ -261,7 +261,7 @@ Compiler.prototype.compileRepeat = function( node ){
 
     const max = node.max != null ? node.max : node.min;
     if( max === Infinity ){
-        const codes1 = this.insertCapReset( from, this.insertEmptyCheck( codes0 ) );
+        const codes1 = this.insertCapReset( from, this.insertEmptyCheck( /** @type {Array.<OpCode>} */ (codes0) ) );
         Compiler_pushElementsToOpCodeList(
             codes,
             { op: node.nonGreedy ? 'fork_next' : 'fork_cont', next: codes1.length + 1 },
@@ -270,7 +270,7 @@ Compiler.prototype.compileRepeat = function( node ){
         );
     } else if( max > node.min ){
         const remain = max - node.min;
-        const codes1 = this.insertCapReset( from, this.insertEmptyCheck( codes0 ) );
+        const codes1 = this.insertCapReset( from, this.insertEmptyCheck( /** @type {Array.<OpCode>} */ (codes0) ) );
         if( remain === 1 ){
             Compiler_pushElementsToOpCodeList(
                 codes,
@@ -375,7 +375,7 @@ Compiler.prototype.compileLookBehind = function( node ){
  * @return {Array.<OpCode>}
  */
 Compiler.prototype.compileLookAround = function( node ){
-    const codes0 = this.compileNode(node.child);
+    const codes0 = this.compileNode( node.child );
     this.advance = false;
 
     if( node.negative ){
@@ -383,7 +383,7 @@ Compiler.prototype.compileLookAround = function( node ){
             { op: 'push_pos' },
             { op: 'push_proc' },
             { op: 'fork_cont', next: codes0.length + 2 },
-            /* ... */ codes0,
+            /* ... */ /** @type {Array.<OpCode>} */ (codes0),
             { op: 'rewind_proc' },
             { op: 'fail' },
             { op: 'pop' },
@@ -394,9 +394,9 @@ Compiler.prototype.compileLookAround = function( node ){
     return Compiler_spreadOperator(
         { op: 'push_pos' },
         { op: 'push_proc' },
-        /* ... */ codes0,
+        /* ... */ /** @type {Array.<OpCode>} */ (codes0),
         { op: 'rewind_proc' },
-        { op: 'restore_pos' },
+        { op: 'restore_pos' }
     );
 };
 

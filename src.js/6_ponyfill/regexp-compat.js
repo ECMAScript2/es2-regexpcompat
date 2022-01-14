@@ -51,7 +51,7 @@ function RegExpCompat( source, flags ){
         };
     };
 
-    const parser = new Parser( source, flags, true );
+    const parser = new Parser( /** @type {string} */ (source), flags, true );
     const pattern = parser.parse();
 
     /** @type {Pattern} */
@@ -112,7 +112,7 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
 
 /**
  * @param {string} string 
- * @return {RegExpExecArray|null}
+ * @return {RegExpResult|null}
  */
 RegExpCompat.prototype.exec = function( string ){
     const update = this.global || this.sticky;
@@ -139,7 +139,7 @@ RegExpCompat.prototype.test = function( string ){
 
 /**
  * @param {string} string 
- * @return {RegExpMatchArray|null}
+ * @return {RegExpResult|Array<string>|null}
  */
 RegExpCompat.prototype[Symbol.match] = function( string ){
     if( this.global ){

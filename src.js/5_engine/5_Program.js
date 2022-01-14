@@ -1,5 +1,3 @@
-function _nullishCoalesce$3(lhs, rhsFn) { if (lhs != null) { return lhs; } else { return rhsFn(); } }
-
 /** Get `s[i]` code point.
  * 
  * @param {string} s 
@@ -214,7 +212,7 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
 };
 
 /**
- * @param {*} input 
+ * @param {string} input 
  * @param {number} pos 
  * @returns 
  */

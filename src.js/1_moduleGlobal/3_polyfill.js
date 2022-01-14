@@ -23,12 +23,12 @@ function String_fromCodePoint( codePoint ){
 
     if( codePoint <= 0xffff ){
         // BMP code point
-        result = String_stringFromCharCode( codePoint );
+        result = String_fromCharCode( codePoint );
     } else {
         codePoint -= 0x10000;
         highSurrogate = (codePoint >> 10) + 0xd800;
         lowSurrogate  = (codePoint % 0x400) + 0xdc00;
-        result = String_stringFromCharCode( highSurrogate ) + String_stringFromCharCode( lowSurrogate );
+        result = String_fromCharCode( highSurrogate ) + String_fromCharCode( lowSurrogate );
     };
     return result;
 };
@@ -95,6 +95,17 @@ function String_padEndWithSpace( str, targetLength ){
     } else {
         return ( str + '             ' ).substr( 0, targetLength );
     }
+};
+
+/**
+ * original:
+ *   https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/String/startsWith#polyfill
+ * @param {string} str 
+ * @param {string} search 
+ * @param {number} pos 
+ */
+function String_startsWith( str, search, pos ){
+    return str.substr( pos, search.length) === search;
 };
 
 /**
