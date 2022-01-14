@@ -52,10 +52,13 @@ function RegExpCompat( source, flags ){
     };
 
     const parser = new Parser( source, flags, true );
-    const pattern =
+    const pattern = parser.parse();
+
     /** @type {Pattern} */
-    this.pattern = parser.parse();
+    this.pattern = pattern;
+
     const compiler = new Compiler( pattern );
+
     /** @type {Program} */
     this.program = compiler.compile();
 
@@ -135,7 +138,7 @@ RegExpCompat.prototype.test = function( string ){
 };
 
 /**
- * @param {*} string 
+ * @param {string} string 
  * @return {RegExpMatchArray|null}
  */
 RegExpCompat.prototype[Symbol.match] = function( string ){

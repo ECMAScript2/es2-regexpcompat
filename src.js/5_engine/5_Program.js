@@ -178,7 +178,7 @@ function Program( pattern, codes ){
     /** @type {boolean} */
     this.sticky = pattern.flagSet.sticky;
 
-    /** @type {boolean} */
+    /** @type {number} */
     this.captureParens = pattern.captureParens; // TODO
 
     /** @type {Map} */
@@ -280,12 +280,13 @@ Program.prototype.exec = function( input, pos ){
                     };
                     var cc = this.ignoreCase ? canonicalize( c, this.unicode ) : c;
 
-                    let actual = code.set.has( cc );
-                    const expected = code.op === 'class';
+                    var actual = code.set.has( cc );
+                    var expected = code.op === 'class';
 
                     if( this.ignoreCase ){
-                        for (const d of uncanonicalize( cc, this.unicode ) ){
-                            actual = actual || code.set.has( d );
+                        const uncanonicalized = uncanonicalize( cc, this.unicode ); // memo 何度も uncanonicalize() が呼ばれるのを修正
+                        for( let d = 0, l = uncanonicalized.length; d < l; ++d ){
+                            actual = actual || code.set.has( uncanonicalized[ d ] );
                         };
                     };
 

@@ -29,38 +29,38 @@ var FlagSet;
 var Pattern;
 
 /** Type for part of regular expression pattern.
- * @typedef {(
+ * @typedef {
  *     Disjunction
- *     | Sequence
- * | Capture
- * | NamedCapture
- * | Group
- * | Many
- * | Some
- * | Optional
- * | Repeat
- * | WordBoundary
- * | LineBegin
- * | LineEnd
- * | LookAhead
- * | LookBehind
- * | Char
- * | EscapeClass
- * | Class
- * | Dot
- * | BackRef
- * | NamedBackRef
- * )}
+ *   | Sequence
+ *   | Capture
+ *   | NamedCapture
+ *   | Group
+ *   | Many
+ *   | Some
+ *   | Optional
+ *   | Repeat
+ *   | WordBoundary
+ *   | LineBegin
+ *   | LineEnd
+ *   | LookAhead
+ *   | LookBehind
+ *   | Char
+ *   | EscapeClass
+ *   | Class
+ *   | Dot
+ *   | BackRef
+ *   | NamedBackRef
+ * }
  */
 var RegExpPaternNode;
 
 /** Type for items of character class.
- * @typedef {(Char | EscapeClass | ClassRange)}
+ * @typedef {Char | EscapeClass | ClassRange}
  */
 var ClassItem;
 
 /** Type for AST elements.
- * @typedef {(Pattern | RegExpPaternNode | ClassItem)}
+ * @typedef {Pattern | RegExpPaternNode | ClassItem}
  */
 var ASTElement;
 
@@ -210,11 +210,11 @@ var LookBehind;
 var Char;
 
 /** Type for escape sequence class like `/\w/`.
- * @typedef {(
- *     SimpleEscapeClass
- *   | UnicodePropertyEscapeClass
- *   | UnicodePropertyValueEscapeClass
- * )}
+ * @typedef {
+ *    SimpleEscapeClass
+ *  | UnicodePropertyEscapeClass
+ *  | UnicodePropertyValueEscapeClass
+ * }
  */
 var EscapeClass;
 

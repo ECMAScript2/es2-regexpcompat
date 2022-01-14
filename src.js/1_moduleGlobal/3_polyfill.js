@@ -128,3 +128,19 @@ function Array_from( array ){
   };
   return result;
 };
+
+/**
+ * @param {Array} array 
+ * @param {Function} callback 
+ * @return {*}
+ */
+function Array_reduceRight( array, callback /*, initialValue*/ ){
+  var len   = array.length >>> 0,
+      k     = len - 1,
+      value = array[ k-- ];
+
+    for( ; 0 <= k; --k ){
+        value = callback( value, array[ k ] /* , k, array */ );
+    };
+    return value;
+};
