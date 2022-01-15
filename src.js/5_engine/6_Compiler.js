@@ -89,7 +89,7 @@ Compiler.prototype.compileDisjunction = function( node ){
     const _children = node.children,
           l = _children.length;
 
-    if( l === 0 ){
+    if( l === 0 && DEFINE_REGEXP_COMPAT__DEBUG ){
         throw new Error('BUG: invalid pattern');
     };
 
@@ -150,7 +150,7 @@ Compiler.prototype.compileSequence = function( node ){
  * @return {Array.<OpCode>}
  */
 Compiler.prototype.compileGroup = function( node ){
-    return this.compileNode( node.child );
+    return /** @type {Array.<OpCode>} */ ( this.compileNode( node.child ) );
 };
 
 /**
@@ -160,7 +160,7 @@ Compiler.prototype.compileGroup = function( node ){
 Compiler.prototype.compileCapture = function( node ){
     const codes0 = this.compileNode( node.child );
 
-    if( node.index !== this.captureParensIndex++ ){
+    if( DEFINE_REGEXP_COMPAT__DEBUG && node.index !== this.captureParensIndex++ ){
         throw new Error('BUG: invalid pattern');
     };
     return Compiler_spreadOperator(
@@ -179,7 +179,9 @@ Compiler.prototype.compileNamedCapture = function( node ){
     const index = this.names.get( node.name );
 
     if( index === undefined || index !== this.captureParensIndex++ ){
-        throw new Error('BUG: invalid pattern');
+        if( DEFINE_REGEXP_COMPAT__DEBUG ){
+            throw new Error('BUG: invalid pattern');
+        };
     };
     return Compiler_spreadOperator(
         { op: 'cap_begin', index },
@@ -476,7 +478,7 @@ Compiler.prototype.escapeClassToSet = function( _node ){
             node = /** @type {UnicodePropertyEscapeClass} */ ( _node );
             var set = loadPropertyValue( 'General_Category', node.property ) || loadProperty( node.property );
             
-            if( !set ){
+            if( !set && DEFINE_REGEXP_COMPAT__DEBUG ){
                 throw new RegExpSyntaxError( 'invalid Unicode property' );
             };
             return node.invert ? set.clone().invert() : set;
@@ -484,7 +486,7 @@ Compiler.prototype.escapeClassToSet = function( _node ){
             node = /** @type {UnicodePropertyValueEscapeClass} */ ( _node );
             var set = loadPropertyValue( node.property, node.value );
 
-            if( set === null ){
+            if( !set && DEFINE_REGEXP_COMPAT__DEBUG ){
                 throw new RegExpSyntaxError( 'invalid Unicode property value' );
             };
             return node.invert ? set.clone().invert() : set;
@@ -520,7 +522,9 @@ Compiler.prototype.insertBack = function( codes ){
  */
 Compiler.prototype.compileBackRef = function( node ){
     if( node.index < 1 || this.captureParens < node.index ){
-        throw new Error('invalid back reference');
+        if( DEFINE_REGEXP_COMPAT__DEBUG ){
+            throw new Error('invalid back reference');
+        };
     };
     this.advance = false;
     return [ { op: this.direction === Compiler_DIRECTION_BACKWARD ? 'ref_back' : 'ref', index: node.index } ];
@@ -534,7 +538,9 @@ Compiler.prototype.compileNamedBackRef = function( node ){
     const index = this.names.get( node.name );
 
     if( index === undefined || index < 1 || this.captureParens < index ){
-        throw new Error('invalid named back reference');
+        if( DEFINE_REGEXP_COMPAT__DEBUG ){
+            throw new Error('invalid named back reference');
+        };
     };
     this.advance = false;
     return [ { op: this.direction === Compiler_DIRECTION_BACKWARD ? 'ref_back' : 'ref', index } ];

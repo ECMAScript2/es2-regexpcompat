@@ -72,14 +72,13 @@ Match.prototype.end = function( k ){
  * If not resolved, it returns `-1`.
  * 
  * @param {Match} match
- * @param {string} k 
+ * @param {string|number} k 
  * @return {Array.<number>}
  */
 function Match_resolve( match, k ){
     if( k === k + '' ){ // typeof k === 'string'
         k = match._names.get( k );
         k  = k !== undefined ? k : -1;
-
     };
     var i = match._caps[ k * 2 ],
         j = match._caps[ k * 2 + 1 ];
@@ -112,12 +111,12 @@ Match.prototype.toArray = function(){
         };
 
         // `RegExpExecArray`'s group does not accept `undefined` value, so cast to `any` for now.
-        (array).groups = groups; // eslint-disable-line @typescript-eslint/no-explicit-any
+        array.groups = groups; // eslint-disable-line @typescript-eslint/no-explicit-any
     } else {
         // (array).groups = undefined;
     };
 
-    return array;
+    return /** @type {RegExpResult} */ (array);
 };
 
 if( DEFINE_REGEXP_COMPAT__DEBUG ){
@@ -131,6 +130,11 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
     };
 
     if( DEFINE_REGEXP_COMPAT__NODEJS ){
+      /**
+       * @param {*} depth 
+       * @param {InspectOptionsStylized} options 
+       * @return {string}
+       */
         Match.prototype[ Symbol.for( 'nodejs.util.inspect.custom' ) ] = function( depth, options ){
             let s = options.stylize( 'Match', 'special' ) + ' [\n';
             const inverseNames = new Map( Array.from(this._names).map(([k, i]) => [i, k]) );

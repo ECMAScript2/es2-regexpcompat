@@ -57,7 +57,7 @@ function isLineTerminator( c ){
 };
 
 /** Calculate the maximum stack size without execution.
- * @param {Array.<OpCode>} c
+ * @param {Array.<OpCode>} codes
  * @return {number}
  */
 function calculateMaxStackSize( codes ){
@@ -167,8 +167,10 @@ function Program( pattern, codes ){
     /** @type {boolean} */
     this.multiline = pattern.flagSet.multiline;
 
-    /** @type {boolean} */
-    this.dotAll = pattern.flagSet.dotAll;
+    if( DEFINE_REGEXP_COMPAT__ES2018 ){
+        /** @type {boolean} */
+        this.dotAll = /** @type {boolean} */ (pattern.flagSet.dotAll);
+    };
 
     /** @type {boolean} */
     this.unicode = pattern.flagSet.unicode;
@@ -194,7 +196,11 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
         s += '}';
         return s;
     };
-    
+    /**
+     * @param {*} depth 
+     * @param {InspectOptionsStylized} options 
+     * @return {string}
+     */
     Program.prototype[Symbol.for('nodejs.util.inspect.custom')] = function( depth, options ){
         let s = ``;
         const pattern = options.stylize(patternToString(this.pattern), 'regexp');
@@ -232,7 +238,7 @@ Program.prototype.exec = function( input, pos ){
             switch( code.op ){
                 case 'any' :
                     c = getIndex( input, proc.pos, this.unicode );
-                    if( c >= 0 && ( this.dotAll || !isLineTerminator( c ) ) ){
+                    if( c >= 0 && ( ( DEFINE_REGEXP_COMPAT__ES2018 && this.dotAll ) || !isLineTerminator( c ) ) ){
                         proc.pos += size( c );
                     } else {
                         backtrack = true;
@@ -247,13 +253,13 @@ Program.prototype.exec = function( input, pos ){
                     };
                     break;
                 case 'cap_begin' :
-                    proc.caps[ code.index * 2 ] = proc.pos;
+                    proc.caps[ /** @type {OpCode_Cap_begin} */ (code).index * 2 ] = proc.pos;
                     break;
                 case 'cap_end' :
-                    proc.caps[ code.index * 2 + 1 ] = proc.pos;
+                    proc.caps[ /** @type {OpCode_Cap_end} */ (code).index * 2 + 1 ] = proc.pos;
                     break;
                 case 'cap_reset' :
-                    for( let i = code.from; i < code.to; ++i ){
+                    for( let i = /** @type {OpCode_Cap_reset} */ (code).from; i < /** @type {OpCode_Cap_reset} */ (code).to; ++i ){
                         proc.caps[ i * 2 ] = proc.caps[ i * 2 + 1 ] = -1;
                     };
                     break;
@@ -263,7 +269,7 @@ Program.prototype.exec = function( input, pos ){
                         backtrack = true;
                     };
                     var cc = this.ignoreCase ? canonicalize( c, this.unicode ) : c;
-                    if( cc === code.value ){
+                    if( cc === /** @type {OpCode_Char} */ (code).value ){
                         proc.pos += size( c );
                     } else {
                         backtrack = true;
@@ -278,13 +284,13 @@ Program.prototype.exec = function( input, pos ){
                     };
                     var cc = this.ignoreCase ? canonicalize( c, this.unicode ) : c;
 
-                    var actual = code.set.has( cc );
-                    var expected = code.op === 'class';
+                    var actual = /** @type {OpCode_Class|OpCode_Class_not} */ (code).set.has( cc );
+                    var expected = /** @type {OpCode_Class|OpCode_Class_not} */ (code).op === 'class';
 
                     if( this.ignoreCase ){
                         const uncanonicalized = uncanonicalize( cc, this.unicode ); // memo 何度も uncanonicalize() が呼ばれるのを修正
                         for( let d = 0, l = uncanonicalized.length; d < l; ++d ){
-                            actual = actual || code.set.has( uncanonicalized[ d ] );
+                            actual = actual || /** @type {OpCode_Class|OpCode_Class_not} */ (code).set.has( uncanonicalized[ d ] );
                         };
                     };
 
@@ -310,14 +316,14 @@ Program.prototype.exec = function( input, pos ){
                 case 'fork_next' :
                     const newProc = proc.clone();
                     procs.push( newProc );
-                    if( code.op === 'fork_cont' ){
-                        proc.pc += code.next;
+                    if( /** @type {OpCode_Fork_cont|OpCode_Fork_next} */ (code).op === 'fork_cont' ){
+                        proc.pc += /** @type {OpCode_Fork_cont|OpCode_Fork_next} */ (code).next;
                     } else {
-                        newProc.pc += code.next;
+                        newProc.pc += /** @type {OpCode_Fork_cont|OpCode_Fork_next} */ (code).next;
                     };
                     break;
                 case 'jump':
-                    proc.pc += code.cont;
+                    proc.pc += /** @type {OpCode_Jump} */ (code).cont;
                     break;
                 case 'line_begin' :
                     c = prevIndex( input, proc.pos, this.unicode );
@@ -334,7 +340,7 @@ Program.prototype.exec = function( input, pos ){
                 case 'loop':
                     const n = proc.stack[ proc.stackSize - 1 ];
                     if( n > 0 ){
-                        proc.pc += code.cont;
+                        proc.pc += /** @type {OpCode_Loop} */ (code).cont;
                     };
                     break;
                 case 'match':
@@ -343,7 +349,7 @@ Program.prototype.exec = function( input, pos ){
                     --proc.stackSize;
                     break;
                 case 'push':
-                    proc.stack[ proc.stackSize++ ] = code.value;
+                    proc.stack[ proc.stackSize++ ] = /** @type {OpCode_Push} */ (code).value;
                     break;
                 case 'push_pos':
                     proc.stack[ proc.stackSize++ ] = proc.pos;
@@ -352,8 +358,8 @@ Program.prototype.exec = function( input, pos ){
                     proc.stack[ proc.stackSize++ ] = procs.length;
                     break;
                 case 'ref':
-                    var begin = proc.caps[ code.index * 2 ];
-                    var end = proc.caps[ code.index * 2 + 1 ];
+                    var begin = proc.caps[ /** @type {OpCode_Ref} */ (code).index * 2 ];
+                    var end = proc.caps[ /** @type {OpCode_Ref} */ (code).index * 2 + 1 ];
                     var s = begin < 0 || end < 0 ? '' : input.slice( begin, end );
                     let i = 0;
                     while( i < s.length ){
@@ -373,8 +379,8 @@ Program.prototype.exec = function( input, pos ){
                     };
                     break;
                 case 'ref_back':
-                    var begin = proc.caps[ code.index * 2 ];
-                    var end = proc.caps[ code.index * 2 + 1 ];
+                    var begin = proc.caps[ /** @type {OpCode_Ref_back} */ (code).index * 2 ];
+                    var end = proc.caps[ /** @type {OpCode_Ref_back} */ (code).index * 2 + 1 ];
                     var s = begin < 0 || end < 0 ? '' : input.slice( begin, end );
                     var i = s.length;
                     while( i > 0 ){

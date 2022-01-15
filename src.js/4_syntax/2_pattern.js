@@ -4,7 +4,7 @@
  *     global: boolean,
  *     ignoreCase: boolean,
  *     multiline: boolean,
- *     dotAll: boolean,
+ *     dotAll: (boolean|undefined),
  *     unicode: boolean,
  *     sticky: boolean
  *   }
@@ -27,28 +27,7 @@ var FlagSet;
 var Pattern;
 
 /** Type for part of regular expression pattern.
- * @typedef {
- *     Disjunction
- *   | Sequence
- *   | Capture
- *   | NamedCapture
- *   | Group
- *   | Many
- *   | Some
- *   | Optional
- *   | Repeat
- *   | WordBoundary
- *   | LineBegin
- *   | LineEnd
- *   | LookAhead
- *   | LookBehind
- *   | Char
- *   | EscapeClass
- *   | Class
- *   | Dot
- *   | BackRef
- *   | NamedBackRef
- * }
+ * @typedef {Disjunction|Sequence|Capture|NamedCapture|Group|Many|Some|Optional|Repeat|WordBoundary|LineBegin|LineEnd|LookAhead|LookBehind|Char|EscapeClass|Class|Dot|BackRef|NamedBackRef}
  */
 var RegExpPaternNode;
 
@@ -209,9 +188,7 @@ var Char;
 
 /** Type for escape sequence class like `/\w/`.
  * @typedef {
- *    SimpleEscapeClass
- *  | UnicodePropertyEscapeClass
- *  | UnicodePropertyValueEscapeClass
+ *    SimpleEscapeClass| UnicodePropertyEscapeClass| UnicodePropertyValueEscapeClass
  * }
  */
 var EscapeClass;
@@ -331,40 +308,40 @@ function escapeRaw( raw ){
 /** Show class item as string.
  * 
  * @param {ClassItem} n 
- * @return {string}
+ * @return {string|undefined}
  */
 function classItemToString( n ){
     switch( n.type ){
         case 'Char':
-            return escapeRaw( n.raw );
-        case 'EscapeClass':
-            switch( n.kind ){
-                case 'digit':
-                    return n.invert ? '\\D' : '\\d';
-                case 'word':
-                    return n.invert ? '\\W' : '\\w';
-                case 'space':
-                    return n.invert ? '\\S' : '\\s';
-                case 'unicode_property':
-                    if( DEFINE_REGEXP_COMPAT__ES2018 ){
-                        return '\\' + ( n.invert ? 'P' : 'p' ) + n.property;
-                    };
-                case 'unicode_property_value':
-                    if( DEFINE_REGEXP_COMPAT__ES2018 ){
-                        return '\\' + ( n.invert ? 'P' : 'p' ) + n.property + '=' + n.value;
-                    };
-            };
+            return escapeRaw( /** @type {Char} */ (n).raw );
         // The above `switch-case` is exhaustive and it is checked by `tsc`, so `eslint` rule is disabled.
         // eslint-disable-next-line no-fallthrough
         case 'ClassRange':
-            return escapeRaw( n.children[ 0 ].raw ) + '-' + escapeRaw( n.children[ 1 ].raw );
+            return escapeRaw( /** @type {ClassRange} */ (n).children[ 0 ].raw ) + '-' + escapeRaw( /** @type {ClassRange} */ (n).children[ 1 ].raw );
+        case 'EscapeClass':
+            switch( n.kind ){
+                case 'digit':
+                    return /** @type {SimpleEscapeClass} */ (n).invert ? '\\D' : '\\d';
+                case 'word':
+                    return /** @type {SimpleEscapeClass} */ (n).invert ? '\\W' : '\\w';
+                case 'space':
+                    return /** @type {SimpleEscapeClass} */ (n).invert ? '\\S' : '\\s';
+                case 'unicode_property':
+                    if( DEFINE_REGEXP_COMPAT__ES2018 ){
+                        return '\\' + ( /** @type {UnicodePropertyEscapeClass} */ (n).invert ? 'P' : 'p' ) + /** @type {UnicodePropertyEscapeClass} */ (n).property;
+                    };
+                case 'unicode_property_value':
+                    if( DEFINE_REGEXP_COMPAT__ES2018 ){
+                        return '\\' + ( /** @type {UnicodePropertyValueEscapeClass} */ (n).invert ? 'P' : 'p' ) + /** @type {UnicodePropertyValueEscapeClass} */ (n).property + '=' + n.value;
+                    };
+            };
     };
 };
 
 nodeToString = function( n ){
     switch( n.type ){
         case 'Sequence':
-            return n.children.map( nodeToString ).join( '' );
+            return n.children.map( nodeToString ).join( '' ); // TODO .map polyfill
         case 'Disjunction':
             return n.children.map( nodeToString ).join( '|' );
         case 'Capture':
@@ -418,7 +395,7 @@ nodeToString = function( n ){
 
 /** Show flag set as string.
  *
- * @param {flagSet} flagSet
+ * @param {FlagSet} flagSet
  * @return {string}
  */
  flagSetToString = function( flagSet ){
@@ -433,7 +410,7 @@ nodeToString = function( n ){
     if( flagSet.multiline ){
         s += 'm';
     };
-    if( flagSet.dotAll ){
+    if( flagSet.dotAll && DEFINE_REGEXP_COMPAT__ES2018 ){
         s += 's';
     };
     if( flagSet.unicode ){

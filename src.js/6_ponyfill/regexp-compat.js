@@ -80,13 +80,14 @@ function RegExpCompat( source, flags ){
     this.multiline = pattern.flagSet.multiline;
 
     /** @type {boolean} */
-    this.dotAll = pattern.flagSet.dotAll;
-
-    /** @type {boolean} */
     this.unicode = pattern.flagSet.unicode;
 
     /** @type {boolean} */
     this.sticky = pattern.flagSet.sticky;
+
+    if( DEFINE_REGEXP_COMPAT__ES2018 ){
+        this.dotAll = /** @type {boolean} */ (pattern.flagSet.dotAll);
+    };
 };
 
 if( DEFINE_REGEXP_COMPAT__DEBUG ){

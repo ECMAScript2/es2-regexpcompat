@@ -32,7 +32,7 @@ CharSet = function( data ){
 
 /** Add a range to this.
  * @param {number} begin
- * @param {number=} end
+ * @param {number=} opt_end
  */
 CharSet.prototype.add = function( begin, opt_end ){
     var data = this.data;
@@ -138,7 +138,12 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
     };
 
     if( DEFINE_REGEXP_COMPAT__NODEJS ){
-        CharSet.prototype[ Symbol.for( 'nodejs.util.inspect.custom' ) ] = function( _depth, options ){
+      /**
+       * @param {*} depth 
+       * @param {InspectOptionsStylized} options 
+       * @return {string}
+       */
+        CharSet.prototype[ Symbol.for( 'nodejs.util.inspect.custom' ) ] = function( depth, options ){
             return options.stylize( 'CharSet', 'special' ) + ' ' +
                    options.stylize( this.toRegExpPattern(), 'regexp' );
         };
