@@ -44,7 +44,7 @@ function isHexDigit( c ){
  * @return {boolean}
  */
 function isSyntax( c ){
-    return c !== '' && '^$\\.*+?()[]{}|'.includes( c );
+    return c !== '' && '^$\\.*+?()[]{}|'.indexOf( c ) !== -1;
 };
 
 /** Check the character can use for control escape.
@@ -897,7 +897,7 @@ Parser.prototype.tryParseEscape = function(){
             };
         };
         if( octal !== this.pos ){
-            const value = Number.parseInt( this.source.slice( octal, this.pos ), 8 );
+            const value = /* Number. */ parseInt( this.source.slice( octal, this.pos ), 8 );
             return {
                 type  : 'Char',
                 value : value,
@@ -1254,7 +1254,7 @@ Parser.prototype.parseDigits = function(){
         s += this.current();
         ++this.pos; // skip digit
     };
-    return s === '' ? -1 : Number.parseInt( s, 10 );
+    return s === '' ? -1 : /* Number. */ parseInt( s, 10 );
 };
 
 /** Parse hex digits. If parsing is failed, return `-1`.
@@ -1268,7 +1268,7 @@ Parser.prototype.parseHexDigits = function(){
         s += c;
         this.pos += c.length; // skip hex digit
     };
-    return s === '' ? -1 : Number.parseInt( s, 16 );
+    return s === '' ? -1 : /* Number. */ parseInt( s, 16 );
 };
 
 /** Try to parse `n` characters of hex digits.  If parsing is faield, return `-1`.
@@ -1288,7 +1288,7 @@ Parser.prototype.tryParseHexDigitsN = function( n ){
         s += c;
         this.pos += c.length; // skip hex digit
     };
-    return Number.parseInt( s, 16 );
+    return /* Number. */ parseInt( s, 16 );
 };
 
 /** Return the current character.
@@ -1300,5 +1300,5 @@ Parser.prototype.current = function(){
         return c === undefined ? '' : String_fromCodePoint( c );
     };
     const c = this.source.charCodeAt( this.pos );
-    return Number.isNaN( c ) ? '' : String_fromCharCode( c );
+    return /* Number.isNaN( c ) */ c !== c ? '' : String_fromCharCode( c );
 };

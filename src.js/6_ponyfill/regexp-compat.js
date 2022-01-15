@@ -233,7 +233,7 @@ RegExpCompat.prototype[Symbol.replace] = function( string, replacer ){
                         if( '0' <= c && c <= '9' ){
                             const d = replacer.charAt( j + 2 );
                             const s = '0' <= d && d <= '9' ? c + d : c;
-                            let n = Number.parseInt( s, 10 );
+                            let n = /* Number. */parseInt( s, 10 );
                             if( 0 < n && n < match.length ){
                                 result += match[ n ] || '';
                                 i = j + 1 + s.length;
@@ -276,7 +276,7 @@ RegExpCompat.prototype[Symbol.split] = function( string, limit ){
     const constructor = this.constructor;
     const species     = /* constructor && constructor[Symbol.species] || */ RegExpCompat;
     const splitter    = new species( this.source, flags );
-    limit = ( limit !== undefined ? limit : 2 ** 32 - 1 ) >>> 0;
+    limit = ( limit !== undefined ? limit : /* 2 ** 32 */ 4294967296 - 1 ) >>> 0;
 
     const result = [];
     if( limit === 0 ){

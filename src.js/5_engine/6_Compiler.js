@@ -110,7 +110,7 @@ Compiler.prototype.compileDisjunction = function( node ){
             { op: 'fork_cont', next: codes0.length + 1 },
             /* ... */ /** @type {Array.<OpCode>} */ (codes0),
             { op: 'jump', cont: codes.length },
-            /* ... */ /** @type {Array.<OpCode>} */ (codes),
+            /* ... */ /** @type {Array.<OpCode>} */ (codes)
         );
     };
 };
@@ -166,7 +166,7 @@ Compiler.prototype.compileCapture = function( node ){
     return Compiler_spreadOperator(
         { op: this.direction === Compiler_DIRECTION_BACKWARD ? 'cap_end' : 'cap_begin', index: node.index },
         /* ... */ /** @type {Array.<OpCode>} */ (codes0),
-        { op: this.direction === Compiler_DIRECTION_BACKWARD ? 'cap_begin' : 'cap_end', index: node.index },
+        { op: this.direction === Compiler_DIRECTION_BACKWARD ? 'cap_begin' : 'cap_end', index: node.index }
     );
 };
 

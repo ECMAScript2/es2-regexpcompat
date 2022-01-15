@@ -168,7 +168,6 @@ function Program( pattern, codes ){
     this.multiline = pattern.flagSet.multiline;
 
     if( DEFINE_REGEXP_COMPAT__ES2018 ){
-        /** @type {boolean} */
         this.dotAll = /** @type {boolean} */ (pattern.flagSet.dotAll);
     };
 

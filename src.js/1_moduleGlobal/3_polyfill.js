@@ -105,7 +105,7 @@ function String_padEndWithSpace( str, targetLength ){
  * @param {number} pos 
  */
 function String_startsWith( str, search, pos ){
-    return str.substr( pos, search.length) === search;
+    return str.substr( pos, search.length ) === search;
 };
 
 /**

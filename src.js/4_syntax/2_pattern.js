@@ -377,13 +377,13 @@ nodeToString = function( n ){
         case 'LookBehind':
             return '(?<' + ( n.negative ? '!' : '=' ) + nodeToString( n.child ) + ')';
         case 'Char': {
-            const c = escapeRaw(n.raw);
+            const c = escapeRaw( n.raw );
             return c === '/' ? '\\/' : c;
         };
         case 'EscapeClass':
-            return classItemToString(n);
+            return classItemToString( n );
         case 'Class':
-            return '[' + ( n.invert ? '^' : '' ) + n.children.map(classItemToString).join('') + ']';
+            return '[' + ( n.invert ? '^' : '' ) + n.children.map( classItemToString ).join('') + ']';
         case 'Dot':
             return '.';
         case 'BackRef':

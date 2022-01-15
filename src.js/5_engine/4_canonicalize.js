@@ -9,7 +9,7 @@ canonicalize = function( c, unicode ){
         return foldMap.get( c ) || c;
     };
 
-    const s = String.fromCharCode( c );
+    const s = String_fromCharCode( c );
     const u = s.toUpperCase();
     if( u.length >= 2 ){
         return c;
@@ -39,6 +39,6 @@ uncanonicalize = function( c, unicode ){
     if( d !== undefined ){
         return d;
     };
-    const s = String.fromCharCode( c );
+    const s = String_fromCharCode( c );
     return [ s.toLowerCase().charCodeAt( 0 ) ];
 };
