@@ -286,7 +286,7 @@ RegExpCompat.prototype[Symbol.split] = function( string, limit ){
     // Special case for empty string.
     if( /* string.length === 0 */ string === '' ){
         const match = splitter.exec( string );
-        if( match === null ){
+        if( !match ){
             result.push( string );
         };
         return result;

@@ -5,12 +5,15 @@
  */
 function isAssertion( n ){
     switch( n.type ){
-        case 'WordBoundary':
-        case 'LineBegin':
-        case 'LineEnd':
-        case 'LookAhead':
-        case 'LookBehind':
+        case REGEXP_COMPAT__PATTERN_IS_WordBoundary :
+        case REGEXP_COMPAT__PATTERN_IS_LineBegin :
+        case REGEXP_COMPAT__PATTERN_IS_LineEnd :
+        case REGEXP_COMPAT__PATTERN_IS_LookAhead :
             return true;
+        case REGEXP_COMPAT__PATTERN_IS_LookBehind :
+            if( DEFINE_REGEXP_COMPAT__ES2018 ){
+                return true;
+            };
     };
     return false;
 };
@@ -81,7 +84,7 @@ const idStart = new CharSet(property.get('ID_Start'));
 function isIDStart( c ){
     var cp;
 
-    return c === '$' || c === '_' || !!idStart.has( ( cp = String_codePointAt( c, 0 ) ) !== undefined ? cp : -1 );
+    return c === '$' || c === '_' || idStart.has( ( cp = String_codePointAt( c, 0 ) ) !== undefined ? cp : -1 );
 };
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -94,7 +97,7 @@ const idContinue = new CharSet(property.get('ID_Continue'));
 function isIDPart( c ){
     var cp;
 
-    return c === '$' || c === '\u200C' || c === '\u200D' || !!idContinue.has( ( cp = String_codePointAt( c, 0 ) ) !== undefined ? cp : -1 );
+    return c === '$' || c === '\u200C' || c === '\u200D' || idContinue.has( ( cp = String_codePointAt( c, 0 ) ) !== undefined ? cp : -1 );
 };
 
 /** Type of repeat quantifier.
@@ -155,7 +158,7 @@ Parser.prototype.parse = function(){
     };
 
     return {
-        type          : 'Pattern',
+        type          : REGEXP_COMPAT__PATTERN_IS_Pattern,
         flagSet       : this.flagSet,
         captureParens : this.captureParens,
         names         : this.names,
@@ -307,7 +310,7 @@ Parser.prototype.skipCharClass = function(){
  *
  * See https://www.ecma-international.org/ecma-262/10.0/index.html#prod-Disjunction.
  * 
- * @return {RegExpPaternNode}
+ * @return {Disjunction}
  */
 Parser.prototype.parseDisjunction = function(){
     const begin = this.pos;
@@ -322,10 +325,10 @@ Parser.prototype.parseDisjunction = function(){
     };
 
     if( children.length === 1 ){
-        return children[0];
+        return children[ 0 ];
     };
 
-    return { type : 'Disjunction', children : children, range : [ begin, this.pos ] };
+    return { type : REGEXP_COMPAT__PATTERN_IS_Disjunction, children : children, range : [ begin, this.pos ] };
 };
 
 /**
@@ -338,7 +341,7 @@ Parser.prototype.parseDisjunction = function(){
  *
  * See https://www.ecma-international.org/ecma-262/10.0/index.html#prod-Alternative.
  *
- * @return {RegExpPaternNode}
+ * @return {Sequence}
  */
 Parser.prototype.parseSequence = function(){
     const begin = this.pos;
@@ -352,7 +355,7 @@ Parser.prototype.parseSequence = function(){
         return children[ 0 ];
     };
 
-    return { type: 'Sequence', children : children, range: [ begin, this.pos ] };
+    return { type: REGEXP_COMPAT__PATTERN_IS_Sequence, children : children, range: [ begin, this.pos ] };
 };
 
 /**
@@ -373,7 +376,7 @@ Parser.prototype.parseQuantifier = function(){
     const child = /** @type {RegExpPaternNode} */ ( this.parseAtom() );
 
     if( isAssertion( child ) ){
-        if( this.additional && !this.unicode && child.type === 'LookAhead' ){
+        if( this.additional && !this.unicode && child.type === REGEXP_COMPAT__PATTERN_IS_LookAhead ){
         } else {
             return child;
         };
@@ -381,11 +384,11 @@ Parser.prototype.parseQuantifier = function(){
 
     switch( this.current() ){
         case '*':
-            return this.parseSimpleQuantifier( 'Many', begin, child );
+            return this.parseSimpleQuantifier( REGEXP_COMPAT__PATTERN_IS_Many, begin, child );
         case '+':
-            return this.parseSimpleQuantifier( 'Some', begin, child );
+            return this.parseSimpleQuantifier( REGEXP_COMPAT__PATTERN_IS_Some, begin, child );
         case '?':
-            return this.parseSimpleQuantifier( 'Optional', begin, child );
+            return this.parseSimpleQuantifier( REGEXP_COMPAT__PATTERN_IS_Optional, begin, child );
         case '{':
             return this.parseRepeat( begin, child );
     };
@@ -398,7 +401,7 @@ Parser.prototype.parseQuantifier = function(){
  *
  * Simple quantifier suffix means quantifiers execpt for `{n,m}`.
  * 
- * @param {string} type 
+ * @param {string|number} type 
  * @param {number} begin 
  * @param {RegExpPaternNode} child 
  * @return {RegExpPaternNode}
@@ -451,7 +454,7 @@ Parser.prototype.parseRepeat = function( begin, child ){
     };
 
     return {
-        type      : 'Repeat',
+        type      : REGEXP_COMPAT__PATTERN_IS_Repeat,
         min       : min,
         max       : max,
         nonGreedy : nonGreedy,
@@ -521,13 +524,13 @@ Parser.prototype.parseAtom = function(){
     switch( c ){
         case '.':
             ++this.pos; // skip '.'
-            return { type: 'Dot', range: [ begin, this.pos ] };
+            return { type: REGEXP_COMPAT__PATTERN_IS_Dot, range: [ begin, this.pos ] };
         case '^':
             ++this.pos; // skip '^'
-            return { type: 'LineBegin', range: [ begin, this.pos ] };
+            return { type: REGEXP_COMPAT__PATTERN_IS_LineBegin, range: [ begin, this.pos ] };
         case '$':
             ++this.pos; // skip '$'
-            return { type: 'LineEnd', range: [ begin, this.pos ] };
+            return { type: REGEXP_COMPAT__PATTERN_IS_LineEnd, range: [ begin, this.pos ] };
         case '[':
             return this.parseClass();
         case '\\':
@@ -581,7 +584,7 @@ Parser.prototype.parseAtom = function(){
     if( value === undefined && DEFINE_REGEXP_COMPAT__DEBUG ){
         throw new Error('BUG: invalid character');
     };
-    return { type : 'Char', value : value, raw : c, range : [ begin, this.pos ] };
+    return { type : REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw : c, range : [ begin, this.pos ] };
 };
 
 /** Parse `character class` pattern.
@@ -608,7 +611,7 @@ Parser.prototype.parseClass = function(){
     };
     ++this.pos; // skip ']'
 
-    return { type : 'Class', invert : invert, children : children, range : [ begin, this.pos ] };
+    return { type : REGEXP_COMPAT__PATTERN_IS_Class, invert : invert, children : children, range : [ begin, this.pos ] };
 };
 
 /** Parse an item of `character class` pattern.
@@ -625,7 +628,7 @@ Parser.prototype.parseClassItem = function(){
         return /** @type {Char|EscapeClass} */ (begin);
     };
 
-    if( begin.type === 'EscapeClass' ){
+    if( begin.type === REGEXP_COMPAT__PATTERN_IS_EscapeClass ){
         if( this.additional && !this.unicode ){
             return /** @type {EscapeClass} */ (begin);
         };
@@ -637,7 +640,7 @@ Parser.prototype.parseClassItem = function(){
     const save = this.pos;
     ++this.pos; // skip '-'
     const end = this.parseClassAtom();
-    if( end.type === 'EscapeClass' ){
+    if( end.type === REGEXP_COMPAT__PATTERN_IS_EscapeClass ){
         if( this.additional && !this.unicode ){
             this.pos = save;
             return begin;
@@ -651,7 +654,7 @@ Parser.prototype.parseClassItem = function(){
         throw new RegExpSyntaxError('range out of order in character class');
     };
 
-    return { type: 'ClassRange', children : [ begin, end ], range: [ beginPos, this.pos ] };
+    return { type: REGEXP_COMPAT__PATTERN_IS_ClassRange, children : [ begin, end ], range: [ beginPos, this.pos ] };
 };
 
 /** Parse an atom of `character class` range.
@@ -671,17 +674,17 @@ Parser.prototype.parseClassAtom = function(){
         if( value === undefined && DEFINE_REGEXP_COMPAT__DEBUG ){
             throw new Error('BUG: invalid character');
         };
-        return { type : 'Char', value : value, raw : c, range : [ begin, this.pos ] };
+        return { type : REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw : c, range : [ begin, this.pos ] };
     };
 
     if( String_startsWith( this.source, '\\-', this.pos ) ){
         this.pos += 2; // skip '\\-'
-        return { type : 'Char', value : 0x2d, raw : '\\-', range : [ begin, this.pos ] };
+        return { type : REGEXP_COMPAT__PATTERN_IS_Char, value : 0x2d, raw : '\\-', range : [ begin, this.pos ] };
     };
 
     if( String_startsWith( this.source, '\\b', this.pos ) ){
         this.pos += 2; // skip '\\b'
-        return { type : 'Char', value : 0x08, raw : '\\b', range : [ begin, this.pos ] };
+        return { type : REGEXP_COMPAT__PATTERN_IS_Char, value : 0x08, raw : '\\b', range : [ begin, this.pos ] };
     };
 
     const escapeClass = this.tryParseEscapeClass();
@@ -731,24 +734,24 @@ Parser.prototype.parseEscape = function(){
 };
 
 /** Try to parse `word boundary` pattern.
- * @return {RegExpPaternNode|undefined}
+ * @return {WordBoundary|undefined}
  */
 Parser.prototype.tryParseWordBoundary = function(){
     const begin = this.pos;
 
     if( String_startsWith( this.source, '\\b', this.pos ) ){
         this.pos += 2; // skip '\\b'
-        return { type : 'WordBoundary', invert : false, range : [ begin, this.pos ] };
+        return { type : REGEXP_COMPAT__PATTERN_IS_WordBoundary, invert : false, range : [ begin, this.pos ] };
     };
 
     if( String_startsWith( this.source, '\\B', this.pos ) ){
         this.pos += 2; // skip '\\B'
-        return { type : 'WordBoundary', invert : true, range : [ begin, this.pos ] };
+        return { type : REGEXP_COMPAT__PATTERN_IS_WordBoundary, invert : true, range : [ begin, this.pos ] };
     };
 };
 
 /** Try to parse `back reference` pattern
- * @return {RegExpPaternNode|undefined}
+ * @return {BackRef|NamedBackRef|undefined}
  */
 Parser.prototype.tryParseBackRef = function(){
     const begin = this.pos;
@@ -763,7 +766,7 @@ Parser.prototype.tryParseBackRef = function(){
             const namePos = ++this.pos; // skip '<'
             const name = this.parseCaptureName();
             return {
-                type  : 'NamedBackRef',
+                type  : REGEXP_COMPAT__PATTERN_IS_NamedBackRef,
                 name  : name,
                 raw   : this.source.slice( namePos, this.pos - 1 ),
                 range : [ begin, this.pos ]
@@ -776,10 +779,10 @@ Parser.prototype.tryParseBackRef = function(){
         if( index >= 1 ){
             if( this.additional && !this.unicode ){
                 if( index <= this.captureParens ){
-                    return { type: 'BackRef', index : index, range : [ begin, this.pos ] };
+                    return { type: REGEXP_COMPAT__PATTERN_IS_BackRef, index : index, range : [ begin, this.pos ] };
                 };
             } else {
-                return { type: 'BackRef', index : index, range : [ begin, this.pos ] };
+                return { type: REGEXP_COMPAT__PATTERN_IS_BackRef, index : index, range : [ begin, this.pos ] };
             };
         };
     };
@@ -800,7 +803,7 @@ Parser.prototype.tryParseEscape = function(){
             throw new Error('BUG: invalid character');
         };
         return {
-            type  : 'Char',
+            type  : REGEXP_COMPAT__PATTERN_IS_Char,
             value : value,
             raw   : this.source.slice( begin, this.pos ),
             range : [ begin, this.pos ]
@@ -811,19 +814,19 @@ Parser.prototype.tryParseEscape = function(){
     switch( this.current() ){
         case 't':
             ++this.pos; // skip 't'
-            return { type: 'Char', value: 0x09, raw: '\\t', range: [ begin, this.pos ] };
+            return { type: REGEXP_COMPAT__PATTERN_IS_Char, value: 0x09, raw: '\\t', range: [ begin, this.pos ] };
         case 'n':
             ++this.pos; // skip 'n'
-            return { type: 'Char', value: 0x0a, raw: '\\n', range: [ begin, this.pos ] };
+            return { type: REGEXP_COMPAT__PATTERN_IS_Char, value: 0x0a, raw: '\\n', range: [ begin, this.pos ] };
         case 'v':
             ++this.pos; // skip 'v'
-            return { type: 'Char', value: 0x0b, raw: '\\v', range: [ begin, this.pos ] };
+            return { type: REGEXP_COMPAT__PATTERN_IS_Char, value: 0x0b, raw: '\\v', range: [ begin, this.pos ] };
         case 'f':
             ++this.pos; // skip 'f'
-            return { type: 'Char', value: 0x0c, raw: '\\f', range: [ begin, this.pos ] };
+            return { type: REGEXP_COMPAT__PATTERN_IS_Char, value: 0x0c, raw: '\\f', range: [ begin, this.pos ] };
         case 'r':
             ++this.pos; // skip 'r'
-            return { type: 'Char', value: 0x0d, raw: '\\r', range: [ begin, this.pos ] };
+            return { type: REGEXP_COMPAT__PATTERN_IS_Char, value: 0x0d, raw: '\\r', range: [ begin, this.pos ] };
         case 'c': {
             ++this.pos; // skip 'c'
             const c = this.current();
@@ -841,7 +844,7 @@ Parser.prototype.tryParseEscape = function(){
                 };
             };
             return {
-                type  : 'Char',
+                type  : REGEXP_COMPAT__PATTERN_IS_Char,
                 value : value,
                 raw   : this.source.slice( begin, this.pos ),
                 range : [ begin, this.pos ]
@@ -855,7 +858,7 @@ Parser.prototype.tryParseEscape = function(){
                 break;
             };
             return {
-                type  : 'Char',
+                type  : REGEXP_COMPAT__PATTERN_IS_Char,
                 value : value,
                 raw   : this.source.slice( begin, this.pos ),
                 range : [ begin, this.pos ]
@@ -867,7 +870,7 @@ Parser.prototype.tryParseEscape = function(){
                 --this.pos; // go back '0'
                 break;
             };
-            return { type : 'Char', value : 0, raw : '\\0', range : [ begin, this.pos ] };
+            return { type : REGEXP_COMPAT__PATTERN_IS_Char, value : 0, raw : '\\0', range : [ begin, this.pos ] };
         };
         case '':
             if( DEFINE_REGEXP_COMPAT__DEBUG ){
@@ -899,7 +902,7 @@ Parser.prototype.tryParseEscape = function(){
         if( octal !== this.pos ){
             const value = /* Number. */ parseInt( this.source.slice( octal, this.pos ), 8 );
             return {
-                type  : 'Char',
+                type  : REGEXP_COMPAT__PATTERN_IS_Char,
                 value : value,
                 raw   : this.source.slice( begin, this.pos ),
                 range : [ begin, this.pos ]
@@ -916,21 +919,21 @@ Parser.prototype.tryParseEscape = function(){
     if( this.unicode ){
         if( isSyntax( c ) || c === '/' ){
             this.pos += c.length; // skip any char
-            return { type : 'Char', value : value, raw : '\\' + c, range : [ begin, this.pos ] };
+            return { type : REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw : '\\' + c, range : [ begin, this.pos ] };
         };
     } else {
         if( this.additional ){
             if( c === 'c' ){
-                return { type : 'Char', value : 0x5c, raw : '\\', range : [ begin, this.pos ] };
+                return { type : REGEXP_COMPAT__PATTERN_IS_Char, value : 0x5c, raw : '\\', range : [ begin, this.pos ] };
             };
             if( this.names.size === 0 || c !== 'k' ){
                 this.pos += c.length; // skip any char
-                return { type : 'Char', value, raw : '\\' + c, range : [ begin, this.pos ] };
+                return { type : REGEXP_COMPAT__PATTERN_IS_Char, value, raw : '\\' + c, range : [ begin, this.pos ] };
             }
         } else {
             if( !idContinue.has( value ) ){
                 this.pos += c.length; // skip any char
-                return { type: 'Char', value : value, raw: '\\' + c, range : [ begin, this.pos ] };
+                return { type: REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw: '\\' + c, range : [ begin, this.pos ] };
             };
         };
     };
@@ -1011,66 +1014,68 @@ Parser.prototype.tryParseEscapeClass = function(){
         case 'd':
         case 'D':
             ++this.pos; // skip 'd' or 'D'
-            return { type: 'EscapeClass', kind: 'digit', invert: c === 'D', range: [ begin, this.pos ] };
+            return { type: REGEXP_COMPAT__PATTERN_IS_EscapeClass, kind: REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_digit, invert: c === 'D', range: [ begin, this.pos ] };
         case 'w':
         case 'W':
             ++this.pos; // skip 'w' or 'W'
-            return { type: 'EscapeClass', kind: 'word', invert: c === 'W', range: [ begin, this.pos ] };
+            return { type: REGEXP_COMPAT__PATTERN_IS_EscapeClass, kind: REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_word, invert: c === 'W', range: [ begin, this.pos ] };
         case 's':
         case 'S':
             ++this.pos; // skip 's' or 'S'
-            return { type: 'EscapeClass', kind: 'space', invert: c === 'S', range: [ begin, this.pos ] };
+            return { type: REGEXP_COMPAT__PATTERN_IS_EscapeClass, kind: REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_space, invert: c === 'S', range: [ begin, this.pos ] };
         case 'p':
         case 'P': {
-            if( !this.unicode ){
-                break;
-            };
-            const invert = c === 'P';
-            ++this.pos; // skip 'p' or 'P'
+            if( DEFINE_REGEXP_COMPAT__ES2018 ){
+                if( !this.unicode ){
+                    break;
+                };
+                const invert = c === 'P';
+                ++this.pos; // skip 'p' or 'P'
 
-            if( this.current() !== '{' && DEFINE_REGEXP_COMPAT__DEBUG ){
-                throw new RegExpSyntaxError('invalid Unicode property escape');
-            };
-            ++this.pos; // skip '{'
+                if( this.current() !== '{' && DEFINE_REGEXP_COMPAT__DEBUG ){
+                    throw new RegExpSyntaxError('invalid Unicode property escape');
+                };
+                ++this.pos; // skip '{'
 
-            const property = this.parseUnicodePropertyName();
-            if( property === '' && DEFINE_REGEXP_COMPAT__DEBUG ){
-                throw new RegExpSyntaxError('invalid Unicode property name');
-            };
+                const property = this.parseUnicodePropertyName();
+                if( property === '' && DEFINE_REGEXP_COMPAT__DEBUG ){
+                    throw new RegExpSyntaxError('invalid Unicode property name');
+                };
 
-            if( this.current() === '}' ){
+                if( this.current() === '}' ){
+                    ++this.pos; // skip '}'
+                    return {
+                        type     : REGEXP_COMPAT__PATTERN_IS_EscapeClass,
+                        kind     : REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_unicode_property,
+                        property : property,
+                        invert   : invert,
+                        range    : [ begin, this.pos ]
+                    };
+                };
+
+                if( this.current() !== '=' && DEFINE_REGEXP_COMPAT__DEBUG ){
+                    throw new RegExpSyntaxError('invalid Unicode property escape');
+                };
+                ++this.pos; // skip '='
+
+                const value = this.parseUnicodePropertyValue();
+                if( value === '' && DEFINE_REGEXP_COMPAT__DEBUG ){
+                    throw new RegExpSyntaxError('invalid Unicode property value');
+                };
+
+                if( this.current() !== '}' && DEFINE_REGEXP_COMPAT__DEBUG ){
+                    throw new RegExpSyntaxError('invalid Unicode property escape');
+                };
                 ++this.pos; // skip '}'
+
                 return {
-                    type     : 'EscapeClass',
-                    kind     : 'unicode_property',
+                    type     : REGEXP_COMPAT__PATTERN_IS_EscapeClass,
+                    kind     : REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_unicode_property_value,
                     property : property,
+                    value    : value,
                     invert   : invert,
                     range    : [ begin, this.pos ]
                 };
-            };
-
-            if( this.current() !== '=' && DEFINE_REGEXP_COMPAT__DEBUG ){
-                throw new RegExpSyntaxError('invalid Unicode property escape');
-            };
-            ++this.pos; // skip '='
-
-            const value = this.parseUnicodePropertyValue();
-            if( value === '' && DEFINE_REGEXP_COMPAT__DEBUG ){
-                throw new RegExpSyntaxError('invalid Unicode property value');
-            };
-
-            if( this.current() !== '}' && DEFINE_REGEXP_COMPAT__DEBUG ){
-                throw new RegExpSyntaxError('invalid Unicode property escape');
-            };
-            ++this.pos; // skip '}'
-
-            return {
-                type     : 'EscapeClass',
-                kind     : 'unicode_property_value',
-                property : property,
-                value    : value,
-                invert   : invert,
-                range    : [ begin, this.pos ]
             };
         };
     };
@@ -1105,7 +1110,7 @@ Parser.prototype.parseUnicodePropertyValue = function(){
 };
 
 /** Parse grouping pattern by paren.
- * @return {RegExpPaternNode|undefined}
+ * @return {Capture|Group|LookAhead|LookBehind|NamedCapture|undefined}
  */
 Parser.prototype.parseParen = function(){
     const begin = this.pos;
@@ -1118,7 +1123,7 @@ Parser.prototype.parseParen = function(){
             throw new RegExpSyntaxError('unterminated capture');
         };
         ++this.pos; // skip ')'
-        return { type: 'Capture', index : index, child : child, range : [ begin, this.pos ] };
+        return { type: REGEXP_COMPAT__PATTERN_IS_Capture, index : index, child : child, range : [ begin, this.pos ] };
     };
 
     if( String_startsWith( this.source, '(?:', this.pos ) ){
@@ -1128,7 +1133,7 @@ Parser.prototype.parseParen = function(){
             throw new RegExpSyntaxError('unterminated group');
         };
         ++this.pos; // skip ')'
-        return { type : 'Group', child : child, range : [ begin, this.pos ] };
+        return { type : REGEXP_COMPAT__PATTERN_IS_Group, child : child, range : [ begin, this.pos ] };
     };
 
     if( String_startsWith( this.source, '(?=', this.pos ) ){
@@ -1138,7 +1143,7 @@ Parser.prototype.parseParen = function(){
             throw new RegExpSyntaxError('unterminated look-ahead');
         };
         ++this.pos; // skip ')'
-        return { type : 'LookAhead', negative : false, child : child, range : [ begin, this.pos ] };
+        return { type : REGEXP_COMPAT__PATTERN_IS_LookAhead, negative : false, child : child, range : [ begin, this.pos ] };
     };
 
     if( String_startsWith( this.source, '(?!', this.pos ) ){
@@ -1148,44 +1153,46 @@ Parser.prototype.parseParen = function(){
             throw new RegExpSyntaxError('unterminated look-ahead');
         };
         ++this.pos; // skip ')'
-        return { type : 'LookAhead', negative : true, child : child, range : [ begin, this.pos ] };
+        return { type : REGEXP_COMPAT__PATTERN_IS_LookAhead, negative : true, child : child, range : [ begin, this.pos ] };
     };
 
-    if( String_startsWith( this.source, '(?<=', this.pos ) ){
-        this.pos += 4; // skip '(?<='
-        const child = this.parseDisjunction();
-        if( this.current() !== ')' && DEFINE_REGEXP_COMPAT__DEBUG ){
-            throw new RegExpSyntaxError('unterminated look-behind');
+    if( DEFINE_REGEXP_COMPAT__ES2018 ){
+        if( String_startsWith( this.source, '(?<=', this.pos ) ){
+            this.pos += 4; // skip '(?<='
+            const child = this.parseDisjunction();
+            if( this.current() !== ')' && DEFINE_REGEXP_COMPAT__DEBUG ){
+                throw new RegExpSyntaxError('unterminated look-behind');
+            };
+            ++this.pos; // skip ')'
+            return { type : REGEXP_COMPAT__PATTERN_IS_LookBehind, negative : false, child : child, range : [ begin, this.pos ] };
         };
-        ++this.pos; // skip ')'
-        return { type : 'LookBehind', negative : false, child : child, range : [ begin, this.pos ] };
-    };
 
-    if( String_startsWith( this.source, '(?<!', this.pos ) ){
-        this.pos += 4; // skip '(?<!'
-        const child = this.parseDisjunction();
-        if( this.current() !== ')' && DEFINE_REGEXP_COMPAT__DEBUG ){
-            throw new RegExpSyntaxError('unterminated look-behind');
+        if( String_startsWith( this.source, '(?<!', this.pos ) ){
+            this.pos += 4; // skip '(?<!'
+            const child = this.parseDisjunction();
+            if( this.current() !== ')' && DEFINE_REGEXP_COMPAT__DEBUG ){
+                throw new RegExpSyntaxError('unterminated look-behind');
+            };
+            ++this.pos; // skip ')'
+            return { type : REGEXP_COMPAT__PATTERN_IS_LookBehind, negative : true, child : child, range : [ begin, this.pos ] };
         };
-        ++this.pos; // skip ')'
-        return { type : 'LookBehind', negative : true, child : child, range : [ begin, this.pos ] };
-    };
 
-    if( String_startsWith( this.source, '(?<', this.pos ) ){
-        const index = ++this.captureParensIndex;
-        this.pos += 3; // skip '(?<'
-        const namePos = this.pos;
-        const name = this.parseCaptureName();
-        const raw = this.source.slice( namePos, this.pos - 1 );
-        if( this.names.get( name ) !== index && DEFINE_REGEXP_COMPAT__DEBUG ){
-            throw new Error('BUG: invalid named capture');
+        if( String_startsWith( this.source, '(?<', this.pos ) ){
+            const index = ++this.captureParensIndex;
+            this.pos += 3; // skip '(?<'
+            const namePos = this.pos;
+            const name = this.parseCaptureName();
+            const raw = this.source.slice( namePos, this.pos - 1 );
+            if( this.names.get( name ) !== index && DEFINE_REGEXP_COMPAT__DEBUG ){
+                throw new Error('BUG: invalid named capture');
+            };
+            const child = this.parseDisjunction();
+            if( this.current() !== ')' && DEFINE_REGEXP_COMPAT__DEBUG ){
+                throw new RegExpSyntaxError('unterminated named capture');
+            };
+            ++this.pos; // skip ')'
+            return { type : REGEXP_COMPAT__PATTERN_IS_NamedCapture, name : name, raw : raw, child : child, range : [ begin, this.pos ] };
         };
-        const child = this.parseDisjunction();
-        if( this.current() !== ')' && DEFINE_REGEXP_COMPAT__DEBUG ){
-            throw new RegExpSyntaxError('unterminated named capture');
-        };
-        ++this.pos; // skip ')'
-        return /** @type {NamedCapture} */ ({ type : 'NamedCapture', name : name, raw : raw, child : child, range : [ begin, this.pos ] });
     };
 
     if( DEFINE_REGEXP_COMPAT__DEBUG ){

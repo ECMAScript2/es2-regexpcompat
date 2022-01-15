@@ -67,15 +67,15 @@ function calculateMaxStackSize( codes ){
 
     for( ; code = codes[ ++i ]; ){
         switch( code.op ){
-            case 'push':
-            case 'push_pos':
-            case 'push_proc':
+            case REGEXP_COMPAT__OPCODE_IS_PUSH:
+            case REGEXP_COMPAT__OPCODE_IS_PUSH_POS:
+            case REGEXP_COMPAT__OPCODE_IS_PUSH_PROC:
                 ++stackSize;
                 break;
-            case 'empty_check':
-            case 'pop':
-            case 'restore_pos':
-            case 'rewind_proc':
+            case REGEXP_COMPAT__OPCODE_IS_EMPTY_CHECK:
+            case REGEXP_COMPAT__OPCODE_IS_POP:
+            case REGEXP_COMPAT__OPCODE_IS_RESTORE_POS:
+            case REGEXP_COMPAT__OPCODE_IS_REWIND_PROC:
                 --stackSize;
                 break;
         };
@@ -235,7 +235,7 @@ Program.prototype.exec = function( input, pos ){
             let c;
 
             switch( code.op ){
-                case 'any' :
+                case REGEXP_COMPAT__OPCODE_IS_ANY :
                     c = getIndex( input, proc.pos, this.unicode );
                     if( c >= 0 && ( ( DEFINE_REGEXP_COMPAT__ES2018 && this.dotAll ) || !isLineTerminator( c ) ) ){
                         proc.pos += size( c );
@@ -243,7 +243,7 @@ Program.prototype.exec = function( input, pos ){
                         backtrack = true;
                     };
                     break;
-                case 'back' :
+                case REGEXP_COMPAT__OPCODE_IS_BACK :
                     c = prevIndex( input, proc.pos, this.unicode );
                     if( c >= 0 ){
                         proc.pos -= size( c );
@@ -251,18 +251,18 @@ Program.prototype.exec = function( input, pos ){
                         backtrack = true;
                     };
                     break;
-                case 'cap_begin' :
+                case REGEXP_COMPAT__OPCODE_IS_CAP_BEGIN :
                     proc.caps[ /** @type {OpCode_Cap_begin} */ (code).index * 2 ] = proc.pos;
                     break;
-                case 'cap_end' :
+                case REGEXP_COMPAT__OPCODE_IS_CAP_END :
                     proc.caps[ /** @type {OpCode_Cap_end} */ (code).index * 2 + 1 ] = proc.pos;
                     break;
-                case 'cap_reset' :
+                case REGEXP_COMPAT__OPCODE_IS_CAP_RESET :
                     for( let i = /** @type {OpCode_Cap_reset} */ (code).from; i < /** @type {OpCode_Cap_reset} */ (code).to; ++i ){
                         proc.caps[ i * 2 ] = proc.caps[ i * 2 + 1 ] = -1;
                     };
                     break;
-                case 'char' :
+                case REGEXP_COMPAT__OPCODE_IS_CHAR :
                     c = getIndex( input, proc.pos, this.unicode );
                     if( c < 0 ){
                         backtrack = true;
@@ -274,8 +274,8 @@ Program.prototype.exec = function( input, pos ){
                         backtrack = true;
                     };
                     break;
-                case 'class' :
-                case 'class_not' :
+                case REGEXP_COMPAT__OPCODE_IS_CLASS :
+                case REGEXP_COMPAT__OPCODE_IS_CLASS_NOT :
                     c = getIndex( input, proc.pos, this.unicode );
                     if( c < 0 ){
                         backtrack = true;
@@ -284,7 +284,7 @@ Program.prototype.exec = function( input, pos ){
                     var cc = this.ignoreCase ? canonicalize( c, this.unicode ) : c;
 
                     var actual = /** @type {OpCode_Class|OpCode_Class_not} */ (code).set.has( cc );
-                    var expected = /** @type {OpCode_Class|OpCode_Class_not} */ (code).op === 'class';
+                    var expected = /** @type {OpCode_Class|OpCode_Class_not} */ (code).op === REGEXP_COMPAT__OPCODE_IS_CLASS;
 
                     if( this.ignoreCase ){
                         const uncanonicalized = uncanonicalize( cc, this.unicode ); // memo 何度も uncanonicalize() が呼ばれるのを修正
@@ -299,64 +299,64 @@ Program.prototype.exec = function( input, pos ){
                         backtrack = true;
                     };
                     break;
-                case 'dec':
+                case REGEXP_COMPAT__OPCODE_IS_DEC:
                     --proc.stack[ proc.stackSize - 1 ];
                     break;
-                case 'empty_check' :
+                case REGEXP_COMPAT__OPCODE_IS_EMPTY_CHECK :
                     const pos = proc.stack[ --proc.stackSize ];
                     if( pos === proc.pos ){
                         backtrack = true;
                     };
                     break;
-                case 'fail':
+                case REGEXP_COMPAT__OPCODE_IS_FAIL:
                     backtrack = true;
                     break;
-                case 'fork_cont' :
-                case 'fork_next' :
+                case REGEXP_COMPAT__OPCODE_IS_FORK_CONT :
+                case REGEXP_COMPAT__OPCODE_IS_FORK_NEXT :
                     const newProc = proc.clone();
                     procs.push( newProc );
-                    if( /** @type {OpCode_Fork_cont|OpCode_Fork_next} */ (code).op === 'fork_cont' ){
+                    if( /** @type {OpCode_Fork_cont|OpCode_Fork_next} */ (code).op === REGEXP_COMPAT__OPCODE_IS_FORK_CONT ){
                         proc.pc += /** @type {OpCode_Fork_cont|OpCode_Fork_next} */ (code).next;
                     } else {
                         newProc.pc += /** @type {OpCode_Fork_cont|OpCode_Fork_next} */ (code).next;
                     };
                     break;
-                case 'jump':
+                case REGEXP_COMPAT__OPCODE_IS_JUMP:
                     proc.pc += /** @type {OpCode_Jump} */ (code).cont;
                     break;
-                case 'line_begin' :
+                case REGEXP_COMPAT__OPCODE_IS_LINE_BEGIN :
                     c = prevIndex( input, proc.pos, this.unicode );
                     if( proc.pos !== 0 && !( this.multiline && isLineTerminator( c ) ) ){
                         backtrack = true;
                     };
                     break;
-                case 'line_end':
+                case REGEXP_COMPAT__OPCODE_IS_LINE_END:
                     c = getIndex( input, proc.pos, this.unicode );
                     if( proc.pos !== input.length && !( this.multiline && isLineTerminator( c ) ) ){
                         backtrack = true;
                     };
                     break;
-                case 'loop':
+                case REGEXP_COMPAT__OPCODE_IS_LOOP:
                     const n = proc.stack[ proc.stackSize - 1 ];
                     if( n > 0 ){
                         proc.pc += /** @type {OpCode_Loop} */ (code).cont;
                     };
                     break;
-                case 'match':
+                case REGEXP_COMPAT__OPCODE_IS_MATCH:
                     return new Match( input, proc.caps, this.names );
-                case 'pop':
+                case REGEXP_COMPAT__OPCODE_IS_POP:
                     --proc.stackSize;
                     break;
-                case 'push':
+                case REGEXP_COMPAT__OPCODE_IS_PUSH:
                     proc.stack[ proc.stackSize++ ] = /** @type {OpCode_Push} */ (code).value;
                     break;
-                case 'push_pos':
+                case REGEXP_COMPAT__OPCODE_IS_PUSH_POS:
                     proc.stack[ proc.stackSize++ ] = proc.pos;
                     break;
-                case 'push_proc':
+                case REGEXP_COMPAT__OPCODE_IS_PUSH_PROC:
                     proc.stack[ proc.stackSize++ ] = procs.length;
                     break;
-                case 'ref':
+                case REGEXP_COMPAT__OPCODE_IS_REF:
                     var begin = proc.caps[ /** @type {OpCode_Ref} */ (code).index * 2 ];
                     var end = proc.caps[ /** @type {OpCode_Ref} */ (code).index * 2 + 1 ];
                     var s = begin < 0 || end < 0 ? '' : input.slice( begin, end );
@@ -377,7 +377,7 @@ Program.prototype.exec = function( input, pos ){
                         i += size( d );
                     };
                     break;
-                case 'ref_back':
+                case REGEXP_COMPAT__OPCODE_IS_REF_BACK:
                     var begin = proc.caps[ /** @type {OpCode_Ref_back} */ (code).index * 2 ];
                     var end = proc.caps[ /** @type {OpCode_Ref_back} */ (code).index * 2 + 1 ];
                     var s = begin < 0 || end < 0 ? '' : input.slice( begin, end );
@@ -398,20 +398,20 @@ Program.prototype.exec = function( input, pos ){
                         i -= size( d );
                     };
                     break;
-                case 'restore_pos':
+                case REGEXP_COMPAT__OPCODE_IS_RESTORE_POS:
                     proc.pos = proc.stack[ --proc.stackSize ];
                     break;
-                case 'rewind_proc':
+                case REGEXP_COMPAT__OPCODE_IS_REWIND_PROC:
                     procs.length = proc.stack[ --proc.stackSize ];
                     procs[ procs.length - 1 ] = proc;
                     break;
-                case 'word_boundary':
-                case 'word_boundary_not':
+                case REGEXP_COMPAT__OPCODE_IS_WORD_BOUNDARY:
+                case REGEXP_COMPAT__OPCODE_IS_WORD_BOUNDARY_NOT:
                     c = prevIndex( input, proc.pos, this.unicode );
                     var d = getIndex( input, proc.pos, this.unicode );
                     var set = this.unicode && this.ignoreCase ? charSetUnicodeWord : charSetWord;
                     var actual = set.has( c ) !== set.has( d );
-                    var expected = code.op === 'word_boundary';
+                    var expected = code.op === REGEXP_COMPAT__OPCODE_IS_WORD_BOUNDARY;
                     if( actual !== expected ){
                         backtrack = true;
                     };

@@ -77,33 +77,33 @@ codesToString = function( codes ){
             let line = pc( lineno ) + ': ' + op( code.op );
 
             switch( code.op ){
-                case 'cap_begin':
-                case 'cap_end':
+                case REGEXP_COMPAT__OPCODE_IS_CAP_BEGIN:
+                case REGEXP_COMPAT__OPCODE_IS_CAP_END:
                     line += code.index;
                     break;
-                case 'cap_reset':
+                case REGEXP_COMPAT__OPCODE_IS_CAP_RESET:
                     line += code.from + ' ' + code.to;
                     break;
-                case 'char':
+                case REGEXP_COMPAT__OPCODE_IS_CHAR:
                     line += "'" + escapeCodePointAsRegExpSpurceChar( code.value ) + "'";
                     break;
-                case 'class':
-                case 'class_not':
-                    line += code.set.toRegExpPattern( code.op === 'class_not' );
+                case REGEXP_COMPAT__OPCODE_IS_CLASS:
+                case REGEXP_COMPAT__OPCODE_IS_CLASS_NOT:
+                    line += code.set.toRegExpPattern( code.op === REGEXP_COMPAT__OPCODE_IS_CLASS_NOT );
                     break;
-                case 'fork_cont':
-                case 'fork_next':
+                case REGEXP_COMPAT__OPCODE_IS_FORK_CONT:
+                case REGEXP_COMPAT__OPCODE_IS_FORK_NEXT:
                     line += pc( lineno + 1 + code.next );
                     break;
-                case 'jump':
-                case 'loop':
+                case REGEXP_COMPAT__OPCODE_IS_JUMP:
+                case REGEXP_COMPAT__OPCODE_IS_LOOP:
                     line += pc( lineno + 1 + code.cont );
                     break;
-                case 'push':
+                case REGEXP_COMPAT__OPCODE_IS_PUSH:
                     line += code.value;
                     break;
-                case 'ref':
-                case 'ref_back':
+                case REGEXP_COMPAT__OPCODE_IS_REF:
+                case REGEXP_COMPAT__OPCODE_IS_REF_BACK:
                     line += code.index;
                     break;
             };

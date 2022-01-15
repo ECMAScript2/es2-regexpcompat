@@ -126,7 +126,7 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
         function show( x ){
             return x === undefined ? 'undefined' : JSON.stringify( x );
         };
-        return 'Match[' + array.map( show ).join( ', ' ) + ']';
+        return 'Match[' + Array_map( array, show ).join( ', ' ) + ']';
     };
 
     if( DEFINE_REGEXP_COMPAT__NODEJS ){

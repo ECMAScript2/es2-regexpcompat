@@ -94,7 +94,7 @@ function loadScriptExtensions( v ){
  * @param {string} p
  * @return {CharSet|undefined}
  */
-function loadProperty( p ){
+m_loadProperty = function( p ){
     // Canonicalize property name.
     p = unicodePropertyAliasesEcmascript.get( p ) || p;
 
@@ -123,7 +123,7 @@ function loadProperty( p ){
  * @param {string} v
  * @return {CharSet|undefined}
  */
-function loadPropertyValue( p, v ){
+m_loadPropertyValue = function( p, v ){
     // Canonicalize property name.
     p = unicodePropertyAliasesEcmascript.get( p ) || p;
 

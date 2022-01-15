@@ -312,25 +312,25 @@ function escapeRaw( raw ){
  */
 function classItemToString( n ){
     switch( n.type ){
-        case 'Char':
+        case REGEXP_COMPAT__PATTERN_IS_Char :
             return escapeRaw( /** @type {Char} */ (n).raw );
         // The above `switch-case` is exhaustive and it is checked by `tsc`, so `eslint` rule is disabled.
         // eslint-disable-next-line no-fallthrough
-        case 'ClassRange':
+        case REGEXP_COMPAT__PATTERN_IS_ClassRange :
             return escapeRaw( /** @type {ClassRange} */ (n).children[ 0 ].raw ) + '-' + escapeRaw( /** @type {ClassRange} */ (n).children[ 1 ].raw );
-        case 'EscapeClass':
+        case REGEXP_COMPAT__PATTERN_IS_EscapeClass :
             switch( n.kind ){
-                case 'digit':
+                case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_digit :
                     return /** @type {SimpleEscapeClass} */ (n).invert ? '\\D' : '\\d';
-                case 'word':
+                case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_word :
                     return /** @type {SimpleEscapeClass} */ (n).invert ? '\\W' : '\\w';
-                case 'space':
+                case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_space :
                     return /** @type {SimpleEscapeClass} */ (n).invert ? '\\S' : '\\s';
-                case 'unicode_property':
+                case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_unicode_property :
                     if( DEFINE_REGEXP_COMPAT__ES2018 ){
                         return '\\' + ( /** @type {UnicodePropertyEscapeClass} */ (n).invert ? 'P' : 'p' ) + /** @type {UnicodePropertyEscapeClass} */ (n).property;
                     };
-                case 'unicode_property_value':
+                case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_unicode_property_value :
                     if( DEFINE_REGEXP_COMPAT__ES2018 ){
                         return '\\' + ( /** @type {UnicodePropertyValueEscapeClass} */ (n).invert ? 'P' : 'p' ) + /** @type {UnicodePropertyValueEscapeClass} */ (n).property + '=' + n.value;
                     };
@@ -340,23 +340,21 @@ function classItemToString( n ){
 
 nodeToString = function( n ){
     switch( n.type ){
-        case 'Sequence':
-            return n.children.map( nodeToString ).join( '' ); // TODO .map polyfill
-        case 'Disjunction':
-            return n.children.map( nodeToString ).join( '|' );
-        case 'Capture':
+        case REGEXP_COMPAT__PATTERN_IS_Disjunction :
+            return Array_map( n.children, nodeToString ).join( '|' );
+        case REGEXP_COMPAT__PATTERN_IS_Sequence :
+            return Array_map( n.children, nodeToString ).join( '' );
+        case REGEXP_COMPAT__PATTERN_IS_Capture :
             return '(' + nodeToString( n.child ) + ')';
-        case 'NamedCapture':
-            return '(?<' + n.raw + '>' + nodeToString( n.child ) + ')';
-        case 'Group':
+        case REGEXP_COMPAT__PATTERN_IS_Group :
             return '(?:' + nodeToString( n.child ) + ')';
-        case 'Many':
+        case REGEXP_COMPAT__PATTERN_IS_Many :
             return nodeToString( n.child ) + '*' + ( n.nonGreedy ? '?' : '' );
-        case 'Some':
+        case REGEXP_COMPAT__PATTERN_IS_Some :
             return nodeToString( n.child ) + '+' + ( n.nonGreedy ? '?' : '' );
-        case 'Optional':
+        case REGEXP_COMPAT__PATTERN_IS_Optional :
             return nodeToString( n.child ) + '?' + ( n.nonGreedy ? '?' : '' );
-        case 'Repeat':
+        case REGEXP_COMPAT__PATTERN_IS_Repeat :
             let s = nodeToString( n.child );
             s += '{' + n.min;
             if( n.max === Infinity ){
@@ -366,30 +364,36 @@ nodeToString = function( n ){
             };
             s += '}' + ( n.nonGreedy ? '?' : '' );
             return s;
-        case 'WordBoundary':
+        case REGEXP_COMPAT__PATTERN_IS_WordBoundary :
             return n.invert ? '\\B' : '\\b';
-        case 'LineBegin':
+        case REGEXP_COMPAT__PATTERN_IS_LineBegin :
             return '^';
-        case 'LineEnd':
+        case REGEXP_COMPAT__PATTERN_IS_LineEnd :
             return '$';
-        case 'LookAhead':
+        case REGEXP_COMPAT__PATTERN_IS_LookAhead :
             return '(?' + ( n.negative ? '!' : '=' ) + nodeToString( n.child ) + ')';
-        case 'LookBehind':
-            return '(?<' + ( n.negative ? '!' : '=' ) + nodeToString( n.child ) + ')';
-        case 'Char': {
+        case REGEXP_COMPAT__PATTERN_IS_Char : {
             const c = escapeRaw( n.raw );
             return c === '/' ? '\\/' : c;
         };
-        case 'EscapeClass':
+        case REGEXP_COMPAT__PATTERN_IS_EscapeClass :
             return classItemToString( n );
-        case 'Class':
-            return '[' + ( n.invert ? '^' : '' ) + n.children.map( classItemToString ).join('') + ']';
-        case 'Dot':
+        case REGEXP_COMPAT__PATTERN_IS_Class :
+            return '[' + ( n.invert ? '^' : '' ) + Array_map( n.children, classItemToString ).join('') + ']';
+        case REGEXP_COMPAT__PATTERN_IS_Dot :
             return '.';
-        case 'BackRef':
+        case REGEXP_COMPAT__PATTERN_IS_BackRef :
             return '\\' + n.index;
-        case 'NamedBackRef':
+        case REGEXP_COMPAT__PATTERN_IS_NamedBackRef :
             return '\\k<' + n.raw + '>';
+        case REGEXP_COMPAT__PATTERN_IS_NamedCapture :
+            if( DEFINE_REGEXP_COMPAT__ES2018 ){
+                return '(?<' + n.raw + '>' + nodeToString( n.child ) + ')';
+            };
+        case REGEXP_COMPAT__PATTERN_IS_LookBehind :
+            if( DEFINE_REGEXP_COMPAT__ES2018 ){
+                return '(?<' + ( n.negative ? '!' : '=' ) + nodeToString( n.child ) + ')';
+            };
     };
 };
 

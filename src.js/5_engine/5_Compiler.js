@@ -24,10 +24,10 @@ function Compiler( pattern ){
 Compiler.prototype.compile = function(){
     const codes0 = this.compileNode( this.pattern.child );
     const codes1 = Compiler_spreadOperator(
-        { op: 'cap_begin', index: 0 },
+        { op: REGEXP_COMPAT__OPCODE_IS_CAP_BEGIN, index: 0 },
         /* ... */ /** @type {Array.<OpCode>} */ (codes0),
-        { op: 'cap_end', index: 0 },
-        { op: 'match' }
+        { op: REGEXP_COMPAT__OPCODE_IS_CAP_END, index: 0 },
+        { op: REGEXP_COMPAT__OPCODE_IS_MATCH }
     );
     return new Program( this.pattern, codes1 );
 };
@@ -38,46 +38,51 @@ Compiler.prototype.compile = function(){
  */
 Compiler.prototype.compileNode = function( node ){
     switch( node.type ){
-        case 'Disjunction':
+        case REGEXP_COMPAT__PATTERN_IS_Disjunction :
             return this.compileDisjunction( /** @type {Disjunction} */ (node) );
-        case 'Sequence':
+        case REGEXP_COMPAT__PATTERN_IS_Sequence :
             return this.compileSequence( /** @type {Sequence} */ (node) );
-        case 'Capture':
+        case REGEXP_COMPAT__PATTERN_IS_Capture :
             return this.compileCapture( /** @type {Capture} */ (node) );
-        case 'NamedCapture':
-            return this.compileNamedCapture( /** @type {NamedCapture} */ (node) );
-        case 'Group':
+        case REGEXP_COMPAT__PATTERN_IS_Group :
             return this.compileGroup( /** @type {Group} */ (node) );
-        case 'Many':
+        case REGEXP_COMPAT__PATTERN_IS_Many :
             return this.compileMany( /** @type {Many} */ (node) );
-        case 'Some':
+        case REGEXP_COMPAT__PATTERN_IS_Some :
             return this.compileSome( /** @type {Some} */ (node) );
-        case 'Optional':
+        case REGEXP_COMPAT__PATTERN_IS_Optional :
             return this.compileOptional( /** @type {Optional} */ (node) );
-        case 'Repeat':
+        case REGEXP_COMPAT__PATTERN_IS_Repeat :
             return this.compileRepeat( /** @type {Repeat} */ (node) );
-        case 'WordBoundary':
+        case REGEXP_COMPAT__PATTERN_IS_WordBoundary :
             return this.compileWordBoundary( /** @type {WordBoundary} */ (node) );
-        case 'LineBegin':
+        case REGEXP_COMPAT__PATTERN_IS_LineBegin :
             return this.compileLineBegin( /* node */ );
-        case 'LineEnd':
+        case REGEXP_COMPAT__PATTERN_IS_LineEnd :
             return this.compileLineEnd( /* node */ );
-        case 'LookAhead':
+        case REGEXP_COMPAT__PATTERN_IS_LookAhead :
             return this.compileLookAhead( /** @type {LookAhead} */ (node) );
-        case 'LookBehind':
-            return this.compileLookBehind( /** @type {LookBehind} */ (node) );
-        case 'Char':
+        case REGEXP_COMPAT__PATTERN_IS_Char:
             return this.compileChar( /** @type {Char} */ (node) );
-        case 'EscapeClass':
+        case REGEXP_COMPAT__PATTERN_IS_EscapeClass:
             return this.compileEscapeClass( /** @type {EscapeClass} */ (node) );
-        case 'Class':
+        case REGEXP_COMPAT__PATTERN_IS_Class :
             return this.compileClass( /** @type {Class} */ (node) );
-        case 'Dot':
+        case REGEXP_COMPAT__PATTERN_IS_Dot :
             return this.compileDot( /* node */ );
-        case 'BackRef':
+        case REGEXP_COMPAT__PATTERN_IS_BackRef :
             return this.compileBackRef( /** @type {BackRef} */ (node) );
-        case 'NamedBackRef':
+        case REGEXP_COMPAT__PATTERN_IS_NamedBackRef :
             return this.compileNamedBackRef( /** @type {NamedBackRef} */ (node) );
+
+        case REGEXP_COMPAT__PATTERN_IS_NamedCapture :
+            if( DEFINE_REGEXP_COMPAT__ES2018 ){
+                return this.compileNamedCapture( /** @type {NamedCapture} */ (node) );
+            };
+        case REGEXP_COMPAT__PATTERN_IS_LookBehind :
+            if( DEFINE_REGEXP_COMPAT__ES2018 ){
+                return this.compileLookBehind( /** @type {LookBehind} */ (node) );
+            };
     };
 };
 
@@ -107,9 +112,9 @@ Compiler.prototype.compileDisjunction = function( node ){
 
     function toOpCodeArray( codes, codes0 ){
         return Compiler_spreadOperator(
-            { op: 'fork_cont', next: codes0.length + 1 },
+            { op: REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes0.length + 1 },
             /* ... */ /** @type {Array.<OpCode>} */ (codes0),
-            { op: 'jump', cont: codes.length },
+            { op: REGEXP_COMPAT__OPCODE_IS_JUMP, cont: codes.length },
             /* ... */ /** @type {Array.<OpCode>} */ (codes)
         );
     };
@@ -160,13 +165,15 @@ Compiler.prototype.compileGroup = function( node ){
 Compiler.prototype.compileCapture = function( node ){
     const codes0 = this.compileNode( node.child );
 
-    if( DEFINE_REGEXP_COMPAT__DEBUG && node.index !== this.captureParensIndex++ ){
-        throw new Error('BUG: invalid pattern');
+    if( node.index !== this.captureParensIndex++ ){
+        if( DEFINE_REGEXP_COMPAT__DEBUG ){
+            throw new Error('BUG: invalid pattern');
+        };
     };
     return Compiler_spreadOperator(
-        { op: this.direction === Compiler_DIRECTION_BACKWARD ? 'cap_end' : 'cap_begin', index: node.index },
+        { op: this.direction === Compiler_DIRECTION_BACKWARD ? REGEXP_COMPAT__OPCODE_IS_CAP_END : REGEXP_COMPAT__OPCODE_IS_CAP_BEGIN, index: node.index },
         /* ... */ /** @type {Array.<OpCode>} */ (codes0),
-        { op: this.direction === Compiler_DIRECTION_BACKWARD ? 'cap_begin' : 'cap_end', index: node.index }
+        { op: this.direction === Compiler_DIRECTION_BACKWARD ? REGEXP_COMPAT__OPCODE_IS_CAP_BEGIN : REGEXP_COMPAT__OPCODE_IS_CAP_END, index: node.index }
     );
 };
 
@@ -184,9 +191,9 @@ Compiler.prototype.compileNamedCapture = function( node ){
         };
     };
     return Compiler_spreadOperator(
-        { op: 'cap_begin', index },
+        { op: REGEXP_COMPAT__OPCODE_IS_CAP_BEGIN, index },
         /* ... */ /** @type {Array.<OpCode>} */ (codes0),
-        { op: 'cap_end', index }
+        { op: REGEXP_COMPAT__OPCODE_IS_CAP_END, index }
     );
 };
 
@@ -201,9 +208,9 @@ Compiler.prototype.compileMany = function( node ){
     this.advance = false;
 
     return Compiler_spreadOperator(
-        { op: node.nonGreedy ? 'fork_next' : 'fork_cont', next: codes1.length + 1 },
+        { op: node.nonGreedy ? REGEXP_COMPAT__OPCODE_IS_FORK_NEXT : REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes1.length + 1 },
         /* ... */ codes1,
-        { op: 'jump', cont: -1 - codes1.length - 1 }
+        { op: REGEXP_COMPAT__OPCODE_IS_JUMP, cont: -1 - codes1.length - 1 }
     );
 };
 
@@ -218,9 +225,9 @@ Compiler.prototype.compileSome = function( node ){
 
     return Compiler_spreadOperator(
         /* ... */ /** @type {Array.<OpCode>} */ (codes0),
-        { op: node.nonGreedy ? 'fork_next' : 'fork_cont', next: codes1.length + 1 },
+        { op: node.nonGreedy ? REGEXP_COMPAT__OPCODE_IS_FORK_NEXT : REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes1.length + 1 },
         /* ... */ codes1,
-        { op: 'jump', cont: -1 - codes1.length - 1 }
+        { op: REGEXP_COMPAT__OPCODE_IS_JUMP, cont: -1 - codes1.length - 1 }
     );
 };
 
@@ -233,7 +240,7 @@ Compiler.prototype.compileOptional = function( node ){
     this.advance = false;
 
     return Compiler_spreadOperator(
-        { op: node.nonGreedy ? 'fork_next' : 'fork_cont', next: codes0.length },
+        { op: node.nonGreedy ? REGEXP_COMPAT__OPCODE_IS_FORK_NEXT : REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes0.length },
         /* ... */ codes0
     );
 };
@@ -254,11 +261,11 @@ Compiler.prototype.compileRepeat = function( node ){
         const codes1 = this.insertCapReset( from, /** @type {Array.<OpCode>} */ (codes0) );
         Compiler_pushElementsToOpCodeList(
             codes,
-            { op: 'push', value: node.min },
+            { op: REGEXP_COMPAT__OPCODE_IS_PUSH, value: node.min },
             /* ... */ codes1,
-            { op: 'dec' },
-            { op: 'loop', cont: -1 - codes1.length - 1 },
-            { op: 'pop' }
+            { op: REGEXP_COMPAT__OPCODE_IS_DEC },
+            { op: REGEXP_COMPAT__OPCODE_IS_LOOP, cont: -1 - codes1.length - 1 },
+            { op: REGEXP_COMPAT__OPCODE_IS_POP }
         );
     } else {
         this.advance = false;
@@ -269,9 +276,9 @@ Compiler.prototype.compileRepeat = function( node ){
         const codes1 = this.insertCapReset( from, this.insertEmptyCheck( /** @type {Array.<OpCode>} */ (codes0) ) );
         Compiler_pushElementsToOpCodeList(
             codes,
-            { op: node.nonGreedy ? 'fork_next' : 'fork_cont', next: codes1.length + 1 },
+            { op: node.nonGreedy ? REGEXP_COMPAT__OPCODE_IS_FORK_NEXT : REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes1.length + 1 },
             /* ... */ codes1,
-            { op: 'jump', cont: -1 - codes1.length - 1 }
+            { op: REGEXP_COMPAT__OPCODE_IS_JUMP, cont: -1 - codes1.length - 1 }
         );
     } else if( max > node.min ){
         const remain = max - node.min;
@@ -279,19 +286,19 @@ Compiler.prototype.compileRepeat = function( node ){
         if( remain === 1 ){
             Compiler_pushElementsToOpCodeList(
                 codes,
-                { op: node.nonGreedy ? 'fork_next' : 'fork_cont', next: codes1.length },
+                { op: node.nonGreedy ? REGEXP_COMPAT__OPCODE_IS_FORK_NEXT : REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes1.length },
                 /* ... */ codes1
             );
         } else {
             Compiler_pushElementsToOpCodeList(
                 codes,
-                { op: 'push', value: remain + 1 },
-                { op: node.nonGreedy ? 'fork_next' : 'fork_cont', next: codes0.length + 4 },
+                { op: REGEXP_COMPAT__OPCODE_IS_PUSH, value: remain + 1 },
+                { op: node.nonGreedy ? REGEXP_COMPAT__OPCODE_IS_FORK_NEXT : REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes0.length + 4 },
                 /* ... */ codes1,
-                { op: 'dec' },
-                { op: 'loop', cont: -1 - codes0.length - 2 },
-                { op: 'fail' },
-                { op: 'pop' }
+                { op: REGEXP_COMPAT__OPCODE_IS_DEC },
+                { op: REGEXP_COMPAT__OPCODE_IS_LOOP, cont: -1 - codes0.length - 2 },
+                { op: REGEXP_COMPAT__OPCODE_IS_FAIL },
+                { op: REGEXP_COMPAT__OPCODE_IS_POP }
             );
         };
     };
@@ -305,9 +312,9 @@ Compiler.prototype.compileRepeat = function( node ){
  */
 Compiler.prototype.insertEmptyCheck = function( codes0 ){
     return this.advance ? codes0 : Compiler_spreadOperator(
-        { op: 'push_pos' },
+        { op: REGEXP_COMPAT__OPCODE_IS_PUSH_POS },
         /* ... */ codes0,
-        { op: 'empty_check' }
+        { op: REGEXP_COMPAT__OPCODE_IS_EMPTY_CHECK }
     );
 };
 
@@ -321,7 +328,7 @@ Compiler.prototype.insertCapReset = function( from, codes0 ){
         return codes0;
     };
     return Compiler_spreadOperator(
-        { op: 'cap_reset', from, to: this.captureParensIndex },
+        { op: REGEXP_COMPAT__OPCODE_IS_CAP_RESET, from, to: this.captureParensIndex },
         /* ... */ codes0
     );
 };
@@ -332,7 +339,7 @@ Compiler.prototype.insertCapReset = function( from, codes0 ){
  */
 Compiler.prototype.compileWordBoundary = function( node ){
     this.advance = false;
-    return [{ op: node.invert ? 'word_boundary_not' : 'word_boundary' }];
+    return [{ op: node.invert ? REGEXP_COMPAT__OPCODE_IS_WORD_BOUNDARY_NOT : REGEXP_COMPAT__OPCODE_IS_WORD_BOUNDARY }];
 };
 
 /**
@@ -340,7 +347,7 @@ Compiler.prototype.compileWordBoundary = function( node ){
  */
 Compiler.prototype.compileLineBegin = function( /* _node */ ){
     this.advance = false;
-    return [{ op: 'line_begin' }];
+    return [{ op: REGEXP_COMPAT__OPCODE_IS_LINE_BEGIN }];
 };
 
 /**
@@ -348,7 +355,7 @@ Compiler.prototype.compileLineBegin = function( /* _node */ ){
  */
 Compiler.prototype.compileLineEnd = function( /* _node */ ){
     this.advance = false;
-    return [{ op: 'line_end' }];
+    return [{ op: REGEXP_COMPAT__OPCODE_IS_LINE_END }];
 };
 
 /**
@@ -385,23 +392,23 @@ Compiler.prototype.compileLookAround = function( node ){
 
     if( node.negative ){
         return Compiler_spreadOperator(
-            { op: 'push_pos' },
-            { op: 'push_proc' },
-            { op: 'fork_cont', next: codes0.length + 2 },
+            { op: REGEXP_COMPAT__OPCODE_IS_PUSH_POS },
+            { op: REGEXP_COMPAT__OPCODE_IS_PUSH_PROC },
+            { op: REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes0.length + 2 },
             /* ... */ /** @type {Array.<OpCode>} */ (codes0),
-            { op: 'rewind_proc' },
-            { op: 'fail' },
-            { op: 'pop' },
-            { op: 'restore_pos' }
+            { op: REGEXP_COMPAT__OPCODE_IS_REWIND_PROC },
+            { op: REGEXP_COMPAT__OPCODE_IS_FAIL },
+            { op: REGEXP_COMPAT__OPCODE_IS_POP },
+            { op: REGEXP_COMPAT__OPCODE_IS_RESTORE_POS }
         );
     };
 
     return Compiler_spreadOperator(
-        { op: 'push_pos' },
-        { op: 'push_proc' },
+        { op: REGEXP_COMPAT__OPCODE_IS_PUSH_POS },
+        { op: REGEXP_COMPAT__OPCODE_IS_PUSH_PROC },
         /* ... */ /** @type {Array.<OpCode>} */ (codes0),
-        { op: 'rewind_proc' },
-        { op: 'restore_pos' }
+        { op: REGEXP_COMPAT__OPCODE_IS_REWIND_PROC },
+        { op: REGEXP_COMPAT__OPCODE_IS_RESTORE_POS }
     );
 };
 
@@ -415,7 +422,7 @@ Compiler.prototype.compileChar = function( node ){
         value = canonicalize( value, this.unicode );
     };
     this.advance = true;
-    return this.insertBack( [ { op: 'char', value } ] );
+    return this.insertBack( [ { op: REGEXP_COMPAT__OPCODE_IS_CHAR, value } ] );
 };
 
 /**
@@ -425,7 +432,7 @@ Compiler.prototype.compileChar = function( node ){
 Compiler.prototype.compileEscapeClass = function( node ){
     const set = this.escapeClassToSet( node );
     this.advance = true;
-    return this.insertBack( [ { op: 'class', set : set } ] );
+    return this.insertBack( [ { op: REGEXP_COMPAT__OPCODE_IS_CLASS, set : set } ] );
 };
 
 /**
@@ -438,20 +445,19 @@ Compiler.prototype.compileClass = function( node ){
 
     for( let /** @type {ClassItem} */ item, i = -1; item = classItemList[ ++i ]; ){
         switch( item.type ){
-            case 'Char':
+            case REGEXP_COMPAT__PATTERN_IS_Char :
                 set.add( item.value, item.value + 1 );
                 break;
-            case 'EscapeClass':
-                var casted = /** @type {EscapeClass} */ ( item );
-                set.addCharSet( this.escapeClassToSet( casted ) );
+            case REGEXP_COMPAT__PATTERN_IS_EscapeClass :
+                set.addCharSet( this.escapeClassToSet( /** @type {EscapeClass} */ (item) ) );
                 break;
-            case 'ClassRange':
+            case REGEXP_COMPAT__PATTERN_IS_ClassRange :
                 set.add( item.children[ 0 ].value, item.children[ 1 ].value + 1 );
                 break;
         };
     };
     this.advance = true;
-    return this.insertBack( [ { op: node.invert ? 'class_not' : 'class', set } ] );
+    return this.insertBack( [ { op: node.invert ? REGEXP_COMPAT__OPCODE_IS_CLASS_NOT : REGEXP_COMPAT__OPCODE_IS_CLASS, set : set } ] );
 };
 
 /**
@@ -462,34 +468,38 @@ Compiler.prototype.escapeClassToSet = function( _node ){
     var node;
 
     switch( _node.kind ){
-        case 'digit':
+        case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_digit :
             node = /** @type {SimpleEscapeClass} */ ( _node );
             return node.invert ? charSetInvertDigit : charSetDigit;
-        case 'word':
+        case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_word :
             node = /** @type {SimpleEscapeClass} */ ( _node );
             if( this.unicode && this.ignoreCase ){
                 return node.invert ? charSetInvertUnicodeWord : charSetUnicodeWord;
             };
             return node.invert ? charSetInvertWord : charSetWord;
-        case 'space':
+        case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_space :
             node = /** @type {SimpleEscapeClass} */ ( _node );
             return node.invert ? charSetInvertSpace : charSetSpace;
-        case 'unicode_property':
-            node = /** @type {UnicodePropertyEscapeClass} */ ( _node );
-            var set = loadPropertyValue( 'General_Category', node.property ) || loadProperty( node.property );
-            
-            if( !set && DEFINE_REGEXP_COMPAT__DEBUG ){
-                throw new RegExpSyntaxError( 'invalid Unicode property' );
+        case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_unicode_property :
+            if( DEFINE_REGEXP_COMPAT__ES2018 ){
+                node = /** @type {UnicodePropertyEscapeClass} */ ( _node );
+                var set = m_loadPropertyValue( 'General_Category', node.property ) || m_loadProperty( node.property );
+                
+                if( !set && DEFINE_REGEXP_COMPAT__DEBUG ){
+                    throw new RegExpSyntaxError( 'invalid Unicode property' );
+                };
+                return node.invert ? set.clone().invert() : set;
             };
-            return node.invert ? set.clone().invert() : set;
-        case 'unicode_property_value':
-            node = /** @type {UnicodePropertyValueEscapeClass} */ ( _node );
-            var set = loadPropertyValue( node.property, node.value );
+        case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_unicode_property_value :
+            if( DEFINE_REGEXP_COMPAT__ES2018 ){
+                node = /** @type {UnicodePropertyValueEscapeClass} */ ( _node );
+                var set = m_loadPropertyValue( node.property, node.value );
 
-            if( !set && DEFINE_REGEXP_COMPAT__DEBUG ){
-                throw new RegExpSyntaxError( 'invalid Unicode property value' );
+                if( !set && DEFINE_REGEXP_COMPAT__DEBUG ){
+                    throw new RegExpSyntaxError( 'invalid Unicode property value' );
+                };
+                return node.invert ? set.clone().invert() : set;
             };
-            return node.invert ? set.clone().invert() : set;
     };
 };
 
@@ -498,7 +508,7 @@ Compiler.prototype.escapeClassToSet = function( _node ){
  */
 Compiler.prototype.compileDot = function( /* _node */ ){
     this.advance = true;
-    return this.insertBack( [ { op: 'any' } ] );
+    return this.insertBack( [ { op : REGEXP_COMPAT__OPCODE_IS_ANY } ] );
 };
 
 /**
@@ -510,9 +520,9 @@ Compiler.prototype.insertBack = function( codes ){
         return codes;
     };
     return Compiler_spreadOperator(
-        { op: 'back' },
+        { op: REGEXP_COMPAT__OPCODE_IS_BACK },
         /* ... */ codes,
-        { op: 'back' }
+        { op: REGEXP_COMPAT__OPCODE_IS_BACK }
     );
 };
 
@@ -527,7 +537,7 @@ Compiler.prototype.compileBackRef = function( node ){
         };
     };
     this.advance = false;
-    return [ { op: this.direction === Compiler_DIRECTION_BACKWARD ? 'ref_back' : 'ref', index: node.index } ];
+    return [ { op: this.direction === Compiler_DIRECTION_BACKWARD ? REGEXP_COMPAT__OPCODE_IS_REF_BACK : REGEXP_COMPAT__OPCODE_IS_REF, index: node.index } ];
 };
 
 /**
@@ -543,7 +553,7 @@ Compiler.prototype.compileNamedBackRef = function( node ){
         };
     };
     this.advance = false;
-    return [ { op: this.direction === Compiler_DIRECTION_BACKWARD ? 'ref_back' : 'ref', index } ];
+    return [ { op: this.direction === Compiler_DIRECTION_BACKWARD ? REGEXP_COMPAT__OPCODE_IS_REF_BACK : REGEXP_COMPAT__OPCODE_IS_REF, index } ];
 };
 
 /**
