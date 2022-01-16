@@ -25,14 +25,14 @@ function getIndex( s, i, unicode ){
  * @return {number}
  */
 function prevIndex( s, i, unicode ){
-    const c = getIndex( s, i - 1, unicode );
+    var c = getIndex( s, i - 1, unicode );
 
     if( !unicode ){
         return c;
     };
 
     if( 0xdc00 <= c && c <= 0xdfff ){
-        const d = getIndex( s, i - 2, unicode );
+        var d = getIndex( s, i - 2, unicode );
         if( 0x10000 <= d && d <= 0x10ffff ){
             return d;
         };
@@ -62,8 +62,8 @@ function isLineTerminator( c ){
  */
 function calculateMaxStackSize( codes ){
     var i = -1, code;
-    let stackSize = 0;
-    let maxStackSize = 0;
+    var stackSize = 0;
+    var maxStackSize = 0;
 
     for( ; code = codes[ ++i ]; ){
         switch( code.op ){
@@ -186,8 +186,8 @@ function Program( pattern, codes ){
 
 if( DEFINE_REGEXP_COMPAT__DEBUG ){
     Program.prototype.toString = function(){
-        let s = '';
-        const codes = codesToString(this.codes).split('\n').join('\n    ');
+        var s = '';
+        var codes = codesToString(this.codes).split('\n').join('\n    ');
         s += 'Program {\n';
         s += `  pattern: ${patternToString(this.pattern)},\n`;
         s += '  codes:\n';
@@ -201,9 +201,9 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
      * @return {string}
      */
     Program.prototype[Symbol.for('nodejs.util.inspect.custom')] = function( depth, options ){
-        let s = ``;
-        const pattern = options.stylize(patternToString(this.pattern), 'regexp');
-        const codes = codesToString(this.codes)
+        var s = ``;
+        var pattern = options.stylize(patternToString(this.pattern), 'regexp');
+        var codes = codesToString(this.codes)
           .split('\n')
           .map((line) => options.stylize(line, 'string'))
           .join('\n    ');
@@ -223,16 +223,16 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
  */
 Program.prototype.exec = function( input, pos ){
     while( pos <= input.length ){
-        const procs = [];
+        var procs = [];
         procs.push( Program_createProc( pos, this.captureParens, this.maxStackSize ) );
 
         while( procs.length > 0 ){
-            const proc = procs[ procs.length - 1 ];
-            const code = this.codes[ proc.pc ];
-            let backtrack = false;
+            var proc = procs[ procs.length - 1 ];
+            var code = this.codes[ proc.pc ];
+            var backtrack = false;
             ++proc.pc;
 
-            let c;
+            var c, d, cc, dc;
 
             switch( code.op ){
                 case REGEXP_COMPAT__OPCODE_IS_ANY :
@@ -258,7 +258,7 @@ Program.prototype.exec = function( input, pos ){
                     proc.caps[ /** @type {OpCode_Cap_end} */ (code).index * 2 + 1 ] = proc.pos;
                     break;
                 case REGEXP_COMPAT__OPCODE_IS_CAP_RESET :
-                    for( let i = /** @type {OpCode_Cap_reset} */ (code).from; i < /** @type {OpCode_Cap_reset} */ (code).to; ++i ){
+                    for( var i = /** @type {OpCode_Cap_reset} */ (code).from; i < /** @type {OpCode_Cap_reset} */ (code).to; ++i ){
                         proc.caps[ i * 2 ] = proc.caps[ i * 2 + 1 ] = -1;
                     };
                     break;
@@ -267,7 +267,7 @@ Program.prototype.exec = function( input, pos ){
                     if( c < 0 ){
                         backtrack = true;
                     };
-                    var cc = this.ignoreCase ? canonicalize( c, this.unicode ) : c;
+                    cc = this.ignoreCase ? canonicalize( c, this.unicode ) : c;
                     if( cc === /** @type {OpCode_Char} */ (code).value ){
                         proc.pos += size( c );
                     } else {
@@ -281,14 +281,15 @@ Program.prototype.exec = function( input, pos ){
                         backtrack = true;
                         break;
                     };
-                    var cc = this.ignoreCase ? canonicalize( c, this.unicode ) : c;
+                    cc = this.ignoreCase ? canonicalize( c, this.unicode ) : c;
 
                     var actual = /** @type {OpCode_Class|OpCode_Class_not} */ (code).set.has( cc );
                     var expected = /** @type {OpCode_Class|OpCode_Class_not} */ (code).op === REGEXP_COMPAT__OPCODE_IS_CLASS;
 
                     if( this.ignoreCase ){
-                        const uncanonicalized = uncanonicalize( cc, this.unicode ); // memo 何度も uncanonicalize() が呼ばれるのを修正
-                        for( let d = 0, l = uncanonicalized.length; d < l; ++d ){
+                        var uncanonicalized = uncanonicalize( cc, this.unicode ); // memo 何度も uncanonicalize() が呼ばれるのを修正
+                        var l = uncanonicalized.length;
+                        for( d = 0; d < l; ++d ){
                             actual = actual || /** @type {OpCode_Class|OpCode_Class_not} */ (code).set.has( uncanonicalized[ d ] );
                         };
                     };
@@ -303,8 +304,7 @@ Program.prototype.exec = function( input, pos ){
                     --proc.stack[ proc.stackSize - 1 ];
                     break;
                 case REGEXP_COMPAT__OPCODE_IS_EMPTY_CHECK :
-                    const pos = proc.stack[ --proc.stackSize ];
-                    if( pos === proc.pos ){
+                    if( proc.stack[ --proc.stackSize ] === proc.pos ){
                         backtrack = true;
                     };
                     break;
@@ -313,7 +313,7 @@ Program.prototype.exec = function( input, pos ){
                     break;
                 case REGEXP_COMPAT__OPCODE_IS_FORK_CONT :
                 case REGEXP_COMPAT__OPCODE_IS_FORK_NEXT :
-                    const newProc = proc.clone();
+                    var newProc = proc.clone();
                     procs.push( newProc );
                     if( /** @type {OpCode_Fork_cont|OpCode_Fork_next} */ (code).op === REGEXP_COMPAT__OPCODE_IS_FORK_CONT ){
                         proc.pc += /** @type {OpCode_Fork_cont|OpCode_Fork_next} */ (code).next;
@@ -337,7 +337,7 @@ Program.prototype.exec = function( input, pos ){
                     };
                     break;
                 case REGEXP_COMPAT__OPCODE_IS_LOOP:
-                    const n = proc.stack[ proc.stackSize - 1 ];
+                    var n = proc.stack[ proc.stackSize - 1 ];
                     if( n > 0 ){
                         proc.pc += /** @type {OpCode_Loop} */ (code).cont;
                     };
@@ -360,13 +360,13 @@ Program.prototype.exec = function( input, pos ){
                     var begin = proc.caps[ /** @type {OpCode_Ref} */ (code).index * 2 ];
                     var end = proc.caps[ /** @type {OpCode_Ref} */ (code).index * 2 + 1 ];
                     var s = begin < 0 || end < 0 ? '' : input.slice( begin, end );
-                    let i = 0;
+                    var i = 0;
                     while( i < s.length ){
-                        const c = getIndex( input, proc.pos, this.unicode );
-                        const d = getIndex( s, i, this.unicode );
+                        c = getIndex( input, proc.pos, this.unicode );
+                        d = getIndex( s, i, this.unicode );
 
-                        const cc = this.ignoreCase ? canonicalize( c, this.unicode ) : c;
-                        const dc = this.ignoreCase ? canonicalize( d, this.unicode ) : d;
+                        cc = this.ignoreCase ? canonicalize( c, this.unicode ) : c;
+                        dc = this.ignoreCase ? canonicalize( d, this.unicode ) : d;
 
                         if( cc !== dc ){
                             backtrack = true;
@@ -383,11 +383,11 @@ Program.prototype.exec = function( input, pos ){
                     var s = begin < 0 || end < 0 ? '' : input.slice( begin, end );
                     var i = s.length;
                     while( i > 0 ){
-                        const c = prevIndex( input, proc.pos, this.unicode );
-                        const d = prevIndex( s, i, this.unicode );
+                        c = prevIndex( input, proc.pos, this.unicode );
+                        d = prevIndex( s, i, this.unicode );
 
-                        const cc = this.ignoreCase ? canonicalize( c, this.unicode ) : c;
-                        const dc = this.ignoreCase ? canonicalize( d, this.unicode ) : d;
+                        cc = this.ignoreCase ? canonicalize( c, this.unicode ) : c;
+                        dc = this.ignoreCase ? canonicalize( d, this.unicode ) : d;
 
                         if( cc !== dc ){
                             backtrack = true;
@@ -408,7 +408,7 @@ Program.prototype.exec = function( input, pos ){
                 case REGEXP_COMPAT__OPCODE_IS_WORD_BOUNDARY:
                 case REGEXP_COMPAT__OPCODE_IS_WORD_BOUNDARY_NOT:
                     c = prevIndex( input, proc.pos, this.unicode );
-                    var d = getIndex( input, proc.pos, this.unicode );
+                    d = getIndex( input, proc.pos, this.unicode );
                     var set = this.unicode && this.ignoreCase ? charSetUnicodeWord : charSetWord;
                     var actual = set.has( c ) !== set.has( d );
                     var expected = code.op === REGEXP_COMPAT__OPCODE_IS_WORD_BOUNDARY;
@@ -434,14 +434,14 @@ Program.prototype.exec = function( input, pos ){
 };
 
 function Program_createProc( pos, captureParens, maxStackSize ){
-    const caps = [];
-    const capsLength = ( captureParens + 1 ) * 2;
-    for( let i = 0; i < capsLength; ++i ){
+    var caps = [];
+    var capsLength = ( captureParens + 1 ) * 2;
+    for( var i = 0; i < capsLength; ++i ){
         caps.push( -1 );
     };
 
-    const stack = [];
-    for( let i = 0; i < maxStackSize; ++i ){
+    var stack = [];
+    for( var i = 0; i < maxStackSize; ++i ){
         stack.push( 0 );
     };
 

@@ -72,9 +72,9 @@ codesToString = function( codes ){
         return String_padEndWithSpace( s, 13 );
     };
 
-    const lines = Array_map( codes,
+    var lines = Array_map( codes,
         function( code, lineno ){
-            let line = pc( lineno ) + ': ' + op( code.op );
+            var line = pc( lineno ) + ': ' + op( code.op );
 
             switch( code.op ){
                 case REGEXP_COMPAT__OPCODE_IS_CAP_BEGIN:

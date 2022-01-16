@@ -9,12 +9,12 @@ canonicalize = function( c, unicode ){
         return foldMap.get( c ) || c;
     };
 
-    const s = String_fromCharCode( c );
-    const u = s.toUpperCase();
+    var s = String_fromCharCode( c );
+    var u = s.toUpperCase();
     if( u.length >= 2 ){
         return c;
     };
-    const d = u.charCodeAt( 0 );
+    var d = u.charCodeAt( 0 );
     if( c >= 0x80 && d < 0x80 ){
         return c;
     };
@@ -35,10 +35,10 @@ uncanonicalize = function( c, unicode ){
         return inverseFoldMap$1.get( c ) || [];
     };
 
-    const d = inverseFoldMap.get( c );
+    var d = inverseFoldMap.get( c );
     if( d !== undefined ){
         return d;
     };
-    const s = String_fromCharCode( c );
+    var s = String_fromCharCode( c );
     return [ s.toLowerCase().charCodeAt( 0 ) ];
 };

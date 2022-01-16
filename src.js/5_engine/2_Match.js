@@ -36,9 +36,9 @@
  * @return {(string|undefined)}
  */
 Match.prototype.get = function( k ){
-    const result = Match_resolve( this, k ),
-          i      = result[ 0 ],
-          j      = result[ 1 ];
+    var result = Match_resolve( this, k ),
+        i      = result[ 0 ],
+        j      = result[ 1 ];
 
     if( i < 0 || j < 0 ){
         return undefined;
@@ -51,7 +51,7 @@ Match.prototype.get = function( k ){
  * @return {(number|undefined)}
  */
 Match.prototype.begin = function( k ){
-    const i = Match_resolve( this, k )[ 0 ];
+    var i = Match_resolve( this, k )[ 0 ];
 
     return i < 0 ? undefined : i;
 };
@@ -61,7 +61,7 @@ Match.prototype.begin = function( k ){
  * @return {(number|undefined)}
  */
 Match.prototype.end = function( k ){
-    const j = Match_resolve( this, k )[ 1 ];
+    var j = Match_resolve( this, k )[ 1 ];
 
     return j < 0 ? undefined : j;
 };
@@ -94,18 +94,18 @@ Match.prototype.toArray = function(){
     // However the **real** `RegExpExecArray` can contain `undefined`.
     // So this method uses type casting to set properties.
 
-    const l     = this.length;
-    const array = new Array( l );
+    var l     = this.length;
+    var array = new Array( l );
     array.index = this.index;
     array.input = this.input;
 
-    for( let i = 0; i < l; ++i ){
+    for( var i = 0; i < l; ++i ){
         array[ i ] = this.get( i );
     };
 
     if( this._names.size > 0 ){
-        const groups = {}, // <- Object.create( null ),
-              names  = this._names;
+        var groups = {}, // <- Object.create( null ),
+            names  = this._names;
         for( var name in names ){
             groups[ name ] = array[ names[ name ] ];
         };
@@ -121,7 +121,7 @@ Match.prototype.toArray = function(){
 
 if( DEFINE_REGEXP_COMPAT__DEBUG ){
     Match.prototype.toString = function(){
-        const array = this.toArray();
+        var array = this.toArray();
 
         function show( x ){
             return x === undefined ? 'undefined' : JSON.stringify( x );
@@ -136,22 +136,22 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
        * @return {string}
        */
         Match.prototype[ Symbol.for( 'nodejs.util.inspect.custom' ) ] = function( depth, options ){
-            let s = options.stylize( 'Match', 'special' ) + ' [\n';
-            const inverseNames = new Map( Array.from(this._names).map(([k, i]) => [i, k]) );
+            var s = options.stylize( 'Match', 'special' ) + ' [\n';
+            var inverseNames = new Map( Array.from(this._names).map(([k, i]) => [i, k]) );
 
-            for (let i = 0, _i; i < this.length; i++) {
+            for (var i = 0, _i; i < this.length; i++) {
                 _i = inverseNames.get( i );
-                const name = options.stylize(
+                var name = options.stylize(
                   JSON.stringify( _i != null ? _i : i ),
                   inverseNames.has( i ) ? 'string' : 'number'
                 );
-                let capture = this.get(i);
+                var capture = this.get(i);
                 if (capture === undefined) {
                   s += `  ${name} => ${options.stylize('undefined', 'undefined')},\n`;
                   continue;
                 }
-                const begin = options.stylize(this._caps[i * 2].toString(), 'number');
-                const end = options.stylize(this._caps[i * 2 + 1].toString(), 'number');
+                var begin = options.stylize(this._caps[i * 2].toString(), 'number');
+                var end = options.stylize(this._caps[i * 2 + 1].toString(), 'number');
                 capture = options.stylize(JSON.stringify(capture), 'string');
                 s += `  ${name} [${begin}:${end}] => ${capture},\n`;
             }

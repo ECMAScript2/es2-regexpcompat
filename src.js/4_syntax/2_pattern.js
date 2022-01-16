@@ -355,7 +355,7 @@ nodeToString = function( n ){
         case REGEXP_COMPAT__PATTERN_IS_Optional :
             return nodeToString( n.child ) + '?' + ( n.nonGreedy ? '?' : '' );
         case REGEXP_COMPAT__PATTERN_IS_Repeat :
-            let s = nodeToString( n.child );
+            var s = nodeToString( n.child );
             s += '{' + n.min;
             if( n.max === Infinity ){
                 s += ',';
@@ -373,7 +373,7 @@ nodeToString = function( n ){
         case REGEXP_COMPAT__PATTERN_IS_LookAhead :
             return '(?' + ( n.negative ? '!' : '=' ) + nodeToString( n.child ) + ')';
         case REGEXP_COMPAT__PATTERN_IS_Char : {
-            const c = escapeRaw( n.raw );
+            var c = escapeRaw( n.raw );
             return c === '/' ? '\\/' : c;
         };
         case REGEXP_COMPAT__PATTERN_IS_EscapeClass :
@@ -432,8 +432,8 @@ nodeToString = function( n ){
  * @return {string}
  */
 patternToString = function( p ){
-    let s = '/';
-    const n = nodeToString( p.child );
+    var s = '/';
+    var n = nodeToString( p.child );
 
     s += n === '' ? '(?:)' : n;
     s += '/';

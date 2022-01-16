@@ -1,5 +1,5 @@
 /** Cache for loaded `ChaeSet`. */
-const Unicode_CACHE = {};
+var Unicode_CACHE = {};
 
 /** Load `CharSet` corresponding to Unicode `General_Category` value.
  * @param {string} v
@@ -11,17 +11,17 @@ function loadCategory( v ){
 
     v = _v && _v.get( v ) || v;
 
-    const key = 'General_Category.' + v;
-    const cache = Unicode_CACHE[ key ];
+    var key = 'General_Category.' + v;
+    var cache = Unicode_CACHE[ key ];
     if( cache ){
         return cache;
     };
 
-    const data = category.get( v );
+    var data = category.get( v );
     if( !data ){
         return;
     };
-    const set = new CharSet( data );
+    var set = new CharSet( data );
     Unicode_CACHE[ key ] = set;;
     return set;
 };
@@ -36,17 +36,17 @@ function loadScript(v){
 
     v = _v && _v.get( v ) || v;
 
-    const key = 'Script.' + v;
-    const cache = Unicode_CACHE[ key ];
+    var key = 'Script.' + v;
+    var cache = Unicode_CACHE[ key ];
     if( cache ){
         return cache;
     };
 
-    const data = script.get( v );
+    var data = script.get( v );
     if( !data ){
         return;
     };
-    const set = new CharSet( data );
+    var set = new CharSet( data );
     Unicode_CACHE[ key ] = set;;
     return set;
 };
@@ -62,23 +62,23 @@ function loadScriptExtensions( v ){
 
     v = _v && _v.get( v ) || v;
 
-    const key = 'Script_Extensions.' + v;
-    const cache = Unicode_CACHE[ key ];
+    var key = 'Script_Extensions.' + v;
+    var cache = Unicode_CACHE[ key ];
     if( cache ){
         return cache;
     };
 
-    const baseSet = loadScript( v );
+    var baseSet = loadScript( v );
     if( !baseSet ){
         return;
     };
-    const data = scriptExtensions.get( v );
+    var data = scriptExtensions.get( v );
     if( !data && DEFINE_REGEXP_COMPAT__DEBUG ){
         throw new Error('BUG: Script_Extensions must contain each value of Script');
     };
 
-    const extSet = new CharSet( data );
-    const set = baseSet.clone();
+    var extSet = new CharSet( data );
+    var set = baseSet.clone();
     set.addCharSet( extSet );
     Unicode_CACHE[ key ] = set;
     return set;
@@ -98,17 +98,17 @@ m_loadProperty = function( p ){
     // Canonicalize property name.
     p = unicodePropertyAliasesEcmascript.get( p ) || p;
 
-    const cache = Unicode_CACHE[ p ];
+    var cache = Unicode_CACHE[ p ];
     if( cache ){
         return cache;
     };
 
-    const data = property.get( p );
+    var data = property.get( p );
     if( !data ){
         return;
     };
 
-    const set = new CharSet( data );
+    var set = new CharSet( data );
     Unicode_CACHE[ p ] = set;
     return set;
 };

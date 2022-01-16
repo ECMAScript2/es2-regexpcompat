@@ -1,5 +1,5 @@
 /** The maximum valid code point of Unicode. */
-const MAX_CODE_POINT = 0x110000;
+var MAX_CODE_POINT = 0x110000;
 
 /** `CharSet` is a set of code points. */
 
@@ -11,7 +11,7 @@ const MAX_CODE_POINT = 0x110000;
  * So, this array's size must be even always.
  *
  * ```typescript
- * const set = new CharSet();
+ * var set = new CharSet();
  * set.add(10, 20);
  * set.add(30, 40)
  * console.log(set.data);
@@ -38,10 +38,10 @@ CharSet.prototype.add = function( begin, opt_end ){
     var data = this.data;
     var end  = opt_end || begin + 1;
 
-    const i = CharSet_searchBegin( data, begin );
-    const j = CharSet_searchEnd( data, end );
+    var i = CharSet_searchBegin( data, begin );
+    var j = CharSet_searchEnd( data, end );
 
-    const removed = data.splice( i * 2, ( j - i + 1 ) * 2 );
+    var removed = data.splice( i * 2, ( j - i + 1 ) * 2 );
     if( removed.length > 0 ){
         begin = Math.min( begin, removed[ 0 ] );
         end   = Math.max( end, removed[ removed.length - 1 ] );
@@ -103,13 +103,13 @@ CharSet.prototype.clone = function(){
  */
 CharSet.prototype.has = function( c ){
     var data = this.data;
-    const i = CharSet_searchEnd( data, c );
+    var i = CharSet_searchEnd( data, c );
 
     if( i < 0 || data.length <= i * 2 ){
         return false;
     };
-    const begin = data[i * 2];
-    const end   = data[i * 2 + 1];
+    var begin = data[ i * 2 ];
+    var end   = data[ i * 2 + 1 ];
     return begin <= c && c < end;
 };
 
@@ -120,9 +120,9 @@ CharSet.prototype.has = function( c ){
 CharSet.prototype.toRegExpPattern = function( opt_invert ){
     var s = opt_invert ? '[^' : '[';
 
-    for( let i = -1, data = this.data, l = data.length - 1; i < l; ){
-        const begin = data[ ++i ];
-        const end   = data[ ++i ];
+    for( var i = -1, data = this.data, l = data.length - 1; i < l; ){
+        var begin = data[ ++i ];
+        var end   = data[ ++i ];
         s += escapeCodePointAsRegExpSpurceChar( begin, true );
         if( begin !== end - 1 ){
             s += '-' + escapeCodePointAsRegExpSpurceChar( end - 1, true );
@@ -160,7 +160,7 @@ function CharSet_searchBegin( data, c ){
     var max  = data.length / 2;
 
     while( max - min > 1 ){
-        const mid = min + Math.floor( ( max - min ) / 2 );
+        var mid = min + Math.floor( ( max - min ) / 2 );
         if( c <= data[ mid * 2 + 1 ] ){
             max = mid;
         } else {
@@ -180,7 +180,7 @@ function CharSet_searchEnd( data, c ){
     var max  = data.length / 2;
 
     while( max - min > 1 ){
-        const mid = min + Math.floor( ( max - min ) / 2 );
+        var mid = min + Math.floor( ( max - min ) / 2 );
         if( data[ mid * 2 ] <= c ){
             min = mid;
         } else {

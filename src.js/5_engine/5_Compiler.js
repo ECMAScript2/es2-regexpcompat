@@ -22,8 +22,8 @@ function Compiler( pattern ){
  * @return {Program}
  */
 Compiler.prototype.compile = function(){
-    const codes0 = this.compileNode( this.pattern.child );
-    const codes1 = Compiler_spreadOperator(
+    var codes0 = this.compileNode( this.pattern.child );
+    var codes1 = Compiler_spreadOperator(
         { op: REGEXP_COMPAT__OPCODE_IS_CAP_BEGIN, index: 0 },
         /* ... */ /** @type {Array.<OpCode>} */ (codes0),
         { op: REGEXP_COMPAT__OPCODE_IS_CAP_END, index: 0 },
@@ -91,17 +91,17 @@ Compiler.prototype.compileNode = function( node ){
  * @return {Array.<OpCode>}
  */
 Compiler.prototype.compileDisjunction = function( node ){
-    const _children = node.children,
-          l = _children.length;
+    var _children = node.children,
+        l = _children.length;
 
     if( l === 0 && DEFINE_REGEXP_COMPAT__DEBUG ){
         throw new Error('BUG: invalid pattern');
     };
 
-    const children = [];
-    let advance = true;
+    var children = [];
+    var advance = true;
 
-    for( let i = 0; i < l; ++i ){
+    for( var i = 0; i < l; ++i ){
         children.push( this.compileNode( _children[ i ] ) );
         advance = advance && this.advance;
     };
@@ -125,7 +125,7 @@ Compiler.prototype.compileDisjunction = function( node ){
  * @return {Array.<OpCode>}
  */
 Compiler.prototype.compileSequence = function( node ){
-    const children = Array_from( node.children );
+    var children = Array_from( node.children );
 
     if( this.direction === Compiler_DIRECTION_BACKWARD ){
         if( false || children.reverse ){
@@ -138,10 +138,10 @@ Compiler.prototype.compileSequence = function( node ){
         };
     };
 
-    const codes = [];
-    let advance = false;
-    for( let i = -1, child; child = children[ ++i ]; ){
-        const codes0 = this.compileNode( child );
+    var codes = [];
+    var advance = false;
+    for( var i = -1, child; child = children[ ++i ]; ){
+        var codes0 = this.compileNode( child );
         Compiler_pushElementsToOpCodeList( codes, /** @type {Array.<OpCode>} */ (codes0) );
         advance = advance || this.advance;
     };
@@ -163,7 +163,7 @@ Compiler.prototype.compileGroup = function( node ){
  * @return {Array.<OpCode>}
  */
 Compiler.prototype.compileCapture = function( node ){
-    const codes0 = this.compileNode( node.child );
+    var codes0 = this.compileNode( node.child );
 
     if( node.index !== this.captureParensIndex++ ){
         if( DEFINE_REGEXP_COMPAT__DEBUG ){
@@ -182,8 +182,8 @@ Compiler.prototype.compileCapture = function( node ){
  * @return {Array.<OpCode>}
  */
 Compiler.prototype.compileNamedCapture = function( node ){
-    const codes0 = this.compileNode( node.child );
-    const index = this.names.get( node.name );
+    var codes0 = this.compileNode( node.child );
+    var index = this.names.get( node.name );
 
     if( index === undefined || index !== this.captureParensIndex++ ){
         if( DEFINE_REGEXP_COMPAT__DEBUG ){
@@ -202,9 +202,9 @@ Compiler.prototype.compileNamedCapture = function( node ){
  * @return {Array.<OpCode>}
  */
 Compiler.prototype.compileMany = function( node ){
-    const from = this.captureParensIndex;
-    const codes0 = this.insertEmptyCheck( /** @type {Array.<OpCode>} */ (this.compileNode( node.child )) );
-    const codes1 = this.insertCapReset( from, /** @type {Array.<OpCode>} */ (codes0) );
+    var from = this.captureParensIndex;
+    var codes0 = this.insertEmptyCheck( /** @type {Array.<OpCode>} */ (this.compileNode( node.child )) );
+    var codes1 = this.insertCapReset( from, /** @type {Array.<OpCode>} */ (codes0) );
     this.advance = false;
 
     return Compiler_spreadOperator(
@@ -219,9 +219,9 @@ Compiler.prototype.compileMany = function( node ){
  * @return {Array.<OpCode>}
  */
 Compiler.prototype.compileSome = function( node ){
-    const from = this.captureParensIndex;
-    const codes0 = this.compileNode( node.child );
-    const codes1 = this.insertCapReset( from, this.insertEmptyCheck( /** @type {Array.<OpCode>} */ (codes0 ) ) );
+    var from = this.captureParensIndex;
+    var codes0 = this.compileNode( node.child );
+    var codes1 = this.insertCapReset( from, this.insertEmptyCheck( /** @type {Array.<OpCode>} */ (codes0 ) ) );
 
     return Compiler_spreadOperator(
         /* ... */ /** @type {Array.<OpCode>} */ (codes0),
@@ -236,7 +236,7 @@ Compiler.prototype.compileSome = function( node ){
  * @return {Array.<OpCode>}
  */
 Compiler.prototype.compileOptional = function( node ){
-    const codes0 = this.compileNode( node.child );
+    var codes0 = this.compileNode( node.child );
     this.advance = false;
 
     return Compiler_spreadOperator(
@@ -250,15 +250,16 @@ Compiler.prototype.compileOptional = function( node ){
  * @return {Array.<OpCode>}
  */
 Compiler.prototype.compileRepeat = function( node ){
-    const from = this.captureParensIndex;
-    const codes0 = this.compileNode( node.child );
-    const codes = [];
+    var from = this.captureParensIndex;
+    var codes0 = this.compileNode( node.child );
+    var codes = [];
+    var codes1;
 
     if( node.min === 1 ){
         Compiler_pushElementsToOpCodeList( codes, /** @type {Array.<OpCode>} */ (codes0) );
         // codes.push(...codes0);
     } else if( node.min > 1 ){
-        const codes1 = this.insertCapReset( from, /** @type {Array.<OpCode>} */ (codes0) );
+        codes1 = this.insertCapReset( from, /** @type {Array.<OpCode>} */ (codes0) );
         Compiler_pushElementsToOpCodeList(
             codes,
             { op: REGEXP_COMPAT__OPCODE_IS_PUSH, value: node.min },
@@ -271,9 +272,9 @@ Compiler.prototype.compileRepeat = function( node ){
         this.advance = false;
     };
 
-    const max = node.max != null ? node.max : node.min;
+    var max = node.max != null ? node.max : node.min;
     if( max === Infinity ){
-        const codes1 = this.insertCapReset( from, this.insertEmptyCheck( /** @type {Array.<OpCode>} */ (codes0) ) );
+        codes1 = this.insertCapReset( from, this.insertEmptyCheck( /** @type {Array.<OpCode>} */ (codes0) ) );
         Compiler_pushElementsToOpCodeList(
             codes,
             { op: node.nonGreedy ? REGEXP_COMPAT__OPCODE_IS_FORK_NEXT : REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes1.length + 1 },
@@ -281,8 +282,8 @@ Compiler.prototype.compileRepeat = function( node ){
             { op: REGEXP_COMPAT__OPCODE_IS_JUMP, cont: -1 - codes1.length - 1 }
         );
     } else if( max > node.min ){
-        const remain = max - node.min;
-        const codes1 = this.insertCapReset( from, this.insertEmptyCheck( /** @type {Array.<OpCode>} */ (codes0) ) );
+        var remain = max - node.min;
+        codes1 = this.insertCapReset( from, this.insertEmptyCheck( /** @type {Array.<OpCode>} */ (codes0) ) );
         if( remain === 1 ){
             Compiler_pushElementsToOpCodeList(
                 codes,
@@ -363,9 +364,9 @@ Compiler.prototype.compileLineEnd = function( /* _node */ ){
  * @return {Array.<OpCode>}
  */
 Compiler.prototype.compileLookAhead = function( node ){
-    const oldDirection = this.direction;
+    var oldDirection = this.direction;
     this.direction = Compiler_DIRECTION_FORWARD;
-    const codes = this.compileLookAround( node );
+    var codes = this.compileLookAround( node );
     this.direction = oldDirection;
     return codes;
 };
@@ -375,9 +376,9 @@ Compiler.prototype.compileLookAhead = function( node ){
  * @return {Array.<OpCode>}
  */
 Compiler.prototype.compileLookBehind = function( node ){
-    const oldDirection = this.direction;
+    var oldDirection = this.direction;
     this.direction = Compiler_DIRECTION_BACKWARD;
-    const codes = this.compileLookAround( node );
+    var codes = this.compileLookAround( node );
     this.direction = oldDirection;
     return codes;
 };
@@ -387,7 +388,7 @@ Compiler.prototype.compileLookBehind = function( node ){
  * @return {Array.<OpCode>}
  */
 Compiler.prototype.compileLookAround = function( node ){
-    const codes0 = this.compileNode( node.child );
+    var codes0 = this.compileNode( node.child );
     this.advance = false;
 
     if( node.negative ){
@@ -417,7 +418,7 @@ Compiler.prototype.compileLookAround = function( node ){
  * @return {Array.<OpCode>}
  */
 Compiler.prototype.compileChar = function( node ){
-    let value = node.value;
+    var value = node.value;
     if( this.ignoreCase ){
         value = canonicalize( value, this.unicode );
     };
@@ -430,7 +431,7 @@ Compiler.prototype.compileChar = function( node ){
  * @return {Array.<OpCode>}
  */
 Compiler.prototype.compileEscapeClass = function( node ){
-    const set = this.escapeClassToSet( node );
+    var set = this.escapeClassToSet( node );
     this.advance = true;
     return this.insertBack( [ { op: REGEXP_COMPAT__OPCODE_IS_CLASS, set : set } ] );
 };
@@ -440,10 +441,10 @@ Compiler.prototype.compileEscapeClass = function( node ){
  * @return {Array.<OpCode>}
  */
 Compiler.prototype.compileClass = function( node ){
-    const set = new CharSet(),
+    var set = new CharSet(),
           classItemList = node.children;
 
-    for( let /** @type {ClassItem} */ item, i = -1; item = classItemList[ ++i ]; ){
+    for( var /** @type {ClassItem} */ item, i = -1; item = classItemList[ ++i ]; ){
         switch( item.type ){
             case REGEXP_COMPAT__PATTERN_IS_Char :
                 set.add( item.value, item.value + 1 );
@@ -545,7 +546,7 @@ Compiler.prototype.compileBackRef = function( node ){
  * @return {Array.<OpCode>}
  */
 Compiler.prototype.compileNamedBackRef = function( node ){
-    const index = this.names.get( node.name );
+    var index = this.names.get( node.name );
 
     if( index === undefined || index < 1 || this.captureParens < index ){
         if( DEFINE_REGEXP_COMPAT__DEBUG ){

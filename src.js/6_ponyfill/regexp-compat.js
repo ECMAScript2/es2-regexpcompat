@@ -51,18 +51,18 @@ function RegExpCompat( source, flags ){
         };
     };
 
-    const parser = new Parser( /** @type {string} */ (source), flags, true );
-    const pattern = parser.parse();
+    var parser = new Parser( /** @type {string} */ (source), flags, true );
+    var pattern = parser.parse();
 
     /** @type {Pattern} */
     this.pattern = pattern;
 
-    const compiler = new Compiler( pattern );
+    var compiler = new Compiler( pattern );
 
     /** @type {Program} */
     this.program = compiler.compile();
 
-    const n = nodeToString( pattern.child );
+    var n = nodeToString( pattern.child );
 
     /** @type {string} */
     this.source = n === '' ? '(?:)' : n;
@@ -116,13 +116,13 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
  * @return {RegExpResult|null}
  */
 RegExpCompat.prototype.exec = function( string ){
-    const update = this.global || this.sticky;
+    var update = this.global || this.sticky;
 
-    let pos = 0;
+    var pos = 0;
     if( update ){
         pos = this.lastIndex;
     };
-    const match = this.program.exec( string, pos );
+    var match = this.program.exec( string, pos );
     if( update ){
         this.lastIndex = match ? match.lastIndex : 0;
     };
@@ -145,8 +145,8 @@ RegExpCompat.prototype.test = function( string ){
 RegExpCompat.prototype[Symbol.match] = function( string ){
     if( this.global ){
         this.lastIndex = 0;
-        const result = [];
-        for( let r; r = this.exec( string ) ; ){
+        var result = [];
+        for( var r; r = this.exec( string ) ; ){
             result.push( r[ 0 ] );
             if( r[ 0 ] === '' ){
                 this.lastIndex = advance( string, this.lastIndex, this.unicode );
@@ -158,8 +158,8 @@ RegExpCompat.prototype[Symbol.match] = function( string ){
 };
 
 RegExpCompat.prototype[Symbol.replace] = function( string, replacer ){
-    const replacerIsFunction = typeof replacer === 'function';
-    const matches = [];
+    var replacerIsFunction = typeof replacer === 'function';
+    var matches = [];
     if( this.global ){
         this.lastIndex = 0;
     };
@@ -167,7 +167,7 @@ RegExpCompat.prototype[Symbol.replace] = function( string, replacer ){
     // Collect matches to replace.
     // It must be done before building result string because
     // the replacer function calls `this.exec` and changes `this.lastIndex` maybe.
-    for( let match; match = this.exec( string ); ){
+    for( var match; match = this.exec( string ); ){
         matches.push( match );
         if( !this.global ){
             break;
@@ -178,29 +178,29 @@ RegExpCompat.prototype[Symbol.replace] = function( string, replacer ){
     };
 
     // Build a result string.
-    let pos = 0;
-    let result = '';
-    const l = matches.length;
-    for( let index = 0, match; index < l; ++index ){
+    var pos = 0;
+    var result = '';
+    var l = matches.length;
+    for( var index = 0, match; index < l; ++index ){
         match = matches[ index ];
         result += string.slice( pos, match.index );
         pos = match.index + match[ 0 ].length;
         if( replacerIsFunction ){
-            const args = Array_from( match );
+            var args = Array_from( match );
             args.push( match.index, string );
             if( match.groups ){
                 args.push( match.groups );
             };
             result += '' + replacer.apply( null, args );
         } else {
-            let i = 0;
+            var i = 0;
             for( ;; ){
-                const j = replacer.indexOf( '$', i );
+                var j = replacer.indexOf( '$', i );
                 result += replacer.slice( i, j === -1 ? string.length : j );
                 if( j === -1 ){
                     break;
                 };
-                const c = replacer.charAt( j + 1 );
+                var c = replacer.charAt( j + 1 );
                 switch( c ){
                     case '$':
                         i = j + 2;
@@ -219,21 +219,21 @@ RegExpCompat.prototype[Symbol.replace] = function( string, replacer ){
                         result += string.slice( pos );
                         break;
                     case '<':
-                        const k = replacer.indexOf( '>', j + 2 );
+                        var k = replacer.indexOf( '>', j + 2 );
                         if( this.pattern.names.size === 0 || k === -1 ){ // TODO .size
                             i = j + 2;
                             result += '$<';
                             break;
                         };
-                        const name = replacer.slice( j + 2, k );
+                        var name = replacer.slice( j + 2, k );
                         result += match.groups && match.groups[ name ] || '';
                         i = k + 1;
                         break;
                     default:
                         if( '0' <= c && c <= '9' ){
-                            const d = replacer.charAt( j + 2 );
-                            const s = '0' <= d && d <= '9' ? c + d : c;
-                            let n = /* Number. */parseInt( s, 10 );
+                            var d = replacer.charAt( j + 2 );
+                            var s = '0' <= d && d <= '9' ? c + d : c;
+                            var n = /* Number. */parseInt( s, 10 );
                             if( 0 < n && n < match.length ){
                                 result += match[ n ] || '';
                                 i = j + 1 + s.length;
@@ -259,9 +259,9 @@ RegExpCompat.prototype[Symbol.replace] = function( string, replacer ){
 };
 
 RegExpCompat.prototype[Symbol.search] = function( string ){
-    const prevLastIndex = this.lastIndex;
+    var prevLastIndex = this.lastIndex;
     this.lastIndex = 0;
-    const m = this.exec( string );
+    var m = this.exec( string );
     this.lastIndex = prevLastIndex;
     return m ? m.index : -1;
 };
@@ -272,50 +272,53 @@ RegExpCompat.prototype[Symbol.search] = function( string ){
  * @return {Array.<string>}
  */
 RegExpCompat.prototype[Symbol.split] = function( string, limit ){
-    const flags       = this.sticky ? this.flags : this.flags + 'y';
-    const constructor = this.constructor;
-    const species     = /* constructor && constructor[Symbol.species] || */ RegExpCompat;
-    const splitter    = new species( this.source, flags );
+    var flags       = this.sticky ? this.flags : this.flags + 'y';
+    var constructor = this.constructor;
+    var species     = /* constructor && constructor[Symbol.species] || */ RegExpCompat;
+    var splitter    = new species( this.source, flags );
     limit = ( limit !== undefined ? limit : /* 2 ** 32 */ 4294967296 - 1 ) >>> 0;
 
-    const result = [];
+    var result = [];
+    var match;
+  
     if( limit === 0 ){
         return result;
     };
 
     // Special case for empty string.
     if( /* string.length === 0 */ string === '' ){
-        const match = splitter.exec( string );
+        match = splitter.exec( string );
         if( !match ){
             result.push( string );
         };
         return result;
     };
 
-    const len = string.length;
-    let p = 0;
-    let q = p;
+    var len = string.length;
+    var p = 0;
+    var q = p;
+    var t;
     while( q < len ){
         splitter.lastIndex = q;
-        const match = splitter.exec( string );
+        match = splitter.exec( string );
         if( !match ){
             q = advance( string, q, this.unicode );
             continue;
         };
 
-        const e = Math.min( splitter.lastIndex, len );
+        var e = Math.min( splitter.lastIndex, len );
         if( e === p ){
             q = advance( string, q, this.unicode );
             continue;
         };
 
-        const t = string.slice( p, q );
+        t = string.slice( p, q );
         result.push( t );
         if( limit === result.length ){
             return result;
         };
         p = e;
-        for( let i = 1, l = match.length; i < l; ++i ){
+        for( var i = 1, l = match.length; i < l; ++i ){
             result.push( match[ i ] );
             if( limit === result.length ){
                 return result;
@@ -325,7 +328,7 @@ RegExpCompat.prototype[Symbol.split] = function( string, limit ){
         q = p;
     };
 
-    const t = string.slice( p );
+    t = string.slice( p );
     result.push( t );
     return result;
 };
