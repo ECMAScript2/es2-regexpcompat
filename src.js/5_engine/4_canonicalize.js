@@ -35,8 +35,8 @@ uncanonicalize = function( c, unicode ){
         return inverseFoldMap$1.get( c ) || [];
     };
 
-    var d = inverseFoldMap.get( c );
-    if( d !== undefined ){
+    var d = inverseFoldMap[ c ];
+    if( d ){
         return d;
     };
     var s = String_fromCharCode( c );
