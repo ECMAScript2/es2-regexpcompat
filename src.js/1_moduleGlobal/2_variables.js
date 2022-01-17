@@ -1,6 +1,9 @@
 var String_fromCharCode = String.fromCharCode;
 var Math_floor = Math.floor;
 
+var unicodeFoldMap        = [],
+    unicodeInverseFoldMap = [];
+
 var CharSet;
 
 var m_loadProperty, m_loadPropertyValue;

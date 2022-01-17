@@ -128,10 +128,13 @@ m_loadPropertyValue = function( p, v ){
     p = unicodePropertyAliasesEcmascript.get( p ) || p;
 
     switch( p ){
+        // case 'gc' :
         case 'General_Category':
             return loadCategory( v );
+        // case 'sc' :
         case 'Script':
             return loadScript( v );
+        // case 'scx' :
         case 'Script_Extensions':
             return loadScriptExtensions( v );
 
