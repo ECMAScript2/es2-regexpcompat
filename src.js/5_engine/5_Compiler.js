@@ -183,7 +183,7 @@ Compiler.prototype.compileCapture = function( node ){
  */
 Compiler.prototype.compileNamedCapture = function( node ){
     var codes0 = this.compileNode( node.child );
-    var index = this.names.get( node.name );
+    var index = this.names[ node.name ];
 
     if( index === undefined || index !== this.captureParensIndex++ ){
         if( DEFINE_REGEXP_COMPAT__DEBUG ){
@@ -191,9 +191,9 @@ Compiler.prototype.compileNamedCapture = function( node ){
         };
     };
     return Compiler_spreadOperator(
-        { op: REGEXP_COMPAT__OPCODE_IS_CAP_BEGIN, index },
+        { op: REGEXP_COMPAT__OPCODE_IS_CAP_BEGIN, index : index },
         /* ... */ /** @type {Array.<OpCode>} */ (codes0),
-        { op: REGEXP_COMPAT__OPCODE_IS_CAP_END, index }
+        { op: REGEXP_COMPAT__OPCODE_IS_CAP_END, index : index }
     );
 };
 
@@ -329,7 +329,7 @@ Compiler.prototype.insertCapReset = function( from, codes0 ){
         return codes0;
     };
     return Compiler_spreadOperator(
-        { op: REGEXP_COMPAT__OPCODE_IS_CAP_RESET, from, to: this.captureParensIndex },
+        { op: REGEXP_COMPAT__OPCODE_IS_CAP_RESET, from : from, to: this.captureParensIndex },
         /* ... */ codes0
     );
 };
@@ -423,7 +423,7 @@ Compiler.prototype.compileChar = function( node ){
         value = canonicalize( value, this.unicode );
     };
     this.advance = true;
-    return this.insertBack( [ { op: REGEXP_COMPAT__OPCODE_IS_CHAR, value } ] );
+    return this.insertBack( [ { op: REGEXP_COMPAT__OPCODE_IS_CHAR, value : value } ] );
 };
 
 /**
@@ -538,7 +538,7 @@ Compiler.prototype.compileBackRef = function( node ){
         };
     };
     this.advance = false;
-    return [ { op: this.direction === Compiler_DIRECTION_BACKWARD ? REGEXP_COMPAT__OPCODE_IS_REF_BACK : REGEXP_COMPAT__OPCODE_IS_REF, index: node.index } ];
+    return [ { op: this.direction === Compiler_DIRECTION_BACKWARD ? REGEXP_COMPAT__OPCODE_IS_REF_BACK : REGEXP_COMPAT__OPCODE_IS_REF, index : node.index } ];
 };
 
 /**
@@ -546,7 +546,7 @@ Compiler.prototype.compileBackRef = function( node ){
  * @return {Array.<OpCode>}
  */
 Compiler.prototype.compileNamedBackRef = function( node ){
-    var index = this.names.get( node.name );
+    var index = this.names[ node.name ];
 
     if( index === undefined || index < 1 || this.captureParens < index ){
         if( DEFINE_REGEXP_COMPAT__DEBUG ){
@@ -554,14 +554,14 @@ Compiler.prototype.compileNamedBackRef = function( node ){
         };
     };
     this.advance = false;
-    return [ { op: this.direction === Compiler_DIRECTION_BACKWARD ? REGEXP_COMPAT__OPCODE_IS_REF_BACK : REGEXP_COMPAT__OPCODE_IS_REF, index } ];
+    return [ { op: this.direction === Compiler_DIRECTION_BACKWARD ? REGEXP_COMPAT__OPCODE_IS_REF_BACK : REGEXP_COMPAT__OPCODE_IS_REF, index : index } ];
 };
 
 /**
  * @param {...(OpCode|Array.<OpCode>)} _args
  * @return {Array.<OpCode>}
  */
-function Compiler_spreadOperator( ..._args /* ... */ ){
+function Compiler_spreadOperator( _args ){
     var args   = arguments,
         l      = args.length,
         i      = 0,
@@ -587,7 +587,7 @@ function Compiler_spreadOperator( ..._args /* ... */ ){
  * @param {...(OpCode|Array.<OpCode>)} _args
  * @return {Array.<OpCode>}
  */
-function Compiler_pushElementsToOpCodeList( targetArray, ..._args /*, ... */ ){
+function Compiler_pushElementsToOpCodeList( targetArray, _args ){
     var args = arguments,
         l    = args.length,
         i    = 1,

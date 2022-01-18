@@ -4,7 +4,7 @@
  *
  * @param {string} input 
  * @param {Array.<number>} caps 
- * @param {Map} names 
+ * @param {Object<string, number>} names 
  */
  Match = function(input, caps, names) {
     /** An input string of this matching.
@@ -135,28 +135,28 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
        * @param {InspectOptionsStylized} options 
        * @return {string}
        */
-        Match.prototype[ Symbol.for( 'nodejs.util.inspect.custom' ) ] = function( depth, options ){
+        Match.prototype[ Symbol[ 'for' ]( 'nodejs.util.inspect.custom' ) ] = function( depth, options ){
             var s = options.stylize( 'Match', 'special' ) + ' [\n';
-            var inverseNames = new Map( Array.from(this._names).map(([k, i]) => [i, k]) );
+            var inverseNames = new Map(
+                    Array.from( this._names ).map( function( ki ){ return [ ki[ 1 ], ki[ 0 ] ]; } ) );
 
-            for (var i = 0, _i; i < this.length; i++) {
+            for( var i = 0, _i; i < this.length; i++ ){
                 _i = inverseNames.get( i );
                 var name = options.stylize(
-                  JSON.stringify( _i != null ? _i : i ),
-                  inverseNames.has( i ) ? 'string' : 'number'
+                    JSON.stringify( _i != null ? _i : i ),
+                    inverseNames.has( i ) ? 'string' : 'number'
                 );
-                var capture = this.get(i);
-                if (capture === undefined) {
-                  s += `  ${name} => ${options.stylize('undefined', 'undefined')},\n`;
-                  continue;
-                }
-                var begin = options.stylize(this._caps[i * 2].toString(), 'number');
-                var end = options.stylize(this._caps[i * 2 + 1].toString(), 'number');
-                capture = options.stylize(JSON.stringify(capture), 'string');
-                s += `  ${name} [${begin}:${end}] => ${capture},\n`;
-            }
-            s += ']';
-            return s;
+                var capture = this.get( i );
+                if( capture === undefined ){
+                    s += '  ' + name + ' => ' + options.stylize( 'undefined', 'undefined' ) + ',\n';
+                    continue;
+                };
+                var begin = options.stylize( this._caps[ i * 2 ].toString(), 'number' );
+                var end = options.stylize( this._caps[ i * 2 + 1 ].toString(), 'number' );
+                capture = options.stylize( JSON.stringify( capture ), 'string' );
+                s += '  ' + name + ' [' + begin + ':' + end + '] => ' + capture + ',\n';
+            };
+            return s + ']';
         };
     };
 };

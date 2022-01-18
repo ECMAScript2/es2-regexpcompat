@@ -29,6 +29,7 @@ function advance( s, i, unicode ){
 
 /**
  * @constructor
+ * @extends RegExp
  * @param {string|RegExp|RegExpCompat} source 
  * @param {string=} flags
  */
@@ -91,14 +92,16 @@ function RegExpCompat( source, flags ){
 };
 
 if( DEFINE_REGEXP_COMPAT__DEBUG ){
-    for( const name of [ '$1', '$2', '$3', '$4', '$5', '$6', '$7', '$8', '$9', 'lastMatch' ] ){
-        RegExpCompat.__defineGetter__(
-            name,
-            function(){
-                throw new Error(`RegExpCompat does not support old RegExp.${name} method`);
-            }
-        );
-    };
+    [ '$1', '$2', '$3', '$4', '$5', '$6', '$7', '$8', '$9', 'lastMatch' ].forEach(
+        function( name ){
+            RegExpCompat.__defineGetter__(
+                name,
+                function(){
+                    throw new Error( 'RegExpCompat does not support old RegExp.' + name + ' method' );
+                }
+            );
+        }
+    );
 
     RegExpCompat[ Symbol.species ] = RegExpCompat;
 
@@ -220,7 +223,7 @@ RegExpCompat.prototype[Symbol.replace] = function( string, replacer ){
                         break;
                     case '<':
                         var k = replacer.indexOf( '>', j + 2 );
-                        if( this.pattern.names.size === 0 || k === -1 ){ // TODO .size
+                        if( this.pattern.names._size === 0 || k === -1 ){
                             i = j + 2;
                             result += '$<';
                             break;

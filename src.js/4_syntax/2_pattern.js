@@ -18,7 +18,7 @@ var FlagSet;
  *     type: (string|number),
  *     flagSet: FlagSet,
  *     captureParens: number,
- *     names: Map<string, number>,
+ *     names: Object<string, number>,
  *     child: RegExpPaternNode,
  *     range: Array.<number>
  *   }

@@ -143,7 +143,7 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
        * @param {InspectOptionsStylized} options 
        * @return {string}
        */
-        CharSet.prototype[ Symbol.for( 'nodejs.util.inspect.custom' ) ] = function( depth, options ){
+        CharSet.prototype[ Symbol[ 'for' ]( 'nodejs.util.inspect.custom' ) ] = function( depth, options ){
             return options.stylize( 'CharSet', 'special' ) + ' ' +
                    options.stylize( this.toRegExpPattern(), 'regexp' );
         };

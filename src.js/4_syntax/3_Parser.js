@@ -122,8 +122,8 @@ var RepeatQuantifier;
 function Parser( source, flags, additional ){
      /** Precalculated number of capture group parens. */
     this.captureParens = 0;
-    /** Precalculated `Map` associate from capture group name to its index. */
-    this.names = new Map();
+    /** @type {Object<string, number>} Precalculated `Map` associate from capture group name to its index. */
+    this.names = { _size : 0 };
     /** The current position of `source` string on parsing. */
     this.pos = 0;
     /** The current capture group parens index number. */
@@ -262,7 +262,10 @@ Parser.prototype.preprocessCaptures = function(){
                     if( d !== '=' && d !== '!' ){
                         ++this.captureParens;
                         var name = this.parseCaptureName();
-                        this.names.set( name, this.captureParens );
+                        if( !this.names[ name ] ){
+                            ++this.names._size;
+                        };
+                        this.names[ name ] = this.captureParens;
                     };
                 } else {
                     if( !String_startsWith( this.source, '(?', this.pos ) ){
@@ -504,7 +507,7 @@ Parser.prototype.tryParseRepeatQuantifier = function(){
     };
     ++this.pos; // skip '}'
 
-    return { min, max };
+    return { min : min, max : max };
 };
 
 /**
@@ -757,7 +760,7 @@ Parser.prototype.tryParseBackRef = function(){
     var begin = this.pos;
     ++this.pos; // skip '\\';
 
-    if( this.names.size > 0 ){
+    if( this.names._size > 0 ){
         if( this.current() === 'k' ){
             ++this.pos; // skip 'k'
             if( this.current() !== '<' && DEFINE_REGEXP_COMPAT__DEBUG ){
@@ -927,9 +930,9 @@ Parser.prototype.tryParseEscape = function(){
             if( c === 'c' ){
                 return { type : REGEXP_COMPAT__PATTERN_IS_Char, value : 0x5c, raw : '\\', range : [ begin, this.pos ] };
             };
-            if( this.names.size === 0 || c !== 'k' ){
+            if( this.names._size === 0 || c !== 'k' ){
                 this.pos += c.length; // skip any char
-                return { type : REGEXP_COMPAT__PATTERN_IS_Char, value, raw : '\\' + c, range : [ begin, this.pos ] };
+                return { type : REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw : '\\' + c, range : [ begin, this.pos ] };
             }
         } else {
             if( !idContinue.has( value ) ){
@@ -1186,7 +1189,7 @@ Parser.prototype.parseParen = function(){
             var namePos = this.pos;
             var name = this.parseCaptureName();
             var raw = this.source.slice( namePos, this.pos - 1 );
-            if( this.names.get( name ) !== index && DEFINE_REGEXP_COMPAT__DEBUG ){
+            if( this.names[ name ] !== index && DEFINE_REGEXP_COMPAT__DEBUG ){
                 throw new Error('BUG: invalid named capture');
             };
             child = this.parseDisjunction();

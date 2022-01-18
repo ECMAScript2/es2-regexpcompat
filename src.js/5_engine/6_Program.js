@@ -180,40 +180,38 @@ function Program( pattern, codes ){
     /** @type {number} */
     this.captureParens = pattern.captureParens; // TODO
 
-    /** @type {Map} */
+    /** @type {Object<string, number>} */
     this.names = pattern.names;
 };
 
 if( DEFINE_REGEXP_COMPAT__DEBUG ){
     Program.prototype.toString = function(){
-        var s = '';
-        var codes = codesToString(this.codes).split('\n').join('\n    ');
-        s += 'Program {\n';
-        s += `  pattern: ${patternToString(this.pattern)},\n`;
-        s += '  codes:\n';
-        s += `    ${codes}\n`;
-        s += '}';
-        return s;
+        var codes = codesToString( this.codes ).split( '\n' ).join( '\n    ' );
+
+        return 'Program {\n' +
+               '  pattern: ' + patternToString( this.pattern ) + ',\n' +
+               '  codes:\n' +
+               '    ' + codes + '\n' +
+               '}';
     };
     /**
      * @param {*} depth 
      * @param {InspectOptionsStylized} options 
      * @return {string}
      */
-    Program.prototype[Symbol.for('nodejs.util.inspect.custom')] = function( depth, options ){
-        var s = ``;
-        var pattern = options.stylize(patternToString(this.pattern), 'regexp');
-        var codes = codesToString(this.codes)
-          .split('\n')
-          .map((line) => options.stylize(line, 'string'))
-          .join('\n    ');
-        s += `${options.stylize('Program', 'special')} {\n`;
-        s += `  pattern: ${pattern},\n`;
-        s += '  codes:\n';
-        s += `    ${codes}\n`;
-        s += '}';
-        return s;
-    };    
+    Program.prototype[ Symbol[ 'for' ]( 'nodejs.util.inspect.custom' ) ] = function( depth, options ){
+        var pattern = options.stylize( patternToString( this.pattern ), 'regexp' );
+        var codes = codesToString( this.codes )
+                        .split('\n')
+                        .map( function( line ){ return options.stylize( line, 'string' ); } )
+                        .join('\n    ');
+        
+        return options.stylize('Program', 'special') + ' {\n' +
+              '  pattern: ' + pattern + ',\n' +
+              '  codes:\n' +
+              '    ' + codes + '\n' +
+              '}';
+    };
 };
 
 /**

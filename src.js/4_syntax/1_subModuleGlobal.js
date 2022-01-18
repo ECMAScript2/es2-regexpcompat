@@ -1,6 +1,8 @@
-/** `SyntaxError` for `RegExp`. */
-class RegExpSyntaxError extends SyntaxError {
-  constructor(message) {
-    super(`invalid regular expression: ${message}`);
-  }
-}
+/** `SyntaxError` for `RegExp`.
+ * @constructor
+ * @extends SyntaxError
+ * @param {string} message
+ */
+function RegExpSyntaxError( message ){
+    SyntaxError.call( this, 'invalid regular expression: ' + message );
+};
