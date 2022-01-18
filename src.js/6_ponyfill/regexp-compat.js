@@ -34,7 +34,7 @@ function advance( s, i, unicode ){
  * @param {string=} flags
  */
 function RegExpCompat( source, flags ){
-    if( DEFINE_REGEXP_COMPAT__DEBUG ){
+    if( false && DEFINE_REGEXP_COMPAT__DEBUG ){
         if( /*new.target === undefined*/ !this || this.constructor !== RegExpCompat ){
             if( isRegExp( source ) && flags === undefined ){
                 if( source.constructor === RegExpCompat ){
@@ -105,13 +105,13 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
 
     RegExpCompat[ Symbol.species ] = RegExpCompat;
 
-    RegExpCompat.prototype.toString = function(){
-        return patternToString( this.pattern );
-    };
-
     RegExpCompat.prototype.compile = function(){
         /* return this; */
     };
+};
+
+RegExpCompat.prototype.toString = function(){
+    return patternToString( this.pattern );
 };
 
 /**
