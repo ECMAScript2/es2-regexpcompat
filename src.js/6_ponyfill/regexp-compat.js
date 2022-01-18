@@ -44,12 +44,12 @@ function RegExpCompat( source, flags ){
             return new RegExpCompat( source, flags );
         };
     
-        if( source instanceof RegExp || source instanceof RegExpCompat ){
+        /* if( source instanceof RegExp || source instanceof RegExpCompat ){
             if( flags === undefined ){
                 flags = source.flags;
             };
             source = source.source;
-        };
+        }; */
     };
 
     var parser = new Parser( /** @type {string} */ (source), flags, true );
@@ -110,12 +110,12 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
     };
 
     RegExpCompat.prototype.compile = function(){
-        return this;
+        /* return this; */
     };
 };
 
 /**
- * @param {string} string 
+ * @param {*} string 
  * @return {RegExpResult|null}
  */
 RegExpCompat.prototype.exec = function( string ){
@@ -125,7 +125,7 @@ RegExpCompat.prototype.exec = function( string ){
     if( update ){
         pos = this.lastIndex;
     };
-    var match = this.program.exec( string, pos );
+    var match = this.program.exec( /** @type {string} */ (string), pos );
     if( update ){
         this.lastIndex = match ? match.lastIndex : 0;
     };
@@ -134,7 +134,7 @@ RegExpCompat.prototype.exec = function( string ){
 };
 
 /**
- * @param {string} string 
+ * @param {*} string 
  * @return {boolean}
  */
 RegExpCompat.prototype.test = function( string ){
