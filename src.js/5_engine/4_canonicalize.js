@@ -6,7 +6,7 @@
  */
 canonicalize = function( c, unicode ){
     if( unicode ){
-        return unicodeFoldMap[ c ] || c;
+        return m_unicodeFoldMap[ c ] || c;
     };
 
     var s = String_fromCharCode( c );
@@ -32,10 +32,10 @@ canonicalize = function( c, unicode ){
  */
 uncanonicalize = function( c, unicode ){
     if( unicode ){
-        return unicodeInverseFoldMap[ c ] || [];
+        return m_unicodeInverseFoldMap[ c ] || [];
     };
 
-    var d = legacyFoldMap[ c ];
+    var d = m_legacyFoldMap[ c ];
     if( d ){
         return d;
     };

@@ -5,19 +5,17 @@ var Unicode_CACHE = {};
  * @param {string} v
  * @return {CharSet|undefined}
  */
-function loadCategory( v ){
+m_loadCategory = function( v ){
     // Canonicalize value name.
-    var _v = unicodePropertyValueAliasesEcmascript.get('General_Category');
+    var _v = m_propertyValueAliasesGeneralCategory[ v ] || v;
 
-    v = _v && _v.get( v ) || v;
-
-    var key = 'General_Category.' + v;
+    var key = 'General_Category.' + _v;
     var cache = Unicode_CACHE[ key ];
     if( cache ){
         return cache;
     };
 
-    var data = category.get( v );
+    var data = m_unicodeCategory[ _v ];
     if( !data ){
         return;
     };
@@ -32,17 +30,15 @@ function loadCategory( v ){
  */
 function loadScript(v){
     // Canonicalize value name.
-    var _v = unicodePropertyValueAliasesEcmascript.get('Script');
+    var _v = m_propertyValueAliasesScript[ v ] || v;
 
-    v = _v && _v.get( v ) || v;
-
-    var key = 'Script.' + v;
+    var key = 'Script.' + _v;
     var cache = Unicode_CACHE[ key ];
     if( cache ){
         return cache;
     };
 
-    var data = script.get( v );
+    var data = m_unicodeScript[ _v ];
     if( !data ){
         return;
     };
@@ -58,23 +54,22 @@ function loadScript(v){
  */
 function loadScriptExtensions( v ){
     // Canonicalize value name.
-    var _v = unicodePropertyValueAliasesEcmascript.get('Script_Extensions');
+    var _v = m_propertyValueAliasesScriptExtensions[ v ] || v;
 
-    v = _v && _v.get( v ) || v;
-
-    var key = 'Script_Extensions.' + v;
+    var key = 'Script_Extensions.' + _v;
     var cache = Unicode_CACHE[ key ];
     if( cache ){
         return cache;
     };
 
-    var baseSet = loadScript( v );
+    var baseSet = loadScript( _v );
     if( !baseSet ){
         return;
     };
-    var data = scriptExtensions.get( v );
-    if( !data && DEFINE_REGEXP_COMPAT__DEBUG ){
-        throw new Error('BUG: Script_Extensions must contain each value of Script');
+    var data = m_unicodeScriptExtensions[ _v ];
+    if( !data ){
+        return ( Unicode_CACHE[ key ] = baseSet.clone() );
+        // throw new Error('BUG: Script_Extensions must contain each value of Script');
     };
 
     var extSet = new CharSet( data );
@@ -96,14 +91,14 @@ function loadScriptExtensions( v ){
  */
 m_loadProperty = function( p ){
     // Canonicalize property name.
-    p = unicodePropertyAliasesEcmascript.get( p ) || p;
+    p = m_propertyAliases[ p ] || p;
 
     var cache = Unicode_CACHE[ p ];
     if( cache ){
         return cache;
     };
 
-    var data = property.get( p );
+    var data = m_unicodeProperty[ p ];
     if( !data ){
         return;
     };
@@ -125,16 +120,16 @@ m_loadProperty = function( p ){
  */
 m_loadPropertyValue = function( p, v ){
     // Canonicalize property name.
-    p = unicodePropertyAliasesEcmascript.get( p ) || p;
+    // p = m_propertyAliases[ p ] || p;
 
     switch( p ){
-        // case 'gc' :
+        case 'gc' :
         case 'General_Category':
-            return loadCategory( v );
-        // case 'sc' :
+            return m_loadCategory( v );
+        case 'sc' :
         case 'Script':
             return loadScript( v );
-        // case 'scx' :
+        case 'scx' :
         case 'Script_Extensions':
             return loadScriptExtensions( v );
 

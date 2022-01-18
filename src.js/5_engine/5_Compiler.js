@@ -484,7 +484,7 @@ Compiler.prototype.escapeClassToSet = function( _node ){
         case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_unicode_property :
             if( DEFINE_REGEXP_COMPAT__ES2018 ){
                 node = /** @type {UnicodePropertyEscapeClass} */ ( _node );
-                var set = m_loadPropertyValue( 'General_Category', node.property ) || m_loadProperty( node.property );
+                var set = m_loadCategory( node.property ) || m_loadProperty( node.property );
                 
                 if( !set && DEFINE_REGEXP_COMPAT__DEBUG ){
                     throw new RegExpSyntaxError( 'invalid Unicode property' );

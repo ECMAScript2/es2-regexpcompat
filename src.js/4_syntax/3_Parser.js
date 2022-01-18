@@ -75,7 +75,7 @@ function isUnicodePropertyValue( c ){
 };
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-var idStart = new CharSet(property.get('ID_Start'));
+var idStart = new CharSet( m_unicodeProperty[ 'ID_Start' ] );
 
 /** Check the character is identifier start character.
  * @param {string} c
@@ -88,7 +88,7 @@ function isIDStart( c ){
 };
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-var idContinue = new CharSet(property.get('ID_Continue'));
+var idContinue = new CharSet( m_unicodeProperty[ 'ID_Continue' ] );
 
 /** Check the character is identifier part character.
  * @param {string} c
