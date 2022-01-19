@@ -306,8 +306,8 @@ function escapeRaw( raw ){
 };
 
 /** Show class item as string.
- * 
- * @param {ClassItem} n 
+ *
+ * @param {ClassItem} n
  * @return {string|undefined}
  */
 function classItemToString( n ){
@@ -315,7 +315,6 @@ function classItemToString( n ){
         case REGEXP_COMPAT__PATTERN_IS_Char :
             return escapeRaw( /** @type {Char} */ (n).raw );
         // The above `switch-case` is exhaustive and it is checked by `tsc`, so `eslint` rule is disabled.
-        // eslint-disable-next-line no-fallthrough
         case REGEXP_COMPAT__PATTERN_IS_ClassRange :
             return escapeRaw( /** @type {ClassRange} */ (n).children[ 0 ].raw ) + '-' + escapeRaw( /** @type {ClassRange} */ (n).children[ 1 ].raw );
         case REGEXP_COMPAT__PATTERN_IS_EscapeClass :
@@ -338,24 +337,28 @@ function classItemToString( n ){
     };
 };
 
-nodeToString = function( n ){
+/**
+ * @param {RegExpPaternNode} n
+ * @return {string|undefined}
+ */
+m_nodeToString = function( n ){
     switch( n.type ){
         case REGEXP_COMPAT__PATTERN_IS_Disjunction :
-            return Array_map( n.children, nodeToString ).join( '|' );
+            return Array_map( n.children, m_nodeToString ).join( '|' );
         case REGEXP_COMPAT__PATTERN_IS_Sequence :
-            return Array_map( n.children, nodeToString ).join( '' );
+            return Array_map( n.children, m_nodeToString ).join( '' );
         case REGEXP_COMPAT__PATTERN_IS_Capture :
-            return '(' + nodeToString( n.child ) + ')';
+            return '(' + m_nodeToString( n.child ) + ')';
         case REGEXP_COMPAT__PATTERN_IS_Group :
-            return '(?:' + nodeToString( n.child ) + ')';
+            return '(?:' + m_nodeToString( n.child ) + ')';
         case REGEXP_COMPAT__PATTERN_IS_Many :
-            return nodeToString( n.child ) + '*' + ( n.nonGreedy ? '?' : '' );
+            return m_nodeToString( n.child ) + '*' + ( n.nonGreedy ? '?' : '' );
         case REGEXP_COMPAT__PATTERN_IS_Some :
-            return nodeToString( n.child ) + '+' + ( n.nonGreedy ? '?' : '' );
+            return m_nodeToString( n.child ) + '+' + ( n.nonGreedy ? '?' : '' );
         case REGEXP_COMPAT__PATTERN_IS_Optional :
-            return nodeToString( n.child ) + '?' + ( n.nonGreedy ? '?' : '' );
+            return m_nodeToString( n.child ) + '?' + ( n.nonGreedy ? '?' : '' );
         case REGEXP_COMPAT__PATTERN_IS_Repeat :
-            var s = nodeToString( n.child );
+            var s = m_nodeToString( n.child );
             s += '{' + n.min;
             if( n.max === Infinity ){
                 s += ',';
@@ -371,13 +374,13 @@ nodeToString = function( n ){
         case REGEXP_COMPAT__PATTERN_IS_LineEnd :
             return '$';
         case REGEXP_COMPAT__PATTERN_IS_LookAhead :
-            return '(?' + ( n.negative ? '!' : '=' ) + nodeToString( n.child ) + ')';
+            return '(?' + ( n.negative ? '!' : '=' ) + m_nodeToString( n.child ) + ')';
         case REGEXP_COMPAT__PATTERN_IS_Char : {
             var c = escapeRaw( n.raw );
             return c === '/' ? '\\/' : c;
         };
         case REGEXP_COMPAT__PATTERN_IS_EscapeClass :
-            return classItemToString( n );
+            return classItemToString( /** @type {ClassItem} */ (n) );
         case REGEXP_COMPAT__PATTERN_IS_Class :
             return '[' + ( n.invert ? '^' : '' ) + Array_map( n.children, classItemToString ).join('') + ']';
         case REGEXP_COMPAT__PATTERN_IS_Dot :
@@ -388,11 +391,11 @@ nodeToString = function( n ){
             return '\\k<' + n.raw + '>';
         case REGEXP_COMPAT__PATTERN_IS_NamedCapture :
             if( DEFINE_REGEXP_COMPAT__ES2018 ){
-                return '(?<' + n.raw + '>' + nodeToString( n.child ) + ')';
+                return '(?<' + n.raw + '>' + m_nodeToString( n.child ) + ')';
             };
         case REGEXP_COMPAT__PATTERN_IS_LookBehind :
             if( DEFINE_REGEXP_COMPAT__ES2018 ){
-                return '(?<' + ( n.negative ? '!' : '=' ) + nodeToString( n.child ) + ')';
+                return '(?<' + ( n.negative ? '!' : '=' ) + m_nodeToString( n.child ) + ')';
             };
     };
 };
@@ -402,7 +405,7 @@ nodeToString = function( n ){
  * @param {FlagSet} flagSet
  * @return {string}
  */
- flagSetToString = function( flagSet ){
+m_flagSetToString = function( flagSet ){
     var s = '';
 
     if( flagSet.global ){
@@ -417,10 +420,10 @@ nodeToString = function( n ){
     if( flagSet.dotAll && DEFINE_REGEXP_COMPAT__ES2018 ){
         s += 's';
     };
-    if( flagSet.unicode ){
+    if( flagSet.unicode ){ // ES2018
         s += 'u';
     };
-    if( flagSet.sticky ){
+    if( flagSet.sticky ){ // ES2015
         s += 'y';
     };
     return s;
@@ -431,12 +434,12 @@ nodeToString = function( n ){
  * @param {Pattern} p
  * @return {string}
  */
-patternToString = function( p ){
+m_patternToString = function( p ){
     var s = '/';
-    var n = nodeToString( p.child );
+    var n = m_nodeToString( p.child );
 
     s += n === '' ? '(?:)' : n;
     s += '/';
-    s += flagSetToString( p.flagSet );
+    s += m_flagSetToString( p.flagSet );
     return s;
 };

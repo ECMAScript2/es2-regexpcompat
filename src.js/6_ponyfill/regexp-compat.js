@@ -34,7 +34,7 @@ function advance( s, i, unicode ){
  * @param {string=} flags
  */
 function RegExpCompat( source, flags ){
-    if( false && DEFINE_REGEXP_COMPAT__DEBUG ){
+    if( DEFINE_REGEXP_COMPAT__DEBUG ){
         if( /*new.target === undefined*/ !this || this.constructor !== RegExpCompat ){
             if( isRegExp( source ) && flags === undefined ){
                 if( source.constructor === RegExpCompat ){
@@ -63,13 +63,13 @@ function RegExpCompat( source, flags ){
     /** @type {Program} */
     this.program = compiler.compile();
 
-    var n = nodeToString( pattern.child );
+    var n = m_nodeToString( pattern.child );
 
     /** @type {string} */
     this.source = n === '' ? '(?:)' : n;
 
     /** @type {string} */
-    this.flags = flagSetToString( pattern.flagSet );
+    this.flags = m_flagSetToString( pattern.flagSet );
 
     /** @type {boolean} */
     this.global = pattern.flagSet.global;
@@ -111,7 +111,7 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
 };
 
 RegExpCompat.prototype.toString = function(){
-    return patternToString( this.pattern );
+    return m_patternToString( this.pattern );
 };
 
 /**
@@ -160,6 +160,11 @@ RegExpCompat.prototype[Symbol.match] = function( string ){
     return this.exec( string );
 };
 
+/**
+ * @param {string} string 
+ * @param {Function|string} replacer 
+ * @return {string}
+ */
 RegExpCompat.prototype[Symbol.replace] = function( string, replacer ){
     var replacerIsFunction = typeof replacer === 'function';
     var matches = [];
@@ -242,7 +247,7 @@ RegExpCompat.prototype[Symbol.replace] = function( string, replacer ){
                                 i = j + 1 + s.length;
                                 break;
                             };
-                            n = Math.floor( n / 10 );
+                            n = Math_floor( n / 10 );
                             if( 0 < n && n < match.length ){
                                 result += match[ n ] || '';
                                 i = j + s.length;
@@ -261,6 +266,10 @@ RegExpCompat.prototype[Symbol.replace] = function( string, replacer ){
     return result;
 };
 
+/**
+ * @param {string} string
+ * @return {number}
+ */
 RegExpCompat.prototype[Symbol.search] = function( string ){
     var prevLastIndex = this.lastIndex;
     this.lastIndex = 0;

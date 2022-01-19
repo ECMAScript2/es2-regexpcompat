@@ -113,26 +113,26 @@ CharSet.prototype.has = function( c ){
     return begin <= c && c < end;
 };
 
-/** Convert this into `RegExp` char-class pattern string.
- * 
- * @param {boolean=} opt_invert
- */
-CharSet.prototype.toRegExpPattern = function( opt_invert ){
-    var s = opt_invert ? '[^' : '[';
+if( DEFINE_REGEXP_COMPAT__DEBUG ){
+    /** Convert this into `RegExp` char-class pattern string.
+     *
+     * @param {boolean=} opt_invert
+     */
+    CharSet.prototype.toRegExpPattern = function( opt_invert ){
+        var s = opt_invert ? '[^' : '[';
 
-    for( var i = -1, data = this.data, l = data.length - 1; i < l; ){
-        var begin = data[ ++i ];
-        var end   = data[ ++i ];
-        s += escapeCodePointAsRegExpSpurceChar( begin, true );
-        if( begin !== end - 1 ){
-            s += '-' + escapeCodePointAsRegExpSpurceChar( end - 1, true );
+        for( var i = -1, data = this.data, l = data.length - 1; i < l; ){
+            var begin = data[ ++i ];
+            var end   = data[ ++i ];
+            s += m_escapeCodePointAsRegExpSpurceChar( begin, true );
+            if( begin !== end - 1 ){
+                s += '-' + m_escapeCodePointAsRegExpSpurceChar( end - 1, true );
+            };
         };
+
+        return s + ']';
     };
 
-    return s + ']';
-};
-
-if( DEFINE_REGEXP_COMPAT__DEBUG ){
     CharSet.prototype.toString = function(){
         return 'CharSet' + this.toRegExpPattern();
     };
@@ -160,7 +160,7 @@ function CharSet_searchBegin( data, c ){
     var max  = data.length / 2;
 
     while( max - min > 1 ){
-        var mid = min + Math.floor( ( max - min ) / 2 );
+        var mid = min + Math_floor( ( max - min ) / 2 );
         if( c <= data[ mid * 2 + 1 ] ){
             max = mid;
         } else {
@@ -180,7 +180,7 @@ function CharSet_searchEnd( data, c ){
     var max  = data.length / 2;
 
     while( max - min > 1 ){
-        var mid = min + Math.floor( ( max - min ) / 2 );
+        var mid = min + Math_floor( ( max - min ) / 2 );
         if( data[ mid * 2 ] <= c ){
             min = mid;
         } else {

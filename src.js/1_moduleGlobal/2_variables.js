@@ -10,11 +10,11 @@ var m_legacyFoldMap = [], m_unicodeCategory, m_unicodeProperty,
 var m_propertyAliases,
     m_propertyValueAliasesGeneralCategory, m_propertyValueAliasesScript, m_propertyValueAliasesScriptExtensions;
 
-var CharSet;
+var m_escapeCodePointAsRegExpSpurceChar, CharSet;
 
 var m_loadCategory, m_loadProperty, m_loadPropertyValue;
 
-var nodeToString, flagSetToString, patternToString;
+var m_nodeToString, m_flagSetToString, m_patternToString;
 
 var Match;
 

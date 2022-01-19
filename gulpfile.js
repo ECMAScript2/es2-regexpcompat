@@ -103,7 +103,16 @@ gulp.task( 'data', gulp.series(
         cb();
     },
     function( cb ){
-        var fileName = './tools.js/9_generateExterns.js';
+        var fileName = './tools.js/9_generateCharSetIdStartAndIdContinue';
+
+        fs.writeFileSync(
+          './src.js/4_syntax/3_charSetIdStartAndIdContinue.generated.js',
+            dontEditMessage.replace( '##', fileName ) + require( fileName )()
+        );
+        cb();
+    },
+    function( cb ){
+        var fileName = './tools.js/A_generateExterns.js';
 
         fs.writeFileSync(
             './src.externs/externs.generated.js',

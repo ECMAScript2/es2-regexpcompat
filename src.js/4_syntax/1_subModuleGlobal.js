@@ -6,3 +6,5 @@
 function RegExpSyntaxError( message ){
     SyntaxError.call( this, 'invalid regular expression: ' + message );
 };
+
+var charSetIdStart, charSetIdContinue;

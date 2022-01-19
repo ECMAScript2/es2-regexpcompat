@@ -6,7 +6,7 @@
  * @param {Array.<number>} caps 
  * @param {Object<string, number>} names 
  */
- Match = function(input, caps, names) {
+Match = function( input, caps, names ){
     /** An input string of this matching.
      * @type {string}
      */
@@ -111,7 +111,7 @@ Match.prototype.toArray = function(){
         };
 
         // `RegExpExecArray`'s group does not accept `undefined` value, so cast to `any` for now.
-        array.groups = groups; // eslint-disable-line @typescript-eslint/no-explicit-any
+        array.groups = groups;
     } else {
         // (array).groups = undefined;
     };

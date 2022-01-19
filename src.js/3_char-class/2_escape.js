@@ -4,7 +4,7 @@
  * @param {boolean=} opt_inCharClass 
  * @return {string}
  */
-function escapeCodePointAsRegExpSpurceChar( c, opt_inCharClass ){
+m_escapeCodePointAsRegExpSpurceChar = function( c, opt_inCharClass ){
     // Common escape character.
     switch( c ){
         case 0x09:

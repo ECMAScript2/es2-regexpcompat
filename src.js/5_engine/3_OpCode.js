@@ -60,56 +60,58 @@ var OpCode_Word_boundary_not;
 */
 var OpCode;
 
-/** Show op-codes as string.
- * @param {Array.<OpCode>} codes
- * @return {string}
- */
-codesToString = function( codes ){
-    function pc( i ){
-        return String_padStringWithZero( i + '', 3 );
+if( DEFINE_REGEXP_COMPAT__DEBUG ){
+    /** Show op-codes as string.
+     * @param {Array.<OpCode>} codes
+     * @return {string}
+     */
+    codesToString = function( codes ){
+        function pc( i ){
+            return String_padStringWithZero( i + '', 3 );
+        };
+        function op( s ){
+            return String_padEndWithSpace( s, 13 );
+        };
+
+        var lines = Array_map( codes,
+            function( code, lineno ){
+                var line = pc( lineno ) + ': ' + op( code.op );
+
+                switch( code.op ){
+                    case REGEXP_COMPAT__OPCODE_IS_CAP_BEGIN:
+                    case REGEXP_COMPAT__OPCODE_IS_CAP_END:
+                        line += code.index;
+                        break;
+                    case REGEXP_COMPAT__OPCODE_IS_CAP_RESET:
+                        line += code.from + ' ' + code.to;
+                        break;
+                    case REGEXP_COMPAT__OPCODE_IS_CHAR:
+                        line += "'" + m_escapeCodePointAsRegExpSpurceChar( code.value ) + "'";
+                        break;
+                    case REGEXP_COMPAT__OPCODE_IS_CLASS:
+                    case REGEXP_COMPAT__OPCODE_IS_CLASS_NOT:
+                        line += code.set.toRegExpPattern( code.op === REGEXP_COMPAT__OPCODE_IS_CLASS_NOT );
+                        break;
+                    case REGEXP_COMPAT__OPCODE_IS_FORK_CONT:
+                    case REGEXP_COMPAT__OPCODE_IS_FORK_NEXT:
+                        line += pc( lineno + 1 + code.next );
+                        break;
+                    case REGEXP_COMPAT__OPCODE_IS_JUMP:
+                    case REGEXP_COMPAT__OPCODE_IS_LOOP:
+                        line += pc( lineno + 1 + code.cont );
+                        break;
+                    case REGEXP_COMPAT__OPCODE_IS_PUSH:
+                        line += code.value;
+                        break;
+                    case REGEXP_COMPAT__OPCODE_IS_REF:
+                    case REGEXP_COMPAT__OPCODE_IS_REF_BACK:
+                        line += code.index;
+                        break;
+                };
+                return line;
+            }
+        );
+
+        return lines.join( '\n' );
     };
-    function op( s ){
-        return String_padEndWithSpace( s, 13 );
-    };
-
-    var lines = Array_map( codes,
-        function( code, lineno ){
-            var line = pc( lineno ) + ': ' + op( code.op );
-
-            switch( code.op ){
-                case REGEXP_COMPAT__OPCODE_IS_CAP_BEGIN:
-                case REGEXP_COMPAT__OPCODE_IS_CAP_END:
-                    line += code.index;
-                    break;
-                case REGEXP_COMPAT__OPCODE_IS_CAP_RESET:
-                    line += code.from + ' ' + code.to;
-                    break;
-                case REGEXP_COMPAT__OPCODE_IS_CHAR:
-                    line += "'" + escapeCodePointAsRegExpSpurceChar( code.value ) + "'";
-                    break;
-                case REGEXP_COMPAT__OPCODE_IS_CLASS:
-                case REGEXP_COMPAT__OPCODE_IS_CLASS_NOT:
-                    line += code.set.toRegExpPattern( code.op === REGEXP_COMPAT__OPCODE_IS_CLASS_NOT );
-                    break;
-                case REGEXP_COMPAT__OPCODE_IS_FORK_CONT:
-                case REGEXP_COMPAT__OPCODE_IS_FORK_NEXT:
-                    line += pc( lineno + 1 + code.next );
-                    break;
-                case REGEXP_COMPAT__OPCODE_IS_JUMP:
-                case REGEXP_COMPAT__OPCODE_IS_LOOP:
-                    line += pc( lineno + 1 + code.cont );
-                    break;
-                case REGEXP_COMPAT__OPCODE_IS_PUSH:
-                    line += code.value;
-                    break;
-                case REGEXP_COMPAT__OPCODE_IS_REF:
-                case REGEXP_COMPAT__OPCODE_IS_REF_BACK:
-                    line += code.index;
-                    break;
-            };
-            return line;
-        }
-    );
-
-    return lines.join( '\n' );
 };

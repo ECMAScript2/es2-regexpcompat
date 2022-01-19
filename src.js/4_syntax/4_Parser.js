@@ -74,9 +74,6 @@ function isUnicodePropertyValue( c ){
     return isUnicodeProperty( c ) || isDigit( c );
 };
 
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-var idStart = new CharSet( m_unicodeProperty[ 'ID_Start' ] );
-
 /** Check the character is identifier start character.
  * @param {string} c
  * @return {boolean}
@@ -84,11 +81,8 @@ var idStart = new CharSet( m_unicodeProperty[ 'ID_Start' ] );
 function isIDStart( c ){
     var cp;
 
-    return c === '$' || c === '_' || idStart.has( ( cp = String_codePointAt( c, 0 ) ) !== undefined ? cp : -1 );
+    return c === '$' || c === '_' || charSetIdStart.has( ( cp = String_codePointAt( c, 0 ) ) !== undefined ? cp : -1 );
 };
-
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-var idContinue = new CharSet( m_unicodeProperty[ 'ID_Continue' ] );
 
 /** Check the character is identifier part character.
  * @param {string} c
@@ -97,7 +91,7 @@ var idContinue = new CharSet( m_unicodeProperty[ 'ID_Continue' ] );
 function isIDPart( c ){
     var cp;
 
-    return c === '$' || c === '\u200C' || c === '\u200D' || idContinue.has( ( cp = String_codePointAt( c, 0 ) ) !== undefined ? cp : -1 );
+    return c === '$' || c === '\u200C' || c === '\u200D' || charSetIdContinue.has( ( cp = String_codePointAt( c, 0 ) ) !== undefined ? cp : -1 );
 };
 
 /** Type of repeat quantifier.
@@ -673,21 +667,21 @@ Parser.prototype.parseClassAtom = function(){
 
     if( c !== '\\' ){
         this.pos += c.length; // skip any character
-        var value = c.codePointAt(0);
+        var value = String_codePointAt( c, 0 );
         if( value === undefined && DEFINE_REGEXP_COMPAT__DEBUG ){
             throw new Error('BUG: invalid character');
         };
-        return { type : REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw : c, range : [ begin, this.pos ] };
+        return /** @type {Char} */ ({ type : REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw : c, range : [ begin, this.pos ] });
     };
 
     if( String_startsWith( this.source, '\\-', this.pos ) ){
         this.pos += 2; // skip '\\-'
-        return { type : REGEXP_COMPAT__PATTERN_IS_Char, value : 0x2d, raw : '\\-', range : [ begin, this.pos ] };
+        return /** @type {Char} */ ({ type : REGEXP_COMPAT__PATTERN_IS_Char, value : 0x2d, raw : '\\-', range : [ begin, this.pos ] });
     };
 
     if( String_startsWith( this.source, '\\b', this.pos ) ){
         this.pos += 2; // skip '\\b'
-        return { type : REGEXP_COMPAT__PATTERN_IS_Char, value : 0x08, raw : '\\b', range : [ begin, this.pos ] };
+        return /** @type {Char} */ ({ type : REGEXP_COMPAT__PATTERN_IS_Char, value : 0x08, raw : '\\b', range : [ begin, this.pos ] });
     };
 
     var escapeClass = this.tryParseEscapeClass();
@@ -802,16 +796,16 @@ Parser.prototype.tryParseEscape = function(){
 
     var unicode = this.tryParseUnicodeEscape( true );
     if( unicode !== '' ){
-        value = unicode.codePointAt(0);
+        value = String_codePointAt( unicode, 0 );
         if( value === undefined && DEFINE_REGEXP_COMPAT__DEBUG ){
             throw new Error('BUG: invalid character');
         };
-        return {
+        return /** @type {Char} */ ({
             type  : REGEXP_COMPAT__PATTERN_IS_Char,
             value : value,
             raw   : this.source.slice( begin, this.pos ),
             range : [ begin, this.pos ]
-        };
+        });
     };
 
     ++this.pos; // skip '\\'
@@ -905,25 +899,25 @@ Parser.prototype.tryParseEscape = function(){
         };
         if( octal !== this.pos ){
             value = /* Number. */ parseInt( this.source.slice( octal, this.pos ), 8 );
-            return {
+            return /** @type {Char} */ ({
                 type  : REGEXP_COMPAT__PATTERN_IS_Char,
                 value : value,
                 raw   : this.source.slice( begin, this.pos ),
                 range : [ begin, this.pos ]
-            };
+            });
         };
     };
 
     // Identity escape.
     c = this.current();
-    value = c.codePointAt( 0 );
+    value = String_codePointAt( c, 0 );
     if( value === undefined && DEFINE_REGEXP_COMPAT__DEBUG ){
         throw new Error( 'BUG: invalid character' );
     };
     if( this.unicode ){
         if( isSyntax( c ) || c === '/' ){
             this.pos += c.length; // skip any char
-            return { type : REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw : '\\' + c, range : [ begin, this.pos ] };
+            return /** @type {Char} */ ({ type : REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw : '\\' + c, range : [ begin, this.pos ] });
         };
     } else {
         if( this.additional ){
@@ -932,12 +926,12 @@ Parser.prototype.tryParseEscape = function(){
             };
             if( this.names._size === 0 || c !== 'k' ){
                 this.pos += c.length; // skip any char
-                return { type : REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw : '\\' + c, range : [ begin, this.pos ] };
+                return /** @type {Char} */ ({ type : REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw : '\\' + c, range : [ begin, this.pos ] });
             }
         } else {
-            if( !idContinue.has( value ) ){
+            if( !charSetIdContinue.has( value ) ){
                 this.pos += c.length; // skip any char
-                return { type: REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw: '\\' + c, range : [ begin, this.pos ] };
+                return /** @type {Char} */ ({ type: REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw: '\\' + c, range : [ begin, this.pos ] });
             };
         };
     };
@@ -1216,8 +1210,11 @@ Parser.prototype.parseParen = function(){
 Parser.prototype.parseCaptureName = function(){
     var name = '';
     var start = this.parseCaptureNameChar();
-    if( !isIDStart( start ) && DEFINE_REGEXP_COMPAT__DEBUG ){
-        throw new RegExpSyntaxError('invalid capture group name');
+
+    if( DEFINE_REGEXP_COMPAT__DEBUG ){
+        if( !isIDStart( start ) ){
+            throw new RegExpSyntaxError('invalid capture group name');
+        };
     };
     name += start;
 

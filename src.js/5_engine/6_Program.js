@@ -189,7 +189,7 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
         var codes = codesToString( this.codes ).split( '\n' ).join( '\n    ' );
 
         return 'Program {\n' +
-               '  pattern: ' + patternToString( this.pattern ) + ',\n' +
+               '  pattern: ' + m_patternToString( this.pattern ) + ',\n' +
                '  codes:\n' +
                '    ' + codes + '\n' +
                '}';
@@ -200,7 +200,7 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
      * @return {string}
      */
     Program.prototype[ Symbol[ 'for' ]( 'nodejs.util.inspect.custom' ) ] = function( depth, options ){
-        var pattern = options.stylize( patternToString( this.pattern ), 'regexp' );
+        var pattern = options.stylize( m_patternToString( this.pattern ), 'regexp' );
         var codes = codesToString( this.codes )
                         .split('\n')
                         .map( function( line ){ return options.stylize( line, 'string' ); } )
