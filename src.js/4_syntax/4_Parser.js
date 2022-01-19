@@ -140,8 +140,10 @@ function Parser( source, flags, additional ){
 Parser.prototype.parse = function(){
     /** @type {FlagSet} Parsed flags. */
     this.flagSet = this.preprocessFlags();
-    /** @type {boolean} Is the `flagSet` has `unicode`? */
-    this.unicode = this.flagSet.unicode;
+
+    if( DEFINE_REGEXP_COMPAT__ES2018 ){
+        this.unicode = /** @type {boolean} Is the `flagSet` has `unicode`? */ (this.flagSet.unicode);
+    };
 
     this.preprocessCaptures();
 
@@ -181,7 +183,7 @@ Parser.prototype.preprocessFlags = function(){
             global     : false,
             ignoreCase : false,
             multiline  : false,
-            unicode    : false,
+            // unicode    : false,
             // dotAll     : false,
             sticky     : false
         };
@@ -208,12 +210,6 @@ Parser.prototype.preprocessFlags = function(){
                 };
                 flagSet.multiline = true;
                 break;
-            case 'u':
-                if( flagSet.unicode && DEFINE_REGEXP_COMPAT__DEBUG ){
-                    throw new RegExpSyntaxError("duplicated 'u' flag");
-                };
-                flagSet.unicode = true;
-                break;
             case 'y':
                 if( flagSet.sticky && DEFINE_REGEXP_COMPAT__DEBUG ){
                     throw new RegExpSyntaxError("duplicated 's' flag");
@@ -226,6 +222,14 @@ Parser.prototype.preprocessFlags = function(){
                         throw new RegExpSyntaxError("duplicated 's' flag");
                     };
                     flagSet.dotAll = true;
+                };
+                break;
+            case 'u':
+                if( DEFINE_REGEXP_COMPAT__ES2018 ){
+                    if( flagSet.unicode && DEFINE_REGEXP_COMPAT__DEBUG ){
+                        throw new RegExpSyntaxError("duplicated 'u' flag");
+                    };
+                    flagSet.unicode = true;
                 };
                 break;
             default:
@@ -373,8 +377,10 @@ Parser.prototype.parseQuantifier = function(){
     var child = /** @type {RegExpPaternNode} */ ( this.parseAtom() );
 
     if( isAssertion( child ) ){
-        if( this.additional && !this.unicode && child.type === REGEXP_COMPAT__PATTERN_IS_LookAhead ){
-        } else {
+        if( this.additional &&
+            ( !DEFINE_REGEXP_COMPAT__ES2018 || !this.unicode ) &&
+            child.type === REGEXP_COMPAT__PATTERN_IS_LookAhead
+        ){} else {
             return child;
         };
     };
@@ -429,7 +435,7 @@ Parser.prototype.parseRepeat = function( begin, child ){
     var quantifier = this.tryParseRepeatQuantifier();
 
     if( !quantifier ){
-        if( this.additional && !this.unicode ){
+        if( this.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !this.unicode ) ){
             this.pos = save;
             return child;
         };
@@ -541,7 +547,7 @@ Parser.prototype.parseAtom = function(){
                 throw new RegExpSyntaxError('nothing to repeat');
             };
         case '{':
-            if( this.additional && !this.unicode ){
+            if( this.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !this.unicode ) ){
                 var quantifier = this.tryParseRepeatQuantifier();
                 if( quantifier && DEFINE_REGEXP_COMPAT__DEBUG ){
                     throw new RegExpSyntaxError('nothing to repeat');
@@ -552,14 +558,14 @@ Parser.prototype.parseAtom = function(){
                 throw new RegExpSyntaxError('lone quantifier brackets');
             };
         case '}':
-            if( this.additional && !this.unicode ){
+            if( this.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !this.unicode ) ){
                 break;
             };
             if( DEFINE_REGEXP_COMPAT__DEBUG ){
                 throw new RegExpSyntaxError('lone quantifier brackets');
             };
         case ']':
-            if( this.additional && !this.unicode ){
+            if( this.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !this.unicode ) ){
                 break;
             };
             if( DEFINE_REGEXP_COMPAT__DEBUG ){
@@ -626,7 +632,7 @@ Parser.prototype.parseClassItem = function(){
     };
 
     if( begin.type === REGEXP_COMPAT__PATTERN_IS_EscapeClass ){
-        if( this.additional && !this.unicode ){
+        if( this.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !this.unicode ) ){
             return /** @type {EscapeClass} */ (begin);
         };
         if( DEFINE_REGEXP_COMPAT__DEBUG ){
@@ -638,7 +644,7 @@ Parser.prototype.parseClassItem = function(){
     ++this.pos; // skip '-'
     var end = this.parseClassAtom();
     if( end.type === REGEXP_COMPAT__PATTERN_IS_EscapeClass ){
-        if( this.additional && !this.unicode ){
+        if( this.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !this.unicode ) ){
             this.pos = save;
             return begin;
         };
@@ -774,7 +780,7 @@ Parser.prototype.tryParseBackRef = function(){
     if( this.current() !== '0' ){
         var index = this.parseDigits();
         if( index >= 1 ){
-            if( this.additional && !this.unicode ){
+            if( this.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !this.unicode ) ){
                 if( index <= this.captureParens ){
                     return { type: REGEXP_COMPAT__PATTERN_IS_BackRef, index : index, range : [ begin, this.pos ] };
                 };
@@ -833,7 +839,7 @@ Parser.prototype.tryParseEscape = function(){
                 ++this.pos; // skip a-z or A-Z
                 value = c.charCodeAt( 0 ) % 32;
             } else {
-                if( this.additional && !this.unicode ){
+                if( this.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !this.unicode ) ){
                     --this.pos; // go back 'c'
                     break;
                 };
@@ -877,7 +883,7 @@ Parser.prototype.tryParseEscape = function(){
     };
 
     // Legacy octal escape.
-    if( this.additional && !this.unicode ){
+    if( this.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !this.unicode ) ){
         var octal = this.pos;
         var c0 = this.current();
         if( '0' <= c0 && c0 <= '3' ){
@@ -914,7 +920,7 @@ Parser.prototype.tryParseEscape = function(){
     if( value === undefined && DEFINE_REGEXP_COMPAT__DEBUG ){
         throw new Error( 'BUG: invalid character' );
     };
-    if( this.unicode ){
+    if( DEFINE_REGEXP_COMPAT__ES2018 && this.unicode ){
         if( isSyntax( c ) || c === '/' ){
             this.pos += c.length; // skip any char
             return /** @type {Char} */ ({ type : REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw : '\\' + c, range : [ begin, this.pos ] });
@@ -961,15 +967,17 @@ Parser.prototype.tryParseUnicodeEscape = function( lead ){
     };
     ++this.pos; // skip 'u'
 
-    if( this.unicode && this.current() === '{' ){
+    if( DEFINE_REGEXP_COMPAT__ES2018 && this.unicode && this.current() === '{' ){
         if( !lead ){
             this.pos = begin;
             return '';
         };
         ++this.pos; // skip '{'
         c = this.parseHexDigits();
-        if( c < 0 || 0x110000 <= c || this.current() !== '}' ){
-            throw new RegExpSyntaxError('invalid Unicode escape');
+        if( DEFINE_REGEXP_COMPAT__DEBUG ){
+            if( c < 0 || 0x110000 <= c || this.current() !== '}' ){
+                throw new RegExpSyntaxError('invalid Unicode escape');
+            };
         };
         ++this.pos; // skip '}'
         return String_fromCodePoint( c );
@@ -977,15 +985,17 @@ Parser.prototype.tryParseUnicodeEscape = function( lead ){
 
     c = this.tryParseHexDigitsN( 4 );
     if( c < 0 ){
-        if( this.additional && !this.unicode ){
+        if( this.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !this.unicode ) ){
             this.pos = begin;
             return '';
         };
-        throw new RegExpSyntaxError('invalid Unicode escape');
+        if( DEFINE_REGEXP_COMPAT__DEBUG ){
+            throw new RegExpSyntaxError('invalid Unicode escape');
+        };
     };
 
     var s = String_fromCharCode( c );
-    if( !this.unicode ){
+    if( !DEFINE_REGEXP_COMPAT__ES2018 || !this.unicode ){
         return s;
     };
 
@@ -1307,7 +1317,7 @@ Parser.prototype.tryParseHexDigitsN = function( n ){
 Parser.prototype.current = function(){
     var c;
 
-    if( this.unicode ){
+    if( DEFINE_REGEXP_COMPAT__ES2018 && this.unicode ){
         c = String_codePointAt( this.source, this.pos );
         return c === undefined ? '' : String_fromCodePoint( c );
     };

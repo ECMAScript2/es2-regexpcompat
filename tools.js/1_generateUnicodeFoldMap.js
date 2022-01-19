@@ -15,7 +15,7 @@ module.exports = function(){
 
     // Generate output data.
     let src =
-`(function( caseFoldingCodePoints ){
+`DEFINE_REGEXP_COMPAT__ES2018 && (function( caseFoldingCodePoints ){
     var i = -1, codePoint0, codePoint1;
 
     for( ; codePoint0 = caseFoldingCodePoints[ ++i ]; ){

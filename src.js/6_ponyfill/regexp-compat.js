@@ -16,7 +16,7 @@ function isRegExp( argument ){
  * @return {number}
  */
 function advance( s, i, unicode ){
-    if( !unicode || i + 1 >= s.length ){
+    if( !DEFINE_REGEXP_COMPAT__ES2018 || !unicode || i + 1 >= s.length ){
         return i + 1;
     };
     var c = String_codePointAt( s, i );
@@ -80,14 +80,11 @@ function RegExpCompat( source, flags ){
     /** @type {boolean} */
     this.multiline = pattern.flagSet.multiline;
 
-    /** @type {boolean} */
-    this.unicode = pattern.flagSet.unicode;
-
-    /** @type {boolean} */
-    this.sticky = pattern.flagSet.sticky;
+    this.sticky = /** @type {boolean} */ (pattern.flagSet.sticky);
 
     if( DEFINE_REGEXP_COMPAT__ES2018 ){
-        this.dotAll = /** @type {boolean} */ (pattern.flagSet.dotAll);
+        this.dotAll  = /** @type {boolean} */ (pattern.flagSet.dotAll);
+        this.unicode = /** @type {boolean} */ (pattern.flagSet.unicode);
     };
 };
 

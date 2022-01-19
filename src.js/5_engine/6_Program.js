@@ -8,7 +8,7 @@
 function getIndex( s, i, unicode ){
     var c;
 
-    if( unicode ){
+    if( DEFINE_REGEXP_COMPAT__ES2018 && unicode ){
         c = String_codePointAt( s, i );
         return c !== undefined ? c : -1;
     };
@@ -27,7 +27,7 @@ function getIndex( s, i, unicode ){
 function prevIndex( s, i, unicode ){
     var c = getIndex( s, i - 1, unicode );
 
-    if( !unicode ){
+    if( !DEFINE_REGEXP_COMPAT__ES2018 || !unicode ){
         return c;
     };
 
@@ -168,14 +168,11 @@ function Program( pattern, codes ){
     this.multiline = pattern.flagSet.multiline;
 
     if( DEFINE_REGEXP_COMPAT__ES2018 ){
-        this.dotAll = /** @type {boolean} */ (pattern.flagSet.dotAll);
+        this.dotAll  = /** @type {boolean} */ (pattern.flagSet.dotAll);
+        this.unicode = /** @type {boolean} */ (pattern.flagSet.unicode);
     };
 
-    /** @type {boolean} */
-    this.unicode = pattern.flagSet.unicode;
-
-    /** @type {boolean} */
-    this.sticky = pattern.flagSet.sticky;
+    this.sticky = /** @type {boolean} */ (pattern.flagSet.sticky);
 
     /** @type {number} */
     this.captureParens = pattern.captureParens; // TODO
@@ -407,7 +404,7 @@ Program.prototype.exec = function( input, pos ){
                 case REGEXP_COMPAT__OPCODE_IS_WORD_BOUNDARY_NOT:
                     c = prevIndex( input, proc.pos, this.unicode );
                     d = getIndex( input, proc.pos, this.unicode );
-                    var set = this.unicode && this.ignoreCase ? charSetUnicodeWord : charSetWord;
+                    var set = DEFINE_REGEXP_COMPAT__ES2018 && this.unicode && this.ignoreCase ? charSetUnicodeWord : charSetWord;
                     var actual = set.has( c ) !== set.has( d );
                     var expected = code.op === REGEXP_COMPAT__OPCODE_IS_WORD_BOUNDARY;
                     if( actual !== expected ){

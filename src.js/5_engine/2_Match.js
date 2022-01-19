@@ -95,7 +95,7 @@ Match.prototype.toArray = function(){
     // So this method uses type casting to set properties.
 
     var l     = this.length;
-    var array = new Array( l );
+    var array = [];
     array.index = this.index;
     array.input = this.input;
 

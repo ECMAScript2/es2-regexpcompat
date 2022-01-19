@@ -66,15 +66,17 @@ var charSetWord = new CharSet( [ ${charSetWord.data.join( ', ' )} ] );
 /** A CharSet which does not contain ASCII word characters. */
 var charSetInvertWord = charSetWord.clone().invert();
 
+if( DEFINE_REGEXP_COMPAT__ES2018 ){
 /**
  * A CharSet which contains Unicode word characters.
  *
  * See https://www.ecma-international.org/ecma-262/10.0/index.html#sec-runtime-semantics-wordcharacters-abstract-operation.
  */
-var charSetUnicodeWord = new CharSet( [ ${charSetUnicodeWord.data.join( ', ' )} ] );
+    var charSetUnicodeWord = new CharSet( [ ${charSetUnicodeWord.data.join( ', ' )} ] );
 
 /** A CharSet which does not contain Unicode word characters. */
-var charSetInvertUnicodeWord = charSetUnicodeWord.clone().invert();
+    var charSetInvertUnicodeWord = charSetUnicodeWord.clone().invert();
+};
 
 /**
  * A CharSet which contains space characters.

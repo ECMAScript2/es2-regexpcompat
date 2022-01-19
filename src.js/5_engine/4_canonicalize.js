@@ -1,11 +1,11 @@
 /** Return case-folded code point for ignore-case comparison.
  *
  * @param {number} c
- * @param {boolean} unicode
+ * @param {boolean|undefined} unicode
  * @return {number} 
  */
 canonicalize = function( c, unicode ){
-    if( unicode ){
+    if( DEFINE_REGEXP_COMPAT__ES2018 && unicode ){
         return m_unicodeFoldMap[ c ] || c;
     };
 
@@ -27,11 +27,11 @@ canonicalize = function( c, unicode ){
  * It is used for character class matching on ignore-case.
  *
  * @param {number} c
- * @param {boolean} unicode
+ * @param {boolean|undefined} unicode
  * @return {Array.<number>} 
  */
 uncanonicalize = function( c, unicode ){
-    if( unicode ){
+    if( DEFINE_REGEXP_COMPAT__ES2018 && unicode ){
         return m_unicodeInverseFoldMap[ c ] || [];
     };
 

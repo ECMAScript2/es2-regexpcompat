@@ -6,15 +6,16 @@ var Compiler_DIRECTION_FORWARD  = DEFINE_REGEXP_COMPAT__MINIFY ? 1 : 'forward',
  * @param {Pattern} pattern 
  */
 function Compiler( pattern ){
-    this.advance = false;
+    this.advance            = false;
     this.captureParensIndex = 1;
-    this.direction = Compiler_DIRECTION_FORWARD;
-    this.pattern = pattern;
-
-    this.ignoreCase = pattern.flagSet.ignoreCase;
-    this.unicode    = pattern.flagSet.unicode;
-    this.captureParens = pattern.captureParens;
-    this.names = pattern.names;
+    this.direction          = Compiler_DIRECTION_FORWARD;
+    this.pattern            = pattern;
+    this.ignoreCase         = pattern.flagSet.ignoreCase;
+    this.captureParens      = pattern.captureParens;
+    this.names              = pattern.names;
+    if( DEFINE_REGEXP_COMPAT__ES2018 ){
+        this.unicode = pattern.flagSet.unicode;
+    };
 };
 
 /** Run compiler and return compiled `Program`.
@@ -128,7 +129,7 @@ Compiler.prototype.compileSequence = function( node ){
     var children = Array_from( node.children );
 
     if( this.direction === Compiler_DIRECTION_BACKWARD ){
-        if( false || children.reverse ){
+        if( false && children.reverse ){
             children.reverse();
         } else {
             for( var i = 1, child, l = children.length; i < l; ++i ){ // for ie5
@@ -474,8 +475,10 @@ Compiler.prototype.escapeClassToSet = function( _node ){
             return node.invert ? charSetInvertDigit : charSetDigit;
         case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_word :
             node = /** @type {SimpleEscapeClass} */ ( _node );
-            if( this.unicode && this.ignoreCase ){
-                return node.invert ? charSetInvertUnicodeWord : charSetUnicodeWord;
+            if( DEFINE_REGEXP_COMPAT__ES2018 ){
+                if( this.unicode && this.ignoreCase ){
+                    return node.invert ? charSetInvertUnicodeWord : charSetUnicodeWord;
+                };
             };
             return node.invert ? charSetInvertWord : charSetWord;
         case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_space :

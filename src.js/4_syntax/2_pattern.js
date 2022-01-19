@@ -4,9 +4,9 @@
  *     global: boolean,
  *     ignoreCase: boolean,
  *     multiline: boolean,
+ *     sticky: (boolean|undefined),
  *     dotAll: (boolean|undefined),
- *     unicode: boolean,
- *     sticky: boolean
+ *     unicode: (boolean|undefined)
  *   }
  * }
 */
@@ -417,14 +417,14 @@ m_flagSetToString = function( flagSet ){
     if( flagSet.multiline ){
         s += 'm';
     };
+    if( flagSet.sticky ){ // ES2015
+        s += 'y';
+    };
     if( flagSet.dotAll && DEFINE_REGEXP_COMPAT__ES2018 ){
         s += 's';
     };
-    if( flagSet.unicode ){ // ES2018
+    if( flagSet.unicode && DEFINE_REGEXP_COMPAT__ES2018 ){
         s += 'u';
-    };
-    if( flagSet.sticky ){ // ES2015
-        s += 'y';
     };
     return s;
 };
