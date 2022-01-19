@@ -1124,8 +1124,8 @@ Parser.prototype.parseParen = function(){
 
     if( !String_startsWith( this.source, '(?', this.pos ) ){
         ++this.pos; // skip '('
-        child = this.parseDisjunction();
         index = ++this.captureParensIndex;
+        child = this.parseDisjunction();
         if( this.current() !== ')' && DEFINE_REGEXP_COMPAT__DEBUG ){
             throw new RegExpSyntaxError('unterminated capture');
         };

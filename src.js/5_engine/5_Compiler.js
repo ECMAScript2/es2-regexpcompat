@@ -164,9 +164,10 @@ Compiler.prototype.compileGroup = function( node ){
  * @return {Array.<OpCode>}
  */
 Compiler.prototype.compileCapture = function( node ){
-    var codes0 = this.compileNode( node.child );
+    var current = this.captureParensIndex++;
+    var codes0  = this.compileNode( node.child );
 
-    if( node.index !== this.captureParensIndex++ ){
+    if( node.index !== current ){
         if( DEFINE_REGEXP_COMPAT__DEBUG ){
             throw new Error('BUG: invalid pattern');
         };
@@ -183,10 +184,11 @@ Compiler.prototype.compileCapture = function( node ){
  * @return {Array.<OpCode>}
  */
 Compiler.prototype.compileNamedCapture = function( node ){
-    var codes0 = this.compileNode( node.child );
-    var index = this.names[ node.name ];
+    var current = this.captureParensIndex++;
+    var codes0  = this.compileNode( node.child );
+    var index   = this.names[ node.name ];
 
-    if( index === undefined || index !== this.captureParensIndex++ ){
+    if( index === undefined || index !== current ){
         if( DEFINE_REGEXP_COMPAT__DEBUG ){
             throw new Error('BUG: invalid pattern');
         };
