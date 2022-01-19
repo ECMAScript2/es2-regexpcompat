@@ -86,6 +86,11 @@ function RegExpCompat( source, flags ){
         this.dotAll  = /** @type {boolean} */ (pattern.flagSet.dotAll);
         this.unicode = /** @type {boolean} */ (pattern.flagSet.unicode);
     };
+
+    if( DEFINE_REGEXP_COMPAT__DEBUG ){
+        this.regExp = new RegExp( source, flags );
+        // this.regExp.compile();
+    };
 };
 
 if( DEFINE_REGEXP_COMPAT__DEBUG ){
@@ -111,6 +116,8 @@ RegExpCompat.prototype.toString = function(){
     return m_patternToString( this.pattern );
 };
 
+var RegExpCompat_debugOne;
+
 /**
  * @param {*} string 
  * @return {RegExpResult|null}
@@ -127,7 +134,50 @@ RegExpCompat.prototype.exec = function( string ){
         this.lastIndex = match ? match.lastIndex : 0;
     };
 
-    return match ? match.toArray() : null;
+    if( !DEFINE_REGEXP_COMPAT__DEBUG || !this.regExp || RegExpCompat_debugOne ){
+        return match ? match.toArray() : null;
+    };
+    var regExpResult = this.regExp.exec( string );
+
+    if( !match && ( !regExpResult || regExpResult.length === 0 || regExpResult.length === 1 && regExpResult[ 0 ] === '' ) ){
+        return null;
+    };
+
+    if( !match && regExpResult ){
+        console.log( '[0]Invalid Result! RegExpCompat("' + this.source + '", "' + this.flags + '").exec("' + string + '")' );
+        console.dir( this );
+        console.dir( match );
+        console.dir( regExpResult );
+        RegExpCompat_debugOne = true;
+        return null;
+    };
+
+    var regExpResultCompat = match.toArray();
+
+    if( regExpResult.length   !== regExpResultCompat.length ||
+        regExpResult.input    !== regExpResultCompat.input  ||
+        regExpResult.index    !== regExpResultCompat.index  ||
+        !!regExpResult.groups !== !!regExpResultCompat.groups
+    ){
+        console.log( '[1]Invalid Result! RegExpCompat("' + this.source + '", "' + this.flags + '").exec("' + string + '")' );
+        console.dir( this );
+        console.dir( regExpResultCompat );
+        console.dir( regExpResult );
+        RegExpCompat_debugOne = true;
+    } else {
+        for( var i = 0, l = regExpResult.length; i < l; ++i ){
+            if( regExpResult[ i ] !== regExpResultCompat[ i ] ){
+                console.log( '[2]Invalid Result! RegExpCompat("' + this.source + '", "' + this.flags + '").exec("' + string + '")' );
+                console.dir( this );
+                console.dir( regExpResultCompat );
+                console.dir( regExpResult );
+                RegExpCompat_debugOne = true;
+                break;
+            };
+        };
+    };
+
+    return regExpResultCompat;
 };
 
 /**
