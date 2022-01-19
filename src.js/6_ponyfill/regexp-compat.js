@@ -342,4 +342,4 @@ RegExpCompat.prototype[Symbol.split] = function( string, limit ){
     return result;
 };
 
-window[ 'RegExpCompat' ] = RegExpCompat;
+this[ 'RegExpCompat' ] = RegExpCompat;
