@@ -317,10 +317,7 @@ Parser.prototype.parseDisjunction = function(){
     var begin = this.pos;
     var children = [ this.parseSequence() ];
 
-    for( ;; ){
-        if( this.current() !== '|' ){
-            break;
-        };
+    for( ; this.current() === '|'; ){
         ++this.pos; // skip '|'
         children.push( this.parseSequence() );
     };

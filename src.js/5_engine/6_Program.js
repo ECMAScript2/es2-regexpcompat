@@ -214,7 +214,7 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
 /**
  * @param {string} input 
  * @param {number} pos 
- * @returns 
+ * @return {Match|null}
  */
 Program.prototype.exec = function( input, pos ){
     while( pos <= input.length ){

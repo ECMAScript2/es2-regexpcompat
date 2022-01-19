@@ -77,13 +77,13 @@ Match.prototype.end = function( k ){
  */
 function Match_resolve( match, k ){
     if( k === k + '' ){ // typeof k === 'string'
-        k = match._names.get( k );
+        k = match._names[ k ];
         k  = k !== undefined ? k : -1;
     };
     var i = match._caps[ k * 2 ],
         j = match._caps[ k * 2 + 1 ];
 
-    return [ 0 <= i ? i : -1, 0 <= j ? j : -1 ];
+    return [ i !== undefined ? i : -1, j !== undefined ? j : -1 ];
 };
 
 /** Convert this into `RegExp`'s result array.

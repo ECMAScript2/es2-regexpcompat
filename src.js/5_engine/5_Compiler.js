@@ -443,7 +443,7 @@ Compiler.prototype.compileEscapeClass = function( node ){
  */
 Compiler.prototype.compileClass = function( node ){
     var set = new CharSet(),
-          classItemList = node.children;
+        classItemList = node.children;
 
     for( var /** @type {ClassItem} */ item, i = -1; item = classItemList[ ++i ]; ){
         switch( item.type ){
