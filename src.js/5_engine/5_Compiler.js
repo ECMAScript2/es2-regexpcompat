@@ -254,18 +254,19 @@ Compiler.prototype.compileOptional = function( node ){
  */
 Compiler.prototype.compileRepeat = function( node ){
     var from = this.captureParensIndex;
+    var min  = node.min;
     var codes0 = this.compileNode( node.child );
     var codes = [];
     var codes1;
 
-    if( node.min === 1 ){
+    if( min === 1 ){
         Compiler_pushElementsToOpCodeList( codes, /** @type {Array.<OpCode>} */ (codes0) );
         // codes.push(...codes0);
-    } else if( node.min > 1 ){
+    } else if( min > 1 ){
         codes1 = this.insertCapReset( from, /** @type {Array.<OpCode>} */ (codes0) );
         Compiler_pushElementsToOpCodeList(
             codes,
-            { op: REGEXP_COMPAT__OPCODE_IS_PUSH, value: node.min },
+            { op: REGEXP_COMPAT__OPCODE_IS_PUSH, value: min },
             /* ... */ codes1,
             { op: REGEXP_COMPAT__OPCODE_IS_DEC },
             { op: REGEXP_COMPAT__OPCODE_IS_LOOP, cont: -1 - codes1.length - 1 },
@@ -275,7 +276,7 @@ Compiler.prototype.compileRepeat = function( node ){
         this.advance = false;
     };
 
-    var max = node.max != null ? node.max : node.min;
+    var max = node.max != null ? node.max : min;
     if( max === Infinity ){
         codes1 = this.insertCapReset( from, this.insertEmptyCheck( /** @type {Array.<OpCode>} */ (codes0) ) );
         Compiler_pushElementsToOpCodeList(
@@ -284,8 +285,8 @@ Compiler.prototype.compileRepeat = function( node ){
             /* ... */ codes1,
             { op: REGEXP_COMPAT__OPCODE_IS_JUMP, cont: -1 - codes1.length - 1 }
         );
-    } else if( max > node.min ){
-        var remain = max - node.min;
+    } else if( max > min ){
+        var remain = max - min;
         codes1 = this.insertCapReset( from, this.insertEmptyCheck( /** @type {Array.<OpCode>} */ (codes0) ) );
         if( remain === 1 ){
             Compiler_pushElementsToOpCodeList(

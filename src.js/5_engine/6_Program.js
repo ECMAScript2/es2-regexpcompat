@@ -310,10 +310,10 @@ Program.prototype.exec = function( input, pos ){
                 case REGEXP_COMPAT__OPCODE_IS_FORK_NEXT :
                     var newProc = proc.clone();
                     procs.push( newProc );
-                    if( /** @type {OpCode_Fork_cont|OpCode_Fork_next} */ (code).op === REGEXP_COMPAT__OPCODE_IS_FORK_CONT ){
-                        proc.pc += /** @type {OpCode_Fork_cont|OpCode_Fork_next} */ (code).next;
+                    if( code.op === REGEXP_COMPAT__OPCODE_IS_FORK_CONT ){
+                        proc.pc += /** @type {OpCode_Fork_cont} */ (code).next;
                     } else {
-                        newProc.pc += /** @type {OpCode_Fork_cont|OpCode_Fork_next} */ (code).next;
+                        newProc.pc += /** @type {OpCode_Fork_next} */ (code).next;
                     };
                     break;
                 case REGEXP_COMPAT__OPCODE_IS_JUMP:
