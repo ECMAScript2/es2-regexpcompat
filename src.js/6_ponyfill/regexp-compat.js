@@ -116,7 +116,7 @@ RegExpCompat.prototype.toString = function(){
     return m_patternToString( this.pattern );
 };
 
-var RegExpCompat_debugOne;
+var RegExpCompat_debugCount = 10;
 
 /**
  * @param {*} string 
@@ -134,7 +134,7 @@ RegExpCompat.prototype.exec = function( string ){
         this.lastIndex = match ? match.lastIndex : 0;
     };
 
-    if( !DEFINE_REGEXP_COMPAT__DEBUG || !this.regExp || RegExpCompat_debugOne ){
+    if( !DEFINE_REGEXP_COMPAT__DEBUG || !this.regExp || RegExpCompat_debugCount < 0 ){
         return match ? match.toArray() : null;
     };
     var regExpResult = this.regExp.exec( string );
@@ -143,12 +143,13 @@ RegExpCompat.prototype.exec = function( string ){
         return null;
     };
 
+    // console.dir( this );
+
     if( !match && regExpResult ){
-        console.log( '[0]Invalid Result! RegExpCompat("' + this.source + '", "' + this.flags + '").exec("' + string + '")' );
-        console.dir( this );
-        console.dir( match );
-        console.dir( regExpResult );
-        RegExpCompat_debugOne = true;
+        //console.log( '[0]Invalid Result! RegExpCompat("' + this.source + '", "' + this.flags + '").exec("' + string + '")' );
+        //console.dir( match );
+        //console.dir( regExpResult );
+        --RegExpCompat_debugCount;
         return null;
     };
 
@@ -159,19 +160,17 @@ RegExpCompat.prototype.exec = function( string ){
         regExpResult.index    !== regExpResultCompat.index  ||
         !!regExpResult.groups !== !!regExpResultCompat.groups
     ){
-        console.log( '[1]Invalid Result! RegExpCompat("' + this.source + '", "' + this.flags + '").exec("' + string + '")' );
-        console.dir( this );
-        console.dir( regExpResultCompat );
-        console.dir( regExpResult );
-        RegExpCompat_debugOne = true;
+        //console.log( '[1]Invalid Result! RegExpCompat("' + this.source + '", "' + this.flags + '").exec("' + string + '")' );
+        //console.dir( regExpResultCompat );
+        //console.dir( regExpResult );
+        --RegExpCompat_debugCount;
     } else {
         for( var i = 0, l = regExpResult.length; i < l; ++i ){
             if( regExpResult[ i ] !== regExpResultCompat[ i ] ){
-                console.log( '[2]Invalid Result! RegExpCompat("' + this.source + '", "' + this.flags + '").exec("' + string + '")' );
-                console.dir( this );
-                console.dir( regExpResultCompat );
-                console.dir( regExpResult );
-                RegExpCompat_debugOne = true;
+                //console.log( '[2]Invalid Result! RegExpCompat("' + this.source + '", "' + this.flags + '").exec("' + string + '")' );
+                //console.dir( regExpResultCompat );
+                //console.dir( regExpResult );
+                --RegExpCompat_debugCount;
                 break;
             };
         };
