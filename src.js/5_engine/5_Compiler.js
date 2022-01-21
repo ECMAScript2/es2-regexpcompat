@@ -281,9 +281,9 @@ Compiler.prototype.compileRepeat = function( node ){
         codes1 = this.insertCapReset( from, this.insertEmptyCheck( /** @type {Array.<OpCode>} */ (codes0) ) );
         Compiler_pushElementsToOpCodeList(
             codes,
-            { op: node.nonGreedy ? REGEXP_COMPAT__OPCODE_IS_FORK_NEXT : REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes1.length + 1 },
+            { op: node.nonGreedy ? REGEXP_COMPAT__OPCODE_IS_FORK_NEXT : REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes1.length + 1 }, // next: は (1) を指す
             /* ... */ codes1,
-            { op: REGEXP_COMPAT__OPCODE_IS_JUMP, cont: -1 - codes1.length - 1 }
+            { op: REGEXP_COMPAT__OPCODE_IS_JUMP, cont: -1 - codes1.length - 1 } // cont: は (1) を指す
         );
     } else if( max > min ){
         var remain = max - min;
@@ -291,19 +291,19 @@ Compiler.prototype.compileRepeat = function( node ){
         if( remain === 1 ){
             Compiler_pushElementsToOpCodeList(
                 codes,
-                { op: node.nonGreedy ? REGEXP_COMPAT__OPCODE_IS_FORK_NEXT : REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes1.length },
-                /* ... */ codes1
+                { op: node.nonGreedy ? REGEXP_COMPAT__OPCODE_IS_FORK_NEXT : REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes1.length }, // next: は (2) を指す
+                /* ... */ codes1 // (2)
             );
         } else {
             Compiler_pushElementsToOpCodeList(
                 codes,
-                { op: REGEXP_COMPAT__OPCODE_IS_PUSH, value: remain + 1 },
-                { op: node.nonGreedy ? REGEXP_COMPAT__OPCODE_IS_FORK_NEXT : REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes0.length + 4 },
+                { op: REGEXP_COMPAT__OPCODE_IS_PUSH, value: remain + 1 }, // (3)
+                { op: node.nonGreedy ? REGEXP_COMPAT__OPCODE_IS_FORK_NEXT : REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes1.length + 4 }, // next: は (4) を指す
                 /* ... */ codes1,
                 { op: REGEXP_COMPAT__OPCODE_IS_DEC },
-                { op: REGEXP_COMPAT__OPCODE_IS_LOOP, cont: -1 - codes0.length - 2 },
+                { op: REGEXP_COMPAT__OPCODE_IS_LOOP, cont: -1 - codes1.length - 2 }, // cont: は (3) を指す
                 { op: REGEXP_COMPAT__OPCODE_IS_FAIL },
-                { op: REGEXP_COMPAT__OPCODE_IS_POP }
+                { op: REGEXP_COMPAT__OPCODE_IS_POP } // (4)
             );
         };
     };
