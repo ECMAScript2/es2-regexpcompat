@@ -1,29 +1,47 @@
 const gulp   = require('gulp'),
       closureCompiler = require('google-closure-compiler').gulp(),
+      gulpDPZ = require('../../../gulp-diamond-princess-zoning/index.js'),
       fs     = require( 'fs' );
 
-gulp.task( 'js', gulp.series(
+gulp.task( 'dist', gulp.series(
   function(){
       return gulp.src(
           [
-                './lib/index.es6.js'
+            './src.js/**/*.js'
           ]
+      ).pipe(
+          gulpDPZ(
+              {
+                  labelGlobal        : 'global',
+                  labelPackageGlobal : 'packageGlobal',
+                  labelModuleGlobal  : 'moduleGlobal',
+                  packageGlobalArgs  : [ 'Math,Infinity,undefined', 'Math,1/0,void 0' ],
+                  basePath           : './',
+                  // wrapAll            : true
+              }
+          )
       ).pipe(
           closureCompiler(
               {
-                  // externs           : externs,
-                  // define            : [],
-                  // compilation_level : 'ADVANCED',
-                  // compilation_level : 'WHITESPACE_ONLY',
-                  formatting        : 'PRETTY_PRINT',
-                  warning_level     : 'VERBOSE',
-                  language_in       : 'ECMASCRIPT_2020',
-                  language_out      : 'ECMASCRIPT5',
-                  output_wrapper    : '(function(){\n%output%\n})()',
-                  js_output_file    : 'ReRE.es5.js'
+                externs           : [ './src.externs/externs.generated.js' ],
+                define            : [
+                    'DEFINE_REGEXP_COMPAT__DEBUG=false',
+                    'DEFINE_REGEXP_COMPAT__MINIFY=true',
+                    'DEFINE_REGEXP_COMPAT__NODEJS=false',
+                    'DEFINE_REGEXP_COMPAT__ES2018=false'
+                ],
+                compilation_level : 'ADVANCED',
+                // compilation_level : 'WHITESPACE_ONLY',
+                env               : 'CUSTOM',
+                // formatting        : 'PRETTY_PRINT',
+                warning_level     : 'VERBOSE',
+                language_in       : 'ECMASCRIPT3',
+                language_out      : 'ECMASCRIPT3',
+                // output_wrapper    : '(function(){\n%output%\n})()',
+                js_output_file    : 'rerejs-es3.min.js'
               }
           )
-      ).pipe( gulp.dest( 'lib' ) );
+      ).pipe( gulp.dest( 'dist' ) );
   }
 ) );
 
@@ -97,7 +115,7 @@ gulp.task( 'data', gulp.series(
         var fileName = './tools.js/8_generateCharSetWordAndUnicodeWord.js';
 
         fs.writeFileSync(
-            './src.js/3_char-class/4_ascii.generated.js',
+            './src.js/3_char-class/3_ascii.generated.js',
             dontEditMessage.replace( '##', fileName ) + require( fileName )()
         );
         cb();

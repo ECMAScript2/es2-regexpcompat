@@ -113,7 +113,7 @@ var RepeatQuantifier;
  * @param {string=} flags 
  * @param {boolean=} additional 
  */
-function Parser( source, flags, additional ){
+Parser = function( source, flags, additional ){
      /** Precalculated number of capture group parens. */
     this.captureParens = 0;
     /** @type {Object<string, number>} Precalculated `Map` associate from capture group name to its index. */

@@ -5,7 +5,7 @@ var Compiler_DIRECTION_FORWARD  = DEFINE_REGEXP_COMPAT__MINIFY ? 1 : 'forward',
  * @constructor
  * @param {Pattern} pattern 
  */
-function Compiler( pattern ){
+Compiler = function( pattern ){
     this.advance            = false;
     this.captureParensIndex = 1;
     this.direction          = Compiler_DIRECTION_FORWARD;
@@ -475,18 +475,18 @@ Compiler.prototype.escapeClassToSet = function( _node ){
     switch( _node.kind ){
         case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_digit :
             node = /** @type {SimpleEscapeClass} */ ( _node );
-            return node.invert ? charSetInvertDigit : charSetDigit;
+            return node.invert ? m_charSetInvertDigit : m_charSetDigit;
         case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_word :
             node = /** @type {SimpleEscapeClass} */ ( _node );
             if( DEFINE_REGEXP_COMPAT__ES2018 ){
                 if( this.unicode && this.ignoreCase ){
-                    return node.invert ? charSetInvertUnicodeWord : charSetUnicodeWord;
+                    return node.invert ? m_charSetInvertUnicodeWord : m_charSetUnicodeWord;
                 };
             };
-            return node.invert ? charSetInvertWord : charSetWord;
+            return node.invert ? m_charSetInvertWord : m_charSetWord;
         case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_space :
             node = /** @type {SimpleEscapeClass} */ ( _node );
-            return node.invert ? charSetInvertSpace : charSetSpace;
+            return node.invert ? m_charSetInvertSpace : m_charSetSpace;
         case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_unicode_property :
             if( DEFINE_REGEXP_COMPAT__ES2018 ){
                 node = /** @type {UnicodePropertyEscapeClass} */ ( _node );

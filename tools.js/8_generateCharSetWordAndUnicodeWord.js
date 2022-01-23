@@ -53,18 +53,18 @@ module.exports = function(){
 // See https://www.ecma-international.org/ecma-262/10.0/index.html#sec-characterclassescape.
 
 /** A CharSet which contains ASCII digits. */
-var charSetDigit = new CharSet(
+m_charSetDigit = new CharSet(
     [ 0x30, 0x39 + 1 ] // 0..9
 );
 
 /** A CharSet which does not contain ASCII digits. */
-var charSetInvertDigit = charSetDigit.clone().invert();
+m_charSetInvertDigit = m_charSetDigit.clone().invert();
 
 /** A CharSet which contains ASCII word characters. */
-var charSetWord = new CharSet( [ ${charSetWord.data.join( ', ' )} ] );
+m_charSetWord = new CharSet( [ ${charSetWord.data.join( ', ' )} ] );
 
 /** A CharSet which does not contain ASCII word characters. */
-var charSetInvertWord = charSetWord.clone().invert();
+m_charSetInvertWord = m_charSetWord.clone().invert();
 
 if( DEFINE_REGEXP_COMPAT__ES2018 ){
 /**
@@ -72,10 +72,10 @@ if( DEFINE_REGEXP_COMPAT__ES2018 ){
  *
  * See https://www.ecma-international.org/ecma-262/10.0/index.html#sec-runtime-semantics-wordcharacters-abstract-operation.
  */
-    var charSetUnicodeWord = new CharSet( [ ${charSetUnicodeWord.data.join( ', ' )} ] );
+    m_charSetUnicodeWord = new CharSet( [ ${charSetUnicodeWord.data.join( ', ' )} ] );
 
 /** A CharSet which does not contain Unicode word characters. */
-    var charSetInvertUnicodeWord = charSetUnicodeWord.clone().invert();
+    m_charSetInvertUnicodeWord = m_charSetUnicodeWord.clone().invert();
 };
 
 /**
@@ -84,9 +84,9 @@ if( DEFINE_REGEXP_COMPAT__ES2018 ){
  * See https://www.ecma-international.org/ecma-262/10.0/index.html#prod-WhiteSpace
  * and https://www.ecma-international.org/ecma-262/10.0/index.html#prod-LineTerminator.
  */
-var charSetSpace = new CharSet( [ ${charSetSpace.data.join( ', ' )} ] );
+m_charSetSpace = new CharSet( [ ${charSetSpace.data.join( ', ' )} ] );
 
 /** A CharSet which does not contain space characters. */
-var charSetInvertSpace = charSetSpace.clone().invert();
+m_charSetInvertSpace = m_charSetSpace.clone().invert();
 `;
 };

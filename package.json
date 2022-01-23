@@ -40,6 +40,7 @@
     "eslint-plugin-prettier": "4.0.0",
     "google-closure-compiler": "^20211107.0.0",
     "gulp": "^4.0.2",
+    "gulp-diamond-princess-zoning": "^0.9.10",
     "nyc": "15.1.0",
     "prettier": "2.3.2",
     "rollup": "2.60.1",

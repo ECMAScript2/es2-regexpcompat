@@ -146,7 +146,7 @@ Proc.prototype.clone = function(){
  * @param {Pattern} pattern
  * @param {Array.<OpCode>} codes
  */
-function Program( pattern, codes ){
+Program = function( pattern, codes ){
     /** A regular expression pattern.
      * @type {Pattern} */
     this.pattern = pattern;
@@ -404,7 +404,7 @@ Program.prototype.exec = function( input, pos ){
                 case REGEXP_COMPAT__OPCODE_IS_WORD_BOUNDARY_NOT:
                     c = prevIndex( input, proc.pos, this.unicode );
                     d = getIndex( input, proc.pos, this.unicode );
-                    var set = DEFINE_REGEXP_COMPAT__ES2018 && this.unicode && this.ignoreCase ? charSetUnicodeWord : charSetWord;
+                    var set = DEFINE_REGEXP_COMPAT__ES2018 && this.unicode && this.ignoreCase ? m_charSetUnicodeWord : m_charSetWord;
                     var actual = set.has( c ) !== set.has( d );
                     var expected = code.op === REGEXP_COMPAT__OPCODE_IS_WORD_BOUNDARY;
                     if( actual !== expected ){

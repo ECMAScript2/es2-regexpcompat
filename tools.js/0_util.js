@@ -10,8 +10,8 @@ module.exports = {
         fs.readFileSync( Path.resolve( __dirname, '../src.js/0_global/1_DEFINE.js'          ) ) +
         fs.readFileSync( Path.resolve( __dirname, '../src.js/1_moduleGlobal/2_variables.js' ) ) +
         fs.readFileSync( Path.resolve( __dirname, '../src.js/1_moduleGlobal/3_polyfill.js'  ) ) +
-        fs.readFileSync( Path.resolve( __dirname, '../src.js/3_char-class/2_escape.js'      ) ) +
-        fs.readFileSync( Path.resolve( __dirname, '../src.js/3_char-class/3_CharSet.js'     ) ) +
+        fs.readFileSync( Path.resolve( __dirname, '../src.js/3_char-class/1_escape.js'      ) ) +
+        fs.readFileSync( Path.resolve( __dirname, '../src.js/3_char-class/2_CharSet.js'     ) ) +
         ';return CharSet;'
     )()
 };
