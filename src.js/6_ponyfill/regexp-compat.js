@@ -55,8 +55,13 @@ function RegExpCompat( source, flags ){
     var parser = new Parser( /** @type {string} */ (source), flags, true );
     var pattern = parser.parse();
 
-    /** @type {Pattern} */
-    this.pattern = pattern;
+    if( DEFINE_REGEXP_COMPAT__DEBUG ){
+        /** @type {Pattern} */
+        this.pattern = pattern;
+    } else {
+        /** @type {string} */
+        this._strPattern = m_patternToString( pattern );
+    };
 
     var compiler = new Compiler( pattern );
 
@@ -113,7 +118,11 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
 };
 
 RegExpCompat.prototype.toString = function(){
-    return m_patternToString( this.pattern );
+    if( DEFINE_REGEXP_COMPAT__DEBUG ){
+        return m_patternToString( this.pattern );
+    } else {
+        return this._strPattern;
+    };
 };
 
 var RegExpCompat_debugCount = 10;
@@ -274,7 +283,7 @@ RegExpCompat.prototype[Symbol.replace] = function( string, replacer ){
                         break;
                     case '<':
                         var k = replacer.indexOf( '>', j + 2 );
-                        if( this.pattern.names._size === 0 || k === -1 ){
+                        if( this.program.names._size === 0 || k === -1 ){
                             i = j + 2;
                             result += '$<';
                             break;

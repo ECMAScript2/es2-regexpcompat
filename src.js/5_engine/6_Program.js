@@ -147,9 +147,11 @@ Proc.prototype.clone = function(){
  * @param {Array.<OpCode>} codes
  */
 Program = function( pattern, codes ){
-    /** A regular expression pattern.
-     * @type {Pattern} */
-    this.pattern = pattern;
+    if( DEFINE_REGEXP_COMPAT__DEBUG ){
+        /** A regular expression pattern.
+         * @type {Pattern} */
+        this.pattern = pattern;
+    };
 
     /** An array of op-codes compiled `pattern`.
      * @type {Array.<OpCode>}
