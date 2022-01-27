@@ -193,23 +193,25 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
                '    ' + codes + '\n' +
                '}';
     };
-    /**
-     * @param {*} depth 
-     * @param {InspectOptionsStylized} options 
-     * @return {string}
-     */
-    Program.prototype[ Symbol[ 'for' ]( 'nodejs.util.inspect.custom' ) ] = function( depth, options ){
-        var pattern = options.stylize( m_patternToString( this.pattern ), 'regexp' );
-        var codes = codesToString( this.codes )
-                        .split('\n')
-                        .map( function( line ){ return options.stylize( line, 'string' ); } )
-                        .join('\n    ');
-        
-        return options.stylize('Program', 'special') + ' {\n' +
-              '  pattern: ' + pattern + ',\n' +
-              '  codes:\n' +
-              '    ' + codes + '\n' +
-              '}';
+    if( DEFINE_REGEXP_COMPAT__NODEJS ){
+        /**
+         * @param {*} depth
+         * @param {InspectOptionsStylized} options
+         * @return {string}
+         */
+        Program.prototype[ Symbol[ 'for' ]( 'nodejs.util.inspect.custom' ) ] = function( depth, options ){
+            var pattern = options.stylize( m_patternToString( this.pattern ), 'regexp' );
+            var codes = codesToString( this.codes )
+                            .split('\n')
+                            .map( function( line ){ return options.stylize( line, 'string' ); } )
+                            .join('\n    ');
+
+            return options.stylize('Program', 'special') + ' {\n' +
+                  '  pattern: ' + pattern + ',\n' +
+                  '  codes:\n' +
+                  '    ' + codes + '\n' +
+                  '}';
+        };
     };
 };
 

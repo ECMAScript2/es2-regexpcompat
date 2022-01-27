@@ -4,7 +4,7 @@
  */
 function isRegExp( argument ){
     if( argument && typeof argument === 'object' ){
-        return !!argument[ Symbol.match ];
+        return !!argument.exec === RegExpCompat.prototype.exec;
     };
     return false;
 };
@@ -99,22 +99,34 @@ function RegExpCompat( source, flags ){
 };
 
 if( DEFINE_REGEXP_COMPAT__DEBUG ){
-    [ '$1', '$2', '$3', '$4', '$5', '$6', '$7', '$8', '$9', 'lastMatch' ].forEach(
-        function( name ){
-            RegExpCompat.__defineGetter__(
-                name,
-                function(){
-                    throw new Error( 'RegExpCompat does not support old RegExp.' + name + ' method' );
-                }
-            );
-        }
-    );
+    if( RegExpCompat.__defineGetter__ ){
+        [ '$1', '$2', '$3', '$4', '$5', '$6', '$7', '$8', '$9', 'lastMatch' ].forEach(
+            function( name ){
+                RegExpCompat.__defineGetter__(
+                    name,
+                    function(){
+                        throw new Error( 'RegExpCompat does not support old RegExp.' + name + ' method' );
+                    }
+                );
+            }
+        );
+    };
 
-    RegExpCompat[ Symbol.species ] = RegExpCompat;
+
+    // RegExpCompat[ Symbol.species ] = RegExpCompat;
 
     RegExpCompat.prototype.compile = function(){
         /* return this; */
     };
+
+    if( this.Symbol ){
+      // Not for ES2
+      // RegExpCompat.prototype[ Symbol.match   ] = function(){ throw "Called Symbol.match!!" };
+      // RegExpCompat.prototype[ Symbol.replace ] = function(){ throw "Called Symbol.replace!!" };
+    };
+
+    /** @type {{log:Function,dir:Function}} */
+    var console = this.console;
 };
 
 RegExpCompat.prototype.toString = function(){
@@ -143,21 +155,21 @@ RegExpCompat.prototype.exec = function( string ){
         this.lastIndex = match ? match.lastIndex : 0;
     };
 
-    if( !DEFINE_REGEXP_COMPAT__DEBUG || !this.regExp || RegExpCompat_debugCount < 0 ){
+    if( !DEFINE_REGEXP_COMPAT__DEBUG || !console || !this.regExp || RegExpCompat_debugCount < 0 ){
         return match ? match.toArray() : null;
     };
     var regExpResult = this.regExp.exec( string );
 
-    if( !match && ( !regExpResult || regExpResult.length === 0 || regExpResult.length === 1 && regExpResult[ 0 ] === '' ) ){
+    if( !match && !regExpResult ){
         return null;
     };
 
     // console.dir( this );
 
     if( !match && regExpResult ){
-        //console.log( '[0]Invalid Result! RegExpCompat("' + this.source + '", "' + this.flags + '").exec("' + string + '")' );
-        //console.dir( match );
-        //console.dir( regExpResult );
+        console.log( '[0]Invalid Result! RegExpCompat("' + this.source + '", "' + this.flags + '").exec("' + string + '")' );
+        console.dir( match );
+        console.dir( regExpResult );
         --RegExpCompat_debugCount;
         return null;
     };
@@ -169,16 +181,18 @@ RegExpCompat.prototype.exec = function( string ){
         regExpResult.index    !== regExpResultCompat.index  ||
         !!regExpResult.groups !== !!regExpResultCompat.groups
     ){
-        //console.log( '[1]Invalid Result! RegExpCompat("' + this.source + '", "' + this.flags + '").exec("' + string + '")' );
-        //console.dir( regExpResultCompat );
-        //console.dir( regExpResult );
+        console.log( '[1]Invalid Result! RegExpCompat("' + this.source + '", "' + this.flags + '").exec("' + string + '")' );
+        console.dir( regExpResultCompat );
+        console.dir( regExpResult );
         --RegExpCompat_debugCount;
     } else {
         for( var i = 0, l = regExpResult.length; i < l; ++i ){
-            if( regExpResult[ i ] !== regExpResultCompat[ i ] ){
-                //console.log( '[2]Invalid Result! RegExpCompat("' + this.source + '", "' + this.flags + '").exec("' + string + '")' );
-                //console.dir( regExpResultCompat );
-                //console.dir( regExpResult );
+            if( regExpResult[ i ] !== regExpResultCompat[ i ] &&
+                !( regExpResult[ i ] === '' && regExpResultCompat[ i ] === undefined ) // for ie8-
+            ){
+                console.log( '[2]Invalid Result! RegExpCompat("' + this.source + '", "' + this.flags + '").exec("' + string + '")' );
+                console.dir( regExpResultCompat );
+                console.dir( regExpResult );
                 --RegExpCompat_debugCount;
                 break;
             };
@@ -200,7 +214,7 @@ RegExpCompat.prototype.test = function( string ){
  * @param {string} string 
  * @return {RegExpResult|Array<string>|null}
  */
-RegExpCompat.prototype[Symbol.match] = function( string ){
+RegExpCompat.prototype[ 'match' ] = function( string ){
     if( this.global ){
         this.lastIndex = 0;
         var result = [];
@@ -220,7 +234,7 @@ RegExpCompat.prototype[Symbol.match] = function( string ){
  * @param {Function|string} replacer 
  * @return {string}
  */
-RegExpCompat.prototype[Symbol.replace] = function( string, replacer ){
+RegExpCompat.prototype[ 'replace' ] = function( string, replacer ){
     var replacerIsFunction = typeof replacer === 'function';
     var matches = [];
     if( this.global ){
@@ -325,7 +339,7 @@ RegExpCompat.prototype[Symbol.replace] = function( string, replacer ){
  * @param {string} string
  * @return {number}
  */
-RegExpCompat.prototype[Symbol.search] = function( string ){
+RegExpCompat.prototype.search = function( string ){
     var prevLastIndex = this.lastIndex;
     this.lastIndex = 0;
     var m = this.exec( string );
@@ -338,7 +352,7 @@ RegExpCompat.prototype[Symbol.search] = function( string ){
  * @param {number=} limit
  * @return {Array.<string>}
  */
-RegExpCompat.prototype[Symbol.split] = function( string, limit ){
+RegExpCompat.prototype.split = function( string, limit ){
     var flags       = this.sticky ? this.flags : this.flags + 'y';
     var constructor = this.constructor;
     var species     = /* constructor && constructor[Symbol.species] || */ RegExpCompat;
