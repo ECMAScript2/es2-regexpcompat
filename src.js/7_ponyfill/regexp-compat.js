@@ -314,7 +314,7 @@ RegExpCompat.prototype[ 'replace' ] = function( string, replacer ){
                         if( '0' <= c && c <= '9' ){
                             var d = replacer.charAt( j + 2 );
                             var s = '0' <= d && d <= '9' ? c + d : c;
-                            var n = /* Number. */parseInt( s, 10 );
+                            var n = s - 0; // Number.parseInt( s, 10 );
                             if( 0 < n && n < match.length ){
                                 result += match[ n ] || '';
                                 i = j + 1 + s.length;

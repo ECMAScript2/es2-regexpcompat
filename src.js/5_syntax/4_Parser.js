@@ -224,7 +224,7 @@ Parser.prototype.preprocessFlags = function(){
                 break;
             case 'y':
                 if( flagSet.sticky && DEFINE_REGEXP_COMPAT__DEBUG ){
-                    throw new RegExpSyntaxError("duplicated 's' flag");
+                    throw new RegExpSyntaxError("duplicated 'y' flag");
                 };
                 flagSet.sticky = true;
                 break;
