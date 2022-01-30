@@ -52,7 +52,7 @@ gulp.task( 'data', gulp.series(
         var fileName = './tools.js/1_generateUnicodeFoldMap.js';
 
         fs.writeFileSync(
-            './src.js/2_data.generated/1_unicodeFoldMap.generated.js',
+            './src.js/3_data.generated/1_unicodeFoldMap.generated.js',
             dontEditMessage.replace( '##', fileName ) + require( fileName )()
         );
         cb();
@@ -61,7 +61,7 @@ gulp.task( 'data', gulp.series(
         var fileName = './tools.js/2_generateUnicodeFoldMapLegacy.js';
 
         fs.writeFileSync(
-            './src.js/2_data.generated/2_unicodeFoldMapLegacy.generated.js',
+            './src.js/3_data.generated/2_unicodeFoldMapLegacy.generated.js',
             dontEditMessage.replace( '##', fileName ) + require( fileName )()
         );
         cb();
@@ -70,7 +70,7 @@ gulp.task( 'data', gulp.series(
       var fileName = './tools.js/3_generateUnicodeCategory.js';
 
       fs.writeFileSync(
-          './src.js/2_data.generated/3_unicodeCategory.generated.js',
+          './src.js/3_data.generated/3_unicodeCategory.generated.js',
           dontEditMessage.replace( '##', fileName ) + require( fileName )()
       );
       cb();
@@ -79,7 +79,7 @@ gulp.task( 'data', gulp.series(
         var fileName = './tools.js/4_generateUnicodeProperty.js';
 
         fs.writeFileSync(
-            './src.js/2_data.generated/4_unicodeProperty.generated.js',
+            './src.js/3_data.generated/4_unicodeProperty.generated.js',
             dontEditMessage.replace( '##', fileName ) + require( fileName )()
         );
         cb();
@@ -88,7 +88,7 @@ gulp.task( 'data', gulp.series(
       var fileName = './tools.js/5_generateUnicodePropertyAlias.js';
 
       fs.writeFileSync(
-          './src.js/2_data.generated/5_unicodePropertyAlias.generated.js',
+          './src.js/3_data.generated/5_unicodePropertyAlias.generated.js',
           dontEditMessage.replace( '##', fileName ) + require( fileName )()
       );
       cb();
@@ -97,7 +97,7 @@ gulp.task( 'data', gulp.series(
         var fileName = './tools.js/6_generateUnicodePropertyValueAlias.js';
 
         fs.writeFileSync(
-            './src.js/2_data.generated/6_unicodePropertyValueAlias.generated.js',
+            './src.js/3_data.generated/6_unicodePropertyValueAlias.generated.js',
             dontEditMessage.replace( '##', fileName ) + require( fileName )()
         );
         cb();
@@ -106,7 +106,7 @@ gulp.task( 'data', gulp.series(
         var fileName = './tools.js/7_generateUnicodeScript.js';
 
         fs.writeFileSync(
-            './src.js/2_data.generated/7_unicodeScript.generated.js',
+            './src.js/3_data.generated/7_unicodeScript.generated.js',
             dontEditMessage.replace( '##', fileName ) + require( fileName )()
         );
         cb();
@@ -115,7 +115,7 @@ gulp.task( 'data', gulp.series(
         var fileName = './tools.js/8_generateCharSetWordAndUnicodeWord.js';
 
         fs.writeFileSync(
-            './src.js/3_char-class/3_ascii.generated.js',
+            './src.js/4_char-class/3_ascii.generated.js',
             dontEditMessage.replace( '##', fileName ) + require( fileName )()
         );
         cb();
@@ -124,7 +124,7 @@ gulp.task( 'data', gulp.series(
         var fileName = './tools.js/9_generateCharSetIdStartAndIdContinue';
 
         fs.writeFileSync(
-          './src.js/4_syntax/3_charSetIdStartAndIdContinue.generated.js',
+          './src.js/5_syntax/3_charSetIdStartAndIdContinue.generated.js',
             dontEditMessage.replace( '##', fileName ) + require( fileName )()
         );
         cb();

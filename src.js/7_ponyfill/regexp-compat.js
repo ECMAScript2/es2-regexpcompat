@@ -4,7 +4,7 @@
  */
 function isRegExp( argument ){
     if( argument && typeof argument === 'object' ){
-        return !!argument.exec === RegExpCompat.prototype.exec;
+        return argument.exec === RegExpCompat.prototype.exec;
     };
     return false;
 };
@@ -33,7 +33,7 @@ function advance( s, i, unicode ){
  * @param {string|RegExp|RegExpCompat} source 
  * @param {string=} flags
  */
-function RegExpCompat( source, flags ){
+RegExpCompat = function( source, flags ){
     if( DEFINE_REGEXP_COMPAT__DEBUG ){
         if( /*new.target === undefined*/ !this || this.constructor !== RegExpCompat ){
             if( isRegExp( source ) && flags === undefined ){
