@@ -116,8 +116,10 @@ var RepeatQuantifier;
 Parser = function( source, flags, additional ){
      /** Precalculated number of capture group parens. */
     this.captureParens = 0;
-    /** @type {Object<string, number>} Precalculated `Map` associate from capture group name to its index. */
-    this.names = { _size : 0 };
+    if( DEFINE_REGEXP_COMPAT__ES2018 ){
+        /** @type {Object<string, number>} Precalculated `Map` associate from capture group name to its index. */
+        this.names = { _size : 0 };
+    };
     /** The current position of `source` string on parsing. */
     this.pos = 0;
     /** The current capture group parens index number. */
@@ -153,13 +155,23 @@ Parser.prototype.parse = function(){
         throw new RegExpSyntaxError( "too many ')'" );
     };
 
-    return {
-        type          : REGEXP_COMPAT__PATTERN_IS_Pattern,
-        flagSet       : this.flagSet,
-        captureParens : this.captureParens,
-        names         : this.names,
-        child         : child,
-        range         : [ 0, this.pos ]
+    if( DEFINE_REGEXP_COMPAT__ES2018 ){
+        return {
+            type          : REGEXP_COMPAT__PATTERN_IS_Pattern,
+            flagSet       : this.flagSet,
+            captureParens : this.captureParens,
+            names         : this.names,
+            child         : child,
+            range         : [ 0, this.pos ]
+        };
+    } else {
+        return {
+            type          : REGEXP_COMPAT__PATTERN_IS_Pattern,
+            flagSet       : this.flagSet,
+            captureParens : this.captureParens,
+            child         : child,
+            range         : [ 0, this.pos ]
+        };
     };
 };
 
@@ -254,7 +266,7 @@ Parser.prototype.preprocessCaptures = function(){
         var c = this.current();
         switch( c ){
             case '(' :
-                if( String_startsWith( this.source, '(?<', this.pos ) ){
+                if( DEFINE_REGEXP_COMPAT__ES2018 && String_startsWith( this.source, '(?<', this.pos ) ){
                     this.pos += 3; // skip '(?<'
                     var d = this.current();
                     if( d !== '=' && d !== '!' ){
@@ -757,7 +769,7 @@ Parser.prototype.tryParseBackRef = function(){
     var begin = this.pos;
     ++this.pos; // skip '\\';
 
-    if( this.names._size > 0 ){
+    if( DEFINE_REGEXP_COMPAT__ES2018 && this.names._size > 0 ){
         if( this.current() === 'k' ){
             ++this.pos; // skip 'k'
             if( this.current() !== '<' && DEFINE_REGEXP_COMPAT__DEBUG ){
@@ -927,10 +939,10 @@ Parser.prototype.tryParseEscape = function(){
             if( c === 'c' ){
                 return { type : REGEXP_COMPAT__PATTERN_IS_Char, value : 0x5c, raw : '\\', range : [ begin, this.pos ] };
             };
-            if( this.names._size === 0 || c !== 'k' ){
+            if( DEFINE_REGEXP_COMPAT__ES2018 && this.names._size === 0 || c !== 'k' ){
                 this.pos += c.length; // skip any char
                 return /** @type {Char} */ ({ type : REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw : '\\' + c, range : [ begin, this.pos ] });
-            }
+            };
         } else {
             if( !charSetIdContinue.has( value ) ){
                 this.pos += c.length; // skip any char

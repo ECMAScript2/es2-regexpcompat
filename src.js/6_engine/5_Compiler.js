@@ -12,8 +12,8 @@ Compiler = function( pattern ){
     this.pattern            = pattern;
     this.ignoreCase         = pattern.flagSet.ignoreCase;
     this.captureParens      = pattern.captureParens;
-    this.names              = pattern.names;
     if( DEFINE_REGEXP_COMPAT__ES2018 ){
+        this.names   = pattern.names;
         this.unicode = pattern.flagSet.unicode;
     };
 };

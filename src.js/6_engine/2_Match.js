@@ -4,7 +4,7 @@
  *
  * @param {string} input 
  * @param {Array.<number>} caps 
- * @param {Object<string, number>} names 
+ * @param {Object<string, number>=} names 
  */
 Match = function( input, caps, names ){
     /** An input string of this matching.
@@ -12,7 +12,10 @@ Match = function( input, caps, names ){
      */
     this.input  = input;
     this._caps  = caps;
-    this._names = names;
+
+    if( DEFINE_REGEXP_COMPAT__ES2018 ){
+        this._names = names;
+    };
 
     /** Return the initial index of this matching.
      * @type {number}
@@ -76,7 +79,7 @@ Match.prototype.end = function( k ){
  * @return {Array.<number>}
  */
 function Match_resolve( match, k ){
-    if( k === k + '' ){ // typeof k === 'string'
+    if( DEFINE_REGEXP_COMPAT__ES2018 && k === k + '' ){ // typeof k === 'string'
         k = match._names[ k ];
         k  = k !== undefined ? k : -1;
     };
@@ -103,7 +106,7 @@ Match.prototype.toArray = function(){
         array[ i ] = this.get( i );
     };
 
-    if( this._names.size > 0 ){
+    if( DEFINE_REGEXP_COMPAT__ES2018 && this._names._size > 0 ){
         var groups = {}, // <- Object.create( null ),
             names  = this._names;
         for( var name in names ){
@@ -112,7 +115,7 @@ Match.prototype.toArray = function(){
 
         // `RegExpExecArray`'s group does not accept `undefined` value, so cast to `any` for now.
         array.groups = groups;
-    } else {
+    // } else {
         // (array).groups = undefined;
     };
 
@@ -138,7 +141,7 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
         Match.prototype[ Symbol[ 'for' ]( 'nodejs.util.inspect.custom' ) ] = function( depth, options ){
             var s = options.stylize( 'Match', 'special' ) + ' [\n';
             var inverseNames = new Map(
-                    Array.from( this._names ).map( function( ki ){ return [ ki[ 1 ], ki[ 0 ] ]; } ) );
+                    Array.from( DEFINE_REGEXP_COMPAT__ES2018 ? this._names : {} ).map( function( ki ){ return [ ki[ 1 ], ki[ 0 ] ]; } ) );
 
             for( var i = 0, _i; i < this.length; i++ ){
                 _i = inverseNames.get( i );

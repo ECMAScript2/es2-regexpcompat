@@ -172,15 +172,13 @@ Program = function( pattern, codes ){
     if( DEFINE_REGEXP_COMPAT__ES2018 ){
         this.dotAll  = /** @type {boolean} */ (pattern.flagSet.dotAll);
         this.unicode = /** @type {boolean} */ (pattern.flagSet.unicode);
+        this.names   = /** @type {Object<string, number>} */ (pattern.names);
     };
 
     this.sticky = /** @type {boolean} */ (pattern.flagSet.sticky);
 
     /** @type {number} */
     this.captureParens = pattern.captureParens; // TODO
-
-    /** @type {Object<string, number>} */
-    this.names = pattern.names;
 };
 
 if( DEFINE_REGEXP_COMPAT__DEBUG ){
@@ -342,7 +340,11 @@ Program.prototype.exec = function( input, pos ){
                     };
                     break;
                 case REGEXP_COMPAT__OPCODE_IS_MATCH:
-                    return new Match( input, proc.caps, this.names );
+                    if( DEFINE_REGEXP_COMPAT__ES2018 ){
+                        return new Match( input, proc.caps, this.names );
+                    } else {
+                        return new Match( input, proc.caps );
+                    };
                 case REGEXP_COMPAT__OPCODE_IS_POP:
                     --proc.stackSize;
                     break;

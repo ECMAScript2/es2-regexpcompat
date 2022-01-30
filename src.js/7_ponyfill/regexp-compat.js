@@ -296,15 +296,19 @@ RegExpCompat.prototype[ 'replace' ] = function( string, replacer ){
                         result += string.slice( pos );
                         break;
                     case '<':
-                        var k = replacer.indexOf( '>', j + 2 );
-                        if( this.program.names._size === 0 || k === -1 ){
-                            i = j + 2;
-                            result += '$<';
-                            break;
+                        // https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/String/replace#specifying_a_string_as_a_parameter
+                        //   $<Name> 	ここで、Name はキャプチャするグループ名です。... 名前付きキャプチャグループに対応しているブラウザーのバージョンでのみ利用可能です。
+                        if( DEFINE_REGEXP_COMPAT__ES2018 ){
+                            var k = replacer.indexOf( '>', j + 2 );
+                            if( this.program.names._size === 0 || k === -1 ){
+                                i = j + 2;
+                                result += '$<';
+                                break;
+                            };
+                            var name = replacer.slice( j + 2, k );
+                            result += match.groups && match.groups[ name ] || '';
+                            i = k + 1;
                         };
-                        var name = replacer.slice( j + 2, k );
-                        result += match.groups && match.groups[ name ] || '';
-                        i = k + 1;
                         break;
                     default:
                         if( '0' <= c && c <= '9' ){
