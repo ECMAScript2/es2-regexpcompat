@@ -49,24 +49,26 @@ Match.prototype.get = function( k ){
     return this.input.slice( i, j );
 };
 
-/** Get the begin index of the capture `k`.
- * @param {(string|number)} k
- * @return {(number|undefined)}
- */
-Match.prototype.begin = function( k ){
-    var i = Match_resolve( this, k )[ 0 ];
+if( DEFINE_REGEXP_COMPAT__DEBUG ){
+    /** Get the begin index of the capture `k`.
+     * @param {(string|number)} k
+     * @return {(number|undefined)}
+     */
+    Match.prototype.begin = function( k ){
+        var i = Match_resolve( this, k )[ 0 ];
 
-    return i < 0 ? undefined : i;
-};
+        return i < 0 ? undefined : i;
+    };
 
-/** Get the end index of the capture `k`.
- * @param {(string|number)} k
- * @return {(number|undefined)}
- */
-Match.prototype.end = function( k ){
-    var j = Match_resolve( this, k )[ 1 ];
+    /** Get the end index of the capture `k`.
+     * @param {(string|number)} k
+     * @return {(number|undefined)}
+     */
+    Match.prototype.end = function( k ){
+        var j = Match_resolve( this, k )[ 1 ];
 
-    return j < 0 ? undefined : j;
+        return j < 0 ? undefined : j;
+    };
 };
 
 /**

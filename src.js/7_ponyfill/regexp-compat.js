@@ -58,9 +58,6 @@ RegExpCompat = function( source, flags ){
     if( DEFINE_REGEXP_COMPAT__DEBUG ){
         /** @type {Pattern} */
         this.pattern = pattern;
-    } else {
-        /** @type {string} */
-        this._strPattern = m_patternToString( pattern );
     };
 
     var compiler = new Compiler( pattern );
@@ -130,11 +127,7 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
 };
 
 RegExpCompat.prototype.toString = function(){
-    if( DEFINE_REGEXP_COMPAT__DEBUG ){
-        return m_patternToString( this.pattern );
-    } else {
-        return this._strPattern;
-    };
+    return '/' + this.source + '/' + this.flags;
 };
 
 var RegExpCompat_debugCount = 10;
@@ -268,7 +261,7 @@ RegExpCompat.prototype[ 'replace' ] = function( string, replacer ){
             if( match.groups ){
                 args.push( match.groups );
             };
-            result += '' + replacer.apply( null, args );
+            result += '' + replacer.apply( null, args ); // TODO .apply
         } else {
             var i = 0;
             for( ;; ){
