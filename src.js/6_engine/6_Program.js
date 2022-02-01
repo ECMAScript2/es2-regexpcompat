@@ -178,7 +178,7 @@ Program = function( pattern, codes ){
     this.sticky = /** @type {boolean} */ (pattern.flagSet.sticky);
 
     /** @type {number} */
-    this.captureParens = pattern.captureParens; // TODO
+    this.captureParens = pattern.captureParens;
 };
 
 if( DEFINE_REGEXP_COMPAT__DEBUG ){
