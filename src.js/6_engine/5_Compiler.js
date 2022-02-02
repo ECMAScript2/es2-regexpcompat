@@ -74,8 +74,9 @@ Compiler.prototype.compileNode = function( node ){
         case REGEXP_COMPAT__PATTERN_IS_BackRef :
             return this.compileBackRef( /** @type {BackRef} */ (node) );
         case REGEXP_COMPAT__PATTERN_IS_NamedBackRef :
-            return this.compileNamedBackRef( /** @type {NamedBackRef} */ (node) );
-
+            if( DEFINE_REGEXP_COMPAT__ES2018 ){
+                return this.compileNamedBackRef( /** @type {NamedBackRef} */ (node) );
+            };
         case REGEXP_COMPAT__PATTERN_IS_NamedCapture :
             if( DEFINE_REGEXP_COMPAT__ES2018 ){
                 return this.compileNamedCapture( /** @type {NamedCapture} */ (node) );
@@ -424,7 +425,7 @@ Compiler.prototype.compileLookAround = function( node ){
 Compiler.prototype.compileChar = function( node ){
     var value = node.value;
     if( this.ignoreCase ){
-        value = canonicalize( value, this.unicode );
+      value = canonicalize( value, this.unicode );
     };
     this.advance = true;
     return this.insertBack( [ { op: REGEXP_COMPAT__OPCODE_IS_CHAR, value : value } ] );

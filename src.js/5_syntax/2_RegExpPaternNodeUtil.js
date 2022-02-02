@@ -103,7 +103,9 @@ m_nodeToString = function( n ){
         case REGEXP_COMPAT__PATTERN_IS_BackRef :
             return '\\' + n.index;
         case REGEXP_COMPAT__PATTERN_IS_NamedBackRef :
-            return '\\k<' + n.raw + '>';
+            if( DEFINE_REGEXP_COMPAT__ES2018 ){
+                return '\\k<' + n.raw + '>';
+            };
         case REGEXP_COMPAT__PATTERN_IS_NamedCapture :
             if( DEFINE_REGEXP_COMPAT__ES2018 ){
                 return '(?<' + n.raw + '>' + m_nodeToString( n.child ) + ')';
