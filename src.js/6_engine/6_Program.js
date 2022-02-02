@@ -220,8 +220,7 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
  */
 Program.prototype.exec = function( input, pos ){
     while( pos <= input.length ){
-        var procs = [];
-        procs.push( Program_createProc( pos, this.captureParens, this.maxStackSize ) );
+        var procs = [ Program_createProc( pos, this.captureParens, this.maxStackSize ) ];
 
         while( procs.length > 0 ){
             var proc = procs[ procs.length - 1 ];

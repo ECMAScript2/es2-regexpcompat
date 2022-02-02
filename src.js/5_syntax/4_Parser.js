@@ -159,7 +159,7 @@ Parser.prototype.parse = function(){
 
     this.pos = 0;
     var child = this.parseDisjunction();
-    if( this.current() !== '' && DEFINE_REGEXP_COMPAT__DEBUG ){
+    if( DEFINE_REGEXP_COMPAT__DEBUG && this.current() !== '' ){
         throw new RegExpSyntaxError( "too many ')'" );
     };
 
@@ -780,7 +780,7 @@ Parser.prototype.tryParseBackRef = function(){
     if( DEFINE_REGEXP_COMPAT__ES2018 && this.names._size > 0 ){
         if( this.current() === 'k' ){
             ++this.pos; // skip 'k'
-            if( this.current() !== '<' && DEFINE_REGEXP_COMPAT__DEBUG ){
+            if( DEFINE_REGEXP_COMPAT__DEBUG && this.current() !== '<' ){
                 throw new RegExpSyntaxError('invalid named back reference');
             };
             var namePos = ++this.pos; // skip '<'
@@ -1057,7 +1057,7 @@ Parser.prototype.tryParseEscapeClass = function(){
                 var invert = c === 'P';
                 ++this.pos; // skip 'p' or 'P'
 
-                if( this.current() !== '{' && DEFINE_REGEXP_COMPAT__DEBUG ){
+                if( DEFINE_REGEXP_COMPAT__DEBUG && this.current() !== '{' ){
                     throw new RegExpSyntaxError('invalid Unicode property escape');
                 };
                 ++this.pos; // skip '{'
@@ -1078,17 +1078,17 @@ Parser.prototype.tryParseEscapeClass = function(){
                     };
                 };
 
-                if( this.current() !== '=' && DEFINE_REGEXP_COMPAT__DEBUG ){
+                if( DEFINE_REGEXP_COMPAT__DEBUG && this.current() !== '=' ){
                     throw new RegExpSyntaxError('invalid Unicode property escape');
                 };
                 ++this.pos; // skip '='
 
                 var value = this.parseUnicodePropertyValue();
-                if( value === '' && DEFINE_REGEXP_COMPAT__DEBUG ){
+                if( DEFINE_REGEXP_COMPAT__DEBUG && value === '' ){
                     throw new RegExpSyntaxError('invalid Unicode property value');
                 };
 
-                if( this.current() !== '}' && DEFINE_REGEXP_COMPAT__DEBUG ){
+                if( DEFINE_REGEXP_COMPAT__DEBUG && this.current() !== '}' ){
                     throw new RegExpSyntaxError('invalid Unicode property escape');
                 };
                 ++this.pos; // skip '}'
@@ -1145,7 +1145,7 @@ Parser.prototype.parseParen = function(){
         ++this.pos; // skip '('
         index = ++this.captureParensIndex;
         child = this.parseDisjunction();
-        if( this.current() !== ')' && DEFINE_REGEXP_COMPAT__DEBUG ){
+        if( DEFINE_REGEXP_COMPAT__DEBUG && this.current() !== ')' ){
             throw new RegExpSyntaxError('unterminated capture');
         };
         ++this.pos; // skip ')'
@@ -1155,7 +1155,7 @@ Parser.prototype.parseParen = function(){
     if( String_startsWith( this.source, '(?:', this.pos ) ){
         this.pos += 3; // skip '(?:'
         child = this.parseDisjunction();
-        if( this.current() !== ')' && DEFINE_REGEXP_COMPAT__DEBUG ){
+        if( DEFINE_REGEXP_COMPAT__DEBUG && this.current() !== ')' ){
             throw new RegExpSyntaxError('unterminated group');
         };
         ++this.pos; // skip ')'
@@ -1165,7 +1165,7 @@ Parser.prototype.parseParen = function(){
     if( String_startsWith( this.source, '(?=', this.pos ) ){
         this.pos += 3; // skip '(?='
         child = this.parseDisjunction();
-        if( this.current() !== ')' && DEFINE_REGEXP_COMPAT__DEBUG ){
+        if( DEFINE_REGEXP_COMPAT__DEBUG && this.current() !== ')' ){
             throw new RegExpSyntaxError('unterminated look-ahead');
         };
         ++this.pos; // skip ')'
@@ -1175,7 +1175,7 @@ Parser.prototype.parseParen = function(){
     if( String_startsWith( this.source, '(?!', this.pos ) ){
         this.pos += 3; // skip '(?!'
         child = this.parseDisjunction();
-        if( this.current() !== ')' && DEFINE_REGEXP_COMPAT__DEBUG ){
+        if( DEFINE_REGEXP_COMPAT__DEBUG && this.current() !== ')' ){
             throw new RegExpSyntaxError('unterminated look-ahead');
         };
         ++this.pos; // skip ')'
@@ -1186,7 +1186,7 @@ Parser.prototype.parseParen = function(){
         if( String_startsWith( this.source, '(?<=', this.pos ) ){
             this.pos += 4; // skip '(?<='
             child = this.parseDisjunction();
-            if( this.current() !== ')' && DEFINE_REGEXP_COMPAT__DEBUG ){
+            if( DEFINE_REGEXP_COMPAT__DEBUG && this.current() !== ')' ){
                 throw new RegExpSyntaxError('unterminated look-behind');
             };
             ++this.pos; // skip ')'
@@ -1196,7 +1196,7 @@ Parser.prototype.parseParen = function(){
         if( String_startsWith( this.source, '(?<!', this.pos ) ){
             this.pos += 4; // skip '(?<!'
             child = this.parseDisjunction();
-            if( this.current() !== ')' && DEFINE_REGEXP_COMPAT__DEBUG ){
+            if( DEFINE_REGEXP_COMPAT__DEBUG && this.current() !== ')' ){
                 throw new RegExpSyntaxError('unterminated look-behind');
             };
             ++this.pos; // skip ')'
@@ -1209,11 +1209,11 @@ Parser.prototype.parseParen = function(){
             var namePos = this.pos;
             var name = this.parseCaptureName();
             var raw = this.source.slice( namePos, this.pos - 1 );
-            if( this.names[ name ] !== index && DEFINE_REGEXP_COMPAT__DEBUG ){
+            if( DEFINE_REGEXP_COMPAT__DEBUG && this.names[ name ] !== index ){
                 throw new Error('BUG: invalid named capture');
             };
             child = this.parseDisjunction();
-            if( this.current() !== ')' && DEFINE_REGEXP_COMPAT__DEBUG ){
+            if( DEFINE_REGEXP_COMPAT__DEBUG && this.current() !== ')' ){
                 throw new RegExpSyntaxError('unterminated named capture');
             };
             ++this.pos; // skip ')'
@@ -1254,7 +1254,7 @@ Parser.prototype.parseCaptureName = function(){
         name += part;
     };
 
-    if( this.current() !== '>' && DEFINE_REGEXP_COMPAT__DEBUG ){
+    if( DEFINE_REGEXP_COMPAT__DEBUG && this.current() !== '>' ){
         throw new RegExpSyntaxError('invalid capture group name');
     };
     ++this.pos; // skip '>'
@@ -1284,10 +1284,10 @@ Parser.prototype.parseCaptureNameChar = function(){
  * @return {number}
  */
 Parser.prototype.parseDigits = function(){
-    var s = '';
+    var s = '', c;
 
-    while( isDigit( this.current() ) ){
-        s += this.current();
+    while( isDigit( c = this.current() ) ){
+        s += c;
         ++this.pos; // skip digit
     };
     return s === '' ? -1 : /* Number. */ parseInt( s, 10 );
@@ -1298,9 +1298,9 @@ Parser.prototype.parseDigits = function(){
  * @return {number}
  */
 Parser.prototype.parseHexDigits = function(){
-    var s = '';
+    var s = '', c;
 
-    for( var c; isHexDigit( c = this.current() ); ){
+    for( ; isHexDigit( c = this.current() ); ){
         s += c;
         this.pos += c.length; // skip hex digit
     };
