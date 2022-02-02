@@ -425,7 +425,7 @@ Compiler.prototype.compileLookAround = function( node ){
 Compiler.prototype.compileChar = function( node ){
     var value = node.value;
     if( this.ignoreCase ){
-      value = canonicalize( value, this.unicode );
+        value = DEFINE_REGEXP_COMPAT__ES2018 ? canonicalize( value, this.unicode ) : canonicalize( value );
     };
     this.advance = true;
     return this.insertBack( [ { op: REGEXP_COMPAT__OPCODE_IS_CHAR, value : value } ] );

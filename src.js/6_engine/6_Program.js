@@ -25,7 +25,7 @@ function getIndex( s, i, unicode ){
  * @return {number}
  */
 function prevIndex( s, i, unicode ){
-    var c = getIndex( s, i - 1, unicode );
+    var c = DEFINE_REGEXP_COMPAT__ES2018 ? getIndex( s, i - 1, unicode ) : getIndex( s, i - 1 );
 
     if( !DEFINE_REGEXP_COMPAT__ES2018 || !unicode ){
         return c;
@@ -232,7 +232,7 @@ Program.prototype.exec = function( input, pos ){
 
             switch( code.op ){
                 case REGEXP_COMPAT__OPCODE_IS_ANY :
-                    c = getIndex( input, proc.pos, this.unicode );
+                    c = DEFINE_REGEXP_COMPAT__ES2018 ? getIndex( input, proc.pos, this.unicode ) : getIndex( input, proc.pos );
                     if( c >= 0 && ( ( DEFINE_REGEXP_COMPAT__ES2018 && this.dotAll ) || !isLineTerminator( c ) ) ){
                         proc.pos += size( c );
                     } else {
@@ -240,7 +240,7 @@ Program.prototype.exec = function( input, pos ){
                     };
                     break;
                 case REGEXP_COMPAT__OPCODE_IS_BACK :
-                    c = prevIndex( input, proc.pos, this.unicode );
+                    c = DEFINE_REGEXP_COMPAT__ES2018 ? prevIndex( input, proc.pos, this.unicode ) : prevIndex( input, proc.pos );
                     if( c >= 0 ){
                         proc.pos -= size( c );
                     } else {
@@ -259,11 +259,11 @@ Program.prototype.exec = function( input, pos ){
                     };
                     break;
                 case REGEXP_COMPAT__OPCODE_IS_CHAR :
-                    c = getIndex( input, proc.pos, this.unicode );
+                    c = DEFINE_REGEXP_COMPAT__ES2018 ? getIndex( input, proc.pos, this.unicode ) : getIndex( input, proc.pos );
                     if( c < 0 ){
                         backtrack = true;
                     };
-                    cc = this.ignoreCase ? canonicalize( c, this.unicode ) : c;
+                    cc = this.ignoreCase ? DEFINE_REGEXP_COMPAT__ES2018 ? canonicalize( c, this.unicode ) : canonicalize( c ) : c;
                     if( cc === /** @type {OpCode_Char} */ (code).value ){
                         proc.pos += size( c );
                     } else {
@@ -272,18 +272,18 @@ Program.prototype.exec = function( input, pos ){
                     break;
                 case REGEXP_COMPAT__OPCODE_IS_CLASS :
                 case REGEXP_COMPAT__OPCODE_IS_CLASS_NOT :
-                    c = getIndex( input, proc.pos, this.unicode );
+                    c = DEFINE_REGEXP_COMPAT__ES2018 ? getIndex( input, proc.pos, this.unicode ) : getIndex( input, proc.pos );;
                     if( c < 0 ){
                         backtrack = true;
                         break;
                     };
-                    cc = this.ignoreCase ? canonicalize( c, this.unicode ) : c;
+                    cc = this.ignoreCase ? DEFINE_REGEXP_COMPAT__ES2018 ? canonicalize( c, this.unicode ) : canonicalize( c ) : c;
 
                     var actual = /** @type {OpCode_Class|OpCode_Class_not} */ (code).set.has( cc );
                     var expected = /** @type {OpCode_Class|OpCode_Class_not} */ (code).op === REGEXP_COMPAT__OPCODE_IS_CLASS;
 
                     if( this.ignoreCase ){
-                        var uncanonicalized = uncanonicalize( cc, this.unicode ); // memo 何度も uncanonicalize() が呼ばれるのを修正
+                        var uncanonicalized = DEFINE_REGEXP_COMPAT__ES2018 ? uncanonicalize( cc, this.unicode ) : uncanonicalize( cc ); // memo 何度も uncanonicalize() が呼ばれるのを修正
                         var l = uncanonicalized.length;
                         for( d = 0; d < l; ++d ){
                             actual = actual || /** @type {OpCode_Class|OpCode_Class_not} */ (code).set.has( uncanonicalized[ d ] );
@@ -321,13 +321,13 @@ Program.prototype.exec = function( input, pos ){
                     proc.pc += /** @type {OpCode_Jump} */ (code).cont;
                     break;
                 case REGEXP_COMPAT__OPCODE_IS_LINE_BEGIN :
-                    c = prevIndex( input, proc.pos, this.unicode );
+                    c = DEFINE_REGEXP_COMPAT__ES2018 ? prevIndex( input, proc.pos, this.unicode ) : prevIndex( input, proc.pos );
                     if( proc.pos !== 0 && !( this.multiline && isLineTerminator( c ) ) ){
                         backtrack = true;
                     };
                     break;
                 case REGEXP_COMPAT__OPCODE_IS_LINE_END:
-                    c = getIndex( input, proc.pos, this.unicode );
+                    c = DEFINE_REGEXP_COMPAT__ES2018 ? getIndex( input, proc.pos, this.unicode ) : getIndex( input, proc.pos );
                     if( proc.pos !== input.length && !( this.multiline && isLineTerminator( c ) ) ){
                         backtrack = true;
                     };
@@ -362,11 +362,11 @@ Program.prototype.exec = function( input, pos ){
                     var s = begin < 0 || end < 0 ? '' : input.slice( begin, end );
                     var i = 0;
                     while( i < s.length ){
-                        c = getIndex( input, proc.pos, this.unicode );
-                        d = getIndex( s, i, this.unicode );
+                        c = DEFINE_REGEXP_COMPAT__ES2018 ? getIndex( input, proc.pos, this.unicode ) : getIndex( input, proc.pos );
+                        d = DEFINE_REGEXP_COMPAT__ES2018 ? getIndex(      s,       i, this.unicode ) : getIndex( s, i );
 
-                        cc = this.ignoreCase ? canonicalize( c, this.unicode ) : c;
-                        dc = this.ignoreCase ? canonicalize( d, this.unicode ) : d;
+                        cc = this.ignoreCase ? DEFINE_REGEXP_COMPAT__ES2018 ? canonicalize( c, this.unicode ) : canonicalize( c ) : c;
+                        dc = this.ignoreCase ? DEFINE_REGEXP_COMPAT__ES2018 ? canonicalize( d, this.unicode ) : canonicalize( d ) : d;
 
                         if( cc !== dc ){
                             backtrack = true;
@@ -383,11 +383,11 @@ Program.prototype.exec = function( input, pos ){
                     var s = begin < 0 || end < 0 ? '' : input.slice( begin, end );
                     var i = s.length;
                     while( i > 0 ){
-                        c = prevIndex( input, proc.pos, this.unicode );
-                        d = prevIndex( s, i, this.unicode );
+                        c = DEFINE_REGEXP_COMPAT__ES2018 ? prevIndex( input, proc.pos, this.unicode ) : prevIndex( input, proc.pos );
+                        d = DEFINE_REGEXP_COMPAT__ES2018 ? prevIndex(     s,        i, this.unicode ) : prevIndex( s, i );
 
-                        cc = this.ignoreCase ? canonicalize( c, this.unicode ) : c;
-                        dc = this.ignoreCase ? canonicalize( d, this.unicode ) : d;
+                        cc = this.ignoreCase ? DEFINE_REGEXP_COMPAT__ES2018 ? canonicalize( c, this.unicode ) : canonicalize( c ) : c;
+                        dc = this.ignoreCase ? DEFINE_REGEXP_COMPAT__ES2018 ? canonicalize( d, this.unicode ) : canonicalize( d ) : d;
 
                         if( cc !== dc ){
                             backtrack = true;
@@ -407,8 +407,8 @@ Program.prototype.exec = function( input, pos ){
                     break;
                 case REGEXP_COMPAT__OPCODE_IS_WORD_BOUNDARY:
                 case REGEXP_COMPAT__OPCODE_IS_WORD_BOUNDARY_NOT:
-                    c = prevIndex( input, proc.pos, this.unicode );
-                    d = getIndex( input, proc.pos, this.unicode );
+                    c = DEFINE_REGEXP_COMPAT__ES2018 ? prevIndex( input, proc.pos, this.unicode ) : prevIndex( input, proc.pos );
+                    d = DEFINE_REGEXP_COMPAT__ES2018 ? getIndex( input, proc.pos, this.unicode ) : getIndex( input, proc.pos );
                     var set = DEFINE_REGEXP_COMPAT__ES2018 && this.unicode && this.ignoreCase ? m_charSetUnicodeWord : m_charSetWord;
                     var actual = set.has( c ) !== set.has( d );
                     var expected = code.op === REGEXP_COMPAT__OPCODE_IS_WORD_BOUNDARY;
@@ -427,7 +427,7 @@ Program.prototype.exec = function( input, pos ){
             break;
         };
 
-        pos += size( getIndex( input, pos, this.unicode ) );
+        pos += size( DEFINE_REGEXP_COMPAT__ES2018 ? getIndex( input, pos, this.unicode ) : getIndex( input, pos ) );
     };
 
     return null;

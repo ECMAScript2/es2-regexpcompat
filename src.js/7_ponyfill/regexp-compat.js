@@ -214,7 +214,7 @@ RegExpCompat.prototype[ 'match' ] = function( string ){
         for( var r; r = this.exec( string ) ; ){
             result.push( r[ 0 ] );
             if( r[ 0 ] === '' ){
-                this.lastIndex = advance( string, this.lastIndex, this.unicode );
+                this.lastIndex = DEFINE_REGEXP_COMPAT__ES2018 ? advance( string, this.lastIndex, this.unicode ) : advance( string, this.lastIndex );
             };
         };
         return result.length === 0 ? null : result;
@@ -243,7 +243,7 @@ RegExpCompat.prototype[ 'replace' ] = function( string, replacer ){
             break;
         };
         if( match[ 0 ] === '' ){
-            this.lastIndex = advance( string, this.lastIndex, this.unicode );
+            this.lastIndex = DEFINE_REGEXP_COMPAT__ES2018 ? advance( string, this.lastIndex, this.unicode ) : advance( string, this.lastIndex );
         };
     };
 
@@ -380,13 +380,13 @@ RegExpCompat.prototype.split = function( string, limit ){
         splitter.lastIndex = q;
         match = splitter.exec( string );
         if( !match ){
-            q = advance( string, q, this.unicode );
+            q = DEFINE_REGEXP_COMPAT__ES2018 ? advance( string, q, this.unicode ) : advance( string, q );
             continue;
         };
 
         var e = Math.min( splitter.lastIndex, len );
         if( e === p ){
-            q = advance( string, q, this.unicode );
+            q = DEFINE_REGEXP_COMPAT__ES2018 ? advance( string, q, this.unicode ) : advance( string, q );
             continue;
         };
 
