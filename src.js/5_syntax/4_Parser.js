@@ -4,18 +4,26 @@
  * @return {boolean} 
  */
 function isAssertion( n ){
-    switch( n.type ){
-        case REGEXP_COMPAT__PATTERN_IS_WordBoundary :
-        case REGEXP_COMPAT__PATTERN_IS_LineBegin :
-        case REGEXP_COMPAT__PATTERN_IS_LineEnd :
-        case REGEXP_COMPAT__PATTERN_IS_LookAhead :
-            return true;
-        case REGEXP_COMPAT__PATTERN_IS_LookBehind :
-            if( DEFINE_REGEXP_COMPAT__ES2018 ){
+    // https://twitter.com/itozyun/status/1488876610077954051
+    //   Closure Compiler が生成するラベル付き break が Opera 7.5x- で構文エラーになるので
+    //   以下の通りに書き換えた
+    if( DEFINE_REGEXP_COMPAT__MINIFY ){
+        return REGEXP_COMPAT__PATTERN_IS_WordBoundary <= n.type &&
+               n.type <= ( DEFINE_REGEXP_COMPAT__ES2018 ? REGEXP_COMPAT__PATTERN_IS_LookBehind : REGEXP_COMPAT__PATTERN_IS_LookAhead );
+    } else {
+        switch( n.type ){
+            case REGEXP_COMPAT__PATTERN_IS_WordBoundary :
+            case REGEXP_COMPAT__PATTERN_IS_LineBegin :
+            case REGEXP_COMPAT__PATTERN_IS_LineEnd :
+            case REGEXP_COMPAT__PATTERN_IS_LookAhead :
                 return true;
-            };
+            case REGEXP_COMPAT__PATTERN_IS_LookBehind :
+                if( DEFINE_REGEXP_COMPAT__ES2018 ){
+                    return true;
+                };
+        };
+        return false;
     };
-    return false;
 };
 
 /** Check the character is sequence delimiter.
@@ -877,14 +885,13 @@ Parser.prototype.tryParseEscape = function(){
                 range : [ begin, this.pos ]
             };
         }
-        case '0': {
+        case '0':
             ++this.pos; // skip '0'
             if( isDigit( this.current() ) ){
                 --this.pos; // go back '0'
                 break;
             };
             return { type : REGEXP_COMPAT__PATTERN_IS_Char, value : 0, raw : '\\0', range : [ begin, this.pos ] };
-        };
         case '':
             if( DEFINE_REGEXP_COMPAT__DEBUG ){
                 throw new RegExpSyntaxError('\\ at end of pattern');
