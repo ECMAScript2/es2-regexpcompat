@@ -1,7 +1,7 @@
 /** Return case-folded code point for ignore-case comparison.
  *
  * @param {number} c
- * @param {boolean|undefined} unicode
+ * @param {boolean=} unicode
  * @return {number} 
  */
 canonicalize = function( c, unicode ){
@@ -27,7 +27,7 @@ canonicalize = function( c, unicode ){
  * It is used for character class matching on ignore-case.
  *
  * @param {number} c
- * @param {boolean|undefined} unicode
+ * @param {boolean=} unicode
  * @return {Array.<number>} 
  */
 uncanonicalize = function( c, unicode ){
