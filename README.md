@@ -1,12 +1,8 @@
-# ReRE.js
+# ReRE.js for ECMAScript 2
 
-<p>
-  <b>Re</b>-implementation of ECMA-262 (JavaScript) <code><b>R</b>eg<b>E</b>xp</code>.
-</p>
+makenowjust 氏による `RegExp` の Javascript 再実装 [ReRE.js](https://github.com/makenowjust/rerejs/) を書き換えて、ES2 相当(Internet Exproler 4.0, JScript 3.0, JavaScript 1.3)のブラウザでの動作を目指しています。
 
-[![codecov](https://codecov.io/gh/MakeNowJust/rerejs/branch/master/graph/badge.svg)](https://codecov.io/gh/MakeNowJust/rerejs)
-[![GitHub Actions status](https://github.com/MakeNowJust/rerejs/workflows/test/badge.svg)](https://github.com/MakeNowJust/rerejs/actions)
-[![NPM version](https://img.shields.io/npm/v/rerejs)](https://www.npmjs.com/package/rerejs)
+複数のビルドオプションを備えていて、必要な ECMAScript Version の機能を備えたコンパクトな JavaScript を提供します。
 
 ## About
 

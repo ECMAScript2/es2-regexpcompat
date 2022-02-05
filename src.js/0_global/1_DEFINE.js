@@ -7,4 +7,6 @@ var /** @define {boolean} */
     /** @define {boolean} */
     DEFINE_REGEXP_COMPAT__ES2015 = true,
     /** @define {boolean} */
-    DEFINE_REGEXP_COMPAT__ES2018 = true;
+    DEFINE_REGEXP_COMPAT__ES2018 = true,
+    /** @define {boolean} */
+    DEFINE_REGEXP_COMPAT__EXPORT_BY_RETURN = false;

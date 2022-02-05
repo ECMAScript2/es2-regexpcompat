@@ -411,4 +411,12 @@ RegExpCompat.prototype.split = function( string, limit ){
     return result;
 };
 
-this[ 'RegExpCompat' ] = RegExpCompat;
+if( DEFINE_REGEXP_COMPAT__NODEJS ){
+  if( this.module ){
+    this.module.exports = RegExpCompat;
+  };
+};
+
+if( DEFINE_REGEXP_COMPAT__EXPORT_BY_RETURN ){
+  return RegExpCompat;
+};
