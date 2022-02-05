@@ -249,44 +249,47 @@ RegExpCompat.prototype[ 'replace' ] = function( string, replacer ){
 
     // Build a result string.
     var pos = 0;
-    var result = '';
+    var result = [];
+    var resultIndex = -1;
     var l = matches.length;
     for( var index = 0, match; index < l; ++index ){
         match = matches[ index ];
-        result += string.slice( pos, match.index );
+        result[ ++resultIndex ] = string.slice( pos, match.index );
         pos = match.index + match[ 0 ].length;
+
         if( replacerIsFunction ){
             var args = Array_from( match );
             args.push( match.index, string );
             if( match.groups ){
                 args.push( match.groups );
             };
-            result += '' + replacer.apply( null, args ); // TODO .apply
+            result[ ++resultIndex ] = '' + replacer.apply( null, args );
         } else {
             var i = 0;
             for( ;; ){
                 var j = replacer.indexOf( '$', i );
-                result += replacer.slice( i, j === -1 ? string.length : j );
                 if( j === -1 ){
+                    result[ ++resultIndex ] = replacer;
                     break;
                 };
+                result[ ++resultIndex ] = replacer.slice( i, j );
                 var c = replacer.charAt( j + 1 );
                 switch( c ){
                     case '$':
                         i = j + 2;
-                        result += '$';
+                        result[ ++resultIndex ] = '$';
                         break;
                     case '&':
                         i = j + 2;
-                        result += match[ 0 ];
+                        result[ ++resultIndex ] = match[ 0 ];
                         break;
                     case '`':
                         i = j + 2;
-                        result += string.slice( 0, match.index );
+                        result[ ++resultIndex ] = string.slice( 0, match.index );
                         break;
                     case "'":
                         i = j + 2;
-                        result += string.slice( pos );
+                        result[ ++resultIndex ] = string.slice( pos );
                         break;
                     case '<':
                         // https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/String/replace#specifying_a_string_as_a_parameter
@@ -295,11 +298,11 @@ RegExpCompat.prototype[ 'replace' ] = function( string, replacer ){
                             var k = replacer.indexOf( '>', j + 2 );
                             if( this.program.names._size === 0 || k === -1 ){
                                 i = j + 2;
-                                result += '$<';
+                                result[ ++resultIndex ] = '$<';
                                 break;
                             };
                             var name = replacer.slice( j + 2, k );
-                            result += match.groups && match.groups[ name ] || '';
+                            result[ ++resultIndex ] = match.groups && match.groups[ name ] || '';
                             i = k + 1;
                         };
                         break;
@@ -309,18 +312,18 @@ RegExpCompat.prototype[ 'replace' ] = function( string, replacer ){
                             var s = '0' <= d && d <= '9' ? c + d : c;
                             var n = s - 0; // Number.parseInt( s, 10 );
                             if( 0 < n && n < match.length ){
-                                result += match[ n ] || '';
+                                result[ ++resultIndex ] = match[ n ] || '';
                                 i = j + 1 + s.length;
                                 break;
                             };
                             n = Math_floor( n / 10 );
                             if( 0 < n && n < match.length ){
-                                result += match[ n ] || '';
+                                result[ ++resultIndex ] = match[ n ] || '';
                                 i = j + s.length;
                                 break;
                             };
                         };
-                        result += '$';
+                        result[ ++resultIndex ] = '$';
                         i = j + 1;
                         break;
                 };
@@ -328,8 +331,8 @@ RegExpCompat.prototype[ 'replace' ] = function( string, replacer ){
         };
     };
 
-    result += string.slice( pos );
-    return result;
+    result[ ++resultIndex ] = string.slice( pos );
+    return result.join( '' );
 };
 
 /**
@@ -412,11 +415,11 @@ RegExpCompat.prototype.split = function( string, limit ){
 };
 
 if( DEFINE_REGEXP_COMPAT__NODEJS ){
-  if( this.module ){
-    this.module.exports = RegExpCompat;
-  };
+    if( this.module ){
+        this.module.exports = RegExpCompat;
+    };
 };
 
 if( DEFINE_REGEXP_COMPAT__EXPORT_BY_RETURN ){
-  return RegExpCompat;
+    return RegExpCompat;
 };
