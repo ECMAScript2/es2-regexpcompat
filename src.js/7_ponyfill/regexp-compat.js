@@ -260,7 +260,7 @@ RegExpCompat.prototype[ 'replace' ] = function( string, replacer ){
         if( replacerIsFunction ){
             var args = Array_from( match );
             args.push( match.index, string );
-            if( match.groups ){
+            if( DEFINE_REGEXP_COMPAT__ES2018 && match.groups ){
                 args.push( match.groups );
             };
             result[ ++resultIndex ] = '' + replacer.apply( null, args );
