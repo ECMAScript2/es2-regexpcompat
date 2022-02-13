@@ -145,7 +145,7 @@ gulp.task( '__compile', gulp.series(
         ).pipe(
             closureCompiler(
                 {
-                    externs           : [ './src.externs/externs.generated.js' ],
+                    // externs           : [ './src.externs/externs.generated.js' ],
                     // compilation_level : 'ADVANCED',
                     compilation_level : 'WHITESPACE_ONLY',
                     // env               : 'CUSTOM',
@@ -161,7 +161,7 @@ gulp.task( '__compile', gulp.series(
     }
 ) );
 
-var strCompileType       = 'develop'; // .release .debug .develop
+var strCompileType       = 'release'; // .release .debug .develop
 var ecmaFeatureVersion   = 3;
 var minTargetECMAVersion = 2;
 
