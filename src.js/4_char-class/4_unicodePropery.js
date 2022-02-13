@@ -20,7 +20,7 @@ m_loadCategory = function( v ){
         return;
     };
     var set = new CharSet( data );
-    Unicode_CACHE[ key ] = set;;
+    Unicode_CACHE[ key ] = set;
     return set;
 };
 
@@ -43,7 +43,7 @@ function loadScript(v){
         return;
     };
     var set = new CharSet( data );
-    Unicode_CACHE[ key ] = set;;
+    Unicode_CACHE[ key ] = set;
     return set;
 };
 
@@ -132,6 +132,5 @@ m_loadPropertyValue = function( p, v ){
         case 'scx' :
         case 'Script_Extensions':
             return loadScriptExtensions( v );
-
     };
 };
