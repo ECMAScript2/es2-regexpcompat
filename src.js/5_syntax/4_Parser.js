@@ -149,17 +149,17 @@ Parser = function( source, flags, additional ){
  */
 Parser.prototype.parse = function(){
     /** @type {FlagSet} Parsed flags. */
-    this.flagSet = this.preprocessFlags();
+    this.flagSet = Parser_preprocessFlags( this.flags );
 
     if( DEFINE_REGEXP_COMPAT__ES2018 ){
         this.unicode = /** @type {boolean} Is the `flagSet` has `unicode`? */ (this.flagSet.unicode);
     };
 
-    this.preprocessCaptures();
+    Parser_preprocessCaptures( this );
 
     this.pos = 0;
-    var child = this.parseDisjunction();
-    if( DEFINE_REGEXP_COMPAT__DEBUG && this.current() !== '' ){
+    var child = Parser_parseDisjunction( this );
+    if( DEFINE_REGEXP_COMPAT__DEBUG && Parser_current( this ) !== '' ){
         throw new RegExpSyntaxError( "too many ')'" );
     };
 
@@ -184,9 +184,10 @@ Parser.prototype.parse = function(){
 };
 
 /** Parse flags.
+ * @param {string} flags
  * @return {FlagSet}
  */
-Parser.prototype.preprocessFlags = function(){
+function Parser_preprocessFlags( flags ){
     var flagSet;
 
     if( DEFINE_REGEXP_COMPAT__ES2018 ){
@@ -208,10 +209,10 @@ Parser.prototype.preprocessFlags = function(){
             sticky     : false
         };
     };
-    var l = this.flags.length;
+    var l = flags.length;
 
     for( ; l; ){
-        switch( this.flags.charAt( --l ) ){
+        switch( flags.charAt( --l ) ){
             case 'g':
                 if( flagSet.global && DEFINE_REGEXP_COMPAT__DEBUG ){
                     throw new RegExpSyntaxError("duplicated 'g' flag");
@@ -266,61 +267,65 @@ Parser.prototype.preprocessFlags = function(){
  *
  * This process is needed before parsing because the syntax changes
  * its behavior when a pattern has named captrue.
+ * 
+ * @param {Parser} parser
  */
-Parser.prototype.preprocessCaptures = function(){
-    var len = this.source.length;
+function Parser_preprocessCaptures( parser ){
+    var len = parser.source.length;
 
-    while( this.pos < len ){
-        var c = this.current();
+    while( parser.pos < len ){
+        var c = Parser_current( parser );
         switch( c ){
             case '(' :
-                if( DEFINE_REGEXP_COMPAT__ES2018 && String_startsWith( this.source, '(?<', this.pos ) ){
-                    this.pos += 3; // skip '(?<'
-                    var d = this.current();
+                if( DEFINE_REGEXP_COMPAT__ES2018 && String_startsWith( parser.source, '(?<', parser.pos ) ){
+                    parser.pos += 3; // skip '(?<'
+                    var d = Parser_current( parser );
                     if( d !== '=' && d !== '!' ){
-                        ++this.captureParens;
-                        var name = this.parseCaptureName();
-                        if( !this.names[ name ] ){
-                            ++this.names._size;
+                        ++parser.captureParens;
+                        var name = Parser_parseCaptureName( parser );
+                        if( !parser.names[ name ] ){
+                            ++parser.names._size;
                         };
-                        this.names[ name ] = this.captureParens;
+                        parser.names[ name ] = parser.captureParens;
                     };
                 } else {
-                    if( !String_startsWith( this.source, '(?', this.pos ) ){
-                        ++this.captureParens;
+                    if( !String_startsWith( parser.source, '(?', parser.pos ) ){
+                        ++parser.captureParens;
                     };
-                    ++this.pos; // skip '('
+                    ++parser.pos; // skip '('
                 };
                 break;
             case '\\':
-                ++this.pos; // skip '\\'
-                this.pos += this.current().length; // skip any character.
+                ++parser.pos; // skip '\\'
+                parser.pos += Parser_current( parser ).length; // skip any character.
                 break;
             case '[':
-                this.skipCharClass();
+                Parser_skipCharClass( parser );
                 break;
             default:
-                this.pos += c.length; // skip any character.
+                parser.pos += c.length; // skip any character.
                 break;
         };
     };
 };
 
-/** Skip character class without parsing. */
-Parser.prototype.skipCharClass = function(){
-    ++this.pos; // skip '['
-    while( this.pos < this.source.length ){
-        var c = this.current();
+/** Skip character class without parsing.
+ * @param {Parser} parser
+ */
+function Parser_skipCharClass( parser ){
+    ++parser.pos; // skip '['
+    while( parser.pos < parser.source.length ){
+        var c = Parser_current( parser );
         switch( c ){
             case ']':
-                ++this.pos; // skip ']'
+                ++parser.pos; // skip ']'
                 return;
             case '\\':
-                ++this.pos; // skip '\\'
-                this.pos += this.current().length; // skip any character.
+                ++parser.pos; // skip '\\'
+                parser.pos += Parser_current( parser ).length; // skip any character.
                 break;
             default:
-                this.pos += c.length; // skip any character
+                parser.pos += c.length; // skip any character
                 break;
         };
     };
@@ -331,22 +336,23 @@ Parser.prototype.skipCharClass = function(){
  *
  * See https://www.ecma-international.org/ecma-262/10.0/index.html#prod-Disjunction.
  * 
+ * @param {Parser} parser
  * @return {Disjunction}
  */
-Parser.prototype.parseDisjunction = function(){
-    var begin = this.pos;
-    var children = [ this.parseSequence() ];
+function Parser_parseDisjunction( parser ){
+    var begin = parser.pos;
+    var children = [ Parser_parseSequence( parser ) ];
 
-    for( ; this.current() === '|'; ){
-        ++this.pos; // skip '|'
-        children.push( this.parseSequence() );
+    for( ; Parser_current( parser ) === '|'; ){
+        ++parser.pos; // skip '|'
+        children.push( Parser_parseSequence( parser ) );
     };
 
     if( children.length === 1 ){
         return children[ 0 ];
     };
 
-    return { type : REGEXP_COMPAT__PATTERN_IS_Disjunction, children : children, range : [ begin, this.pos ] };
+    return { type : REGEXP_COMPAT__PATTERN_IS_Disjunction, children : children, range : [ begin, parser.pos ] };
 };
 
 /**
@@ -359,21 +365,22 @@ Parser.prototype.parseDisjunction = function(){
  *
  * See https://www.ecma-international.org/ecma-262/10.0/index.html#prod-Alternative.
  *
+ * @param {Parser} parser
  * @return {Sequence}
  */
-Parser.prototype.parseSequence = function(){
-    var begin = this.pos;
+function Parser_parseSequence( parser ){
+    var begin = parser.pos;
     var children = [];
 
-    for( ; !isSequenceDelimiter( this.current() ); ){
-        children.push( this.parseQuantifier() );
+    for( ; !isSequenceDelimiter( Parser_current( parser ) ); ){
+        children.push( Parser_parseQuantifier( parser ) );
     };
 
     if( children.length === 1 ){
         return children[ 0 ];
     };
 
-    return { type: REGEXP_COMPAT__PATTERN_IS_Sequence, children : children, range: [ begin, this.pos ] };
+    return { type: REGEXP_COMPAT__PATTERN_IS_Sequence, children : children, range: [ begin, parser.pos ] };
 };
 
 /**
@@ -387,30 +394,31 @@ Parser.prototype.parseSequence = function(){
  * See https://www.ecma-international.org/ecma-262/10.0/index.html#prod-Quantifier,
  * and https://www.ecma-international.org/ecma-262/10.0/index.html#prod-Term.
  *
+ * @param {Parser} parser
  * @return {RegExpPaternNode}
  */
-Parser.prototype.parseQuantifier = function(){
-    var begin = this.pos;
-    var child = /** @type {RegExpPaternNode} */ ( this.parseAtom() );
+function Parser_parseQuantifier( parser ){
+    var begin = parser.pos;
+    var child = /** @type {RegExpPaternNode} */ (Parser_parseAtom( parser ));
 
     if( isAssertion( child ) ){
-        if( this.additional &&
-            ( !DEFINE_REGEXP_COMPAT__ES2018 || !this.unicode ) &&
+        if( parser.additional &&
+            ( !DEFINE_REGEXP_COMPAT__ES2018 || !parser.unicode ) &&
             child.type === REGEXP_COMPAT__PATTERN_IS_LookAhead
         ){} else {
             return child;
         };
     };
 
-    switch( this.current() ){
+    switch( Parser_current( parser ) ){
         case '*':
-            return this.parseSimpleQuantifier( REGEXP_COMPAT__PATTERN_IS_Many, begin, child );
+            return Parser_parseSimpleQuantifier( parser, REGEXP_COMPAT__PATTERN_IS_Many, begin, child );
         case '+':
-            return this.parseSimpleQuantifier( REGEXP_COMPAT__PATTERN_IS_Some, begin, child );
+            return Parser_parseSimpleQuantifier( parser, REGEXP_COMPAT__PATTERN_IS_Some, begin, child );
         case '?':
-            return this.parseSimpleQuantifier( REGEXP_COMPAT__PATTERN_IS_Optional, begin, child );
+            return Parser_parseSimpleQuantifier( parser, REGEXP_COMPAT__PATTERN_IS_Optional, begin, child );
         case '{':
-            return this.parseRepeat( begin, child );
+            return Parser_parseRepeat( parser, begin, child );
     };
 
     return child;
@@ -421,19 +429,20 @@ Parser.prototype.parseQuantifier = function(){
  *
  * Simple quantifier suffix means quantifiers execpt for `{n,m}`.
  * 
+ * @param {Parser} parser
  * @param {string|number} type 
  * @param {number} begin 
  * @param {RegExpPaternNode} child 
  * @return {RegExpPaternNode}
  */
-Parser.prototype.parseSimpleQuantifier = function( type, begin, child ){
-    ++this.pos; // skip one of '*', '+', '?'
+function Parser_parseSimpleQuantifier( parser, type, begin, child ){
+    ++parser.pos; // skip one of '*', '+', '?'
     var nonGreedy = false;
-    if( this.current() === '?' ){
-        ++this.pos; // skip '?'
+    if( Parser_current( parser ) === '?' ){
+        ++parser.pos; // skip '?'
         nonGreedy = true;
     };
-    return /** @type {Many|Some|Optional} */ ({ type : type, nonGreedy : nonGreedy, child : child, range : [ begin, this.pos ] });
+    return /** @type {Many|Some|Optional} */ ({ type : type, nonGreedy : nonGreedy, child : child, range : [ begin, parser.pos ] });
 };
 
 /**
@@ -443,17 +452,18 @@ Parser.prototype.parseSimpleQuantifier = function( type, begin, child ){
  * it is retryable. And the real parsing is done by
  * `tryParseRepeatQuantifier` method.
  *
+ * @param {Parser} parser
  * @param {number} begin
  * @param {RegExpPaternNode} child
  * @return {RegExpPaternNode}
  */
-Parser.prototype.parseRepeat = function( begin, child ){
-    var save = this.pos;
-    var quantifier = this.tryParseRepeatQuantifier();
+function Parser_parseRepeat( parser, begin, child ){
+    var save = parser.pos;
+    var quantifier = Parser_tryParseRepeatQuantifier( parser );
 
     if( !quantifier ){
-        if( this.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !this.unicode ) ){
-            this.pos = save;
+        if( parser.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !parser.unicode ) ){
+            parser.pos = save;
             return child;
         };
         if( DEFINE_REGEXP_COMPAT__DEBUG ){
@@ -468,8 +478,8 @@ Parser.prototype.parseRepeat = function( begin, child ){
     };
 
     var nonGreedy = false;
-    if( this.current() === '?' ){
-        ++this.pos; // skip '?'
+    if( Parser_current( parser ) === '?' ){
+        ++parser.pos; // skip '?'
         nonGreedy = true;
     };
 
@@ -479,7 +489,7 @@ Parser.prototype.parseRepeat = function( begin, child ){
         max       : max,
         nonGreedy : nonGreedy,
         child     : child,
-        range     : [ begin, this.pos ]
+        range     : [ begin, parser.pos ]
     };
 };
 
@@ -492,37 +502,38 @@ Parser.prototype.parseRepeat = function( begin, child ){
  *
  * When parsing is failed, it does not consume any character and return `null`.
  * 
+ * @param {Parser} parser
  * @return {RepeatQuantifier|undefined}
  */
-Parser.prototype.tryParseRepeatQuantifier = function(){
-    var save = this.pos;
-    ++this.pos; // skip '{'
+function Parser_tryParseRepeatQuantifier( parser ){
+    var save = parser.pos;
+    ++parser.pos; // skip '{'
 
-    var min = this.parseDigits();
+    var min = Parser_parseDigits( parser );
     if( min < 0 ){
-        this.pos = save;
+        parser.pos = save;
         return;
     };
 
     var max = null;
-    if( this.current() === ',' ){
-        ++this.pos; // skip ','
-        if( this.current() === '}' ){
+    if( Parser_current( parser ) === ',' ){
+        ++parser.pos; // skip ','
+        if( Parser_current( parser ) === '}' ){
             max = Infinity;
         } else {
-            max = this.parseDigits();
+            max = Parser_parseDigits( parser );
             if( max < 0 ){
-                this.pos = save;
+                parser.pos = save;
                 return;
             };
         };
     };
 
-    if( this.current() !== '}' ){
-        this.pos = save;
+    if( Parser_current( parser ) !== '}' ){
+        parser.pos = save;
         return;
     };
-    ++this.pos; // skip '}'
+    ++parser.pos; // skip '}'
 
     return { min : min, max : max };
 };
@@ -535,28 +546,29 @@ Parser.prototype.tryParseRepeatQuantifier = function(){
  * See https://www.ecma-international.org/ecma-262/10.0/index.html#prod-Assertion,
  * and https://www.ecma-international.org/ecma-262/10.0/index.html#prod-Atom.
  *
+ * @param {Parser} parser
  * @return {RegExpPaternNode|undefined}
  */
-Parser.prototype.parseAtom = function(){
-    var begin = this.pos;
-    var c = this.current();
+function Parser_parseAtom( parser ){
+    var begin = parser.pos;
+    var c = Parser_current( parser );
 
     switch( c ){
         case '.':
-            ++this.pos; // skip '.'
-            return { type: REGEXP_COMPAT__PATTERN_IS_Dot, range: [ begin, this.pos ] };
+            ++parser.pos; // skip '.'
+            return { type: REGEXP_COMPAT__PATTERN_IS_Dot, range: [ begin, parser.pos ] };
         case '^':
-            ++this.pos; // skip '^'
-            return { type: REGEXP_COMPAT__PATTERN_IS_LineBegin, range: [ begin, this.pos ] };
+            ++parser.pos; // skip '^'
+            return { type: REGEXP_COMPAT__PATTERN_IS_LineBegin, range: [ begin, parser.pos ] };
         case '$':
-            ++this.pos; // skip '$'
-            return { type: REGEXP_COMPAT__PATTERN_IS_LineEnd, range: [ begin, this.pos ] };
+            ++parser.pos; // skip '$'
+            return { type: REGEXP_COMPAT__PATTERN_IS_LineEnd, range: [ begin, parser.pos ] };
         case '[':
-            return this.parseClass();
+            return Parser_parseClass( parser );
         case '\\':
-            return this.parseEscape();
+            return Parser_parseEscape( parser );
         case '(':
-            return this.parseParen();
+            return Parser_parseParen( parser );
         case '*':
         case '+':
         case '?':
@@ -564,9 +576,8 @@ Parser.prototype.parseAtom = function(){
                 throw new RegExpSyntaxError('nothing to repeat');
             };
         case '{':
-            if( this.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !this.unicode ) ){
-                var quantifier = this.tryParseRepeatQuantifier();
-                if( quantifier && DEFINE_REGEXP_COMPAT__DEBUG ){
+            if( parser.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !parser.unicode ) ){
+                if( DEFINE_REGEXP_COMPAT__DEBUG && Parser_tryParseRepeatQuantifier( parser ) ){
                     throw new RegExpSyntaxError('nothing to repeat');
                 };
                 break;
@@ -575,14 +586,14 @@ Parser.prototype.parseAtom = function(){
                 throw new RegExpSyntaxError('lone quantifier brackets');
             };
         case '}':
-            if( this.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !this.unicode ) ){
+            if( parser.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !parser.unicode ) ){
                 break;
             };
             if( DEFINE_REGEXP_COMPAT__DEBUG ){
                 throw new RegExpSyntaxError('lone quantifier brackets');
             };
         case ']':
-            if( this.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !this.unicode ) ){
+            if( parser.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !parser.unicode ) ){
                 break;
             };
             if( DEFINE_REGEXP_COMPAT__DEBUG ){
@@ -599,57 +610,61 @@ Parser.prototype.parseAtom = function(){
 
     // All cases are through, then it should be a simple source character.
 
-    this.pos += c.length; // skip any character
+    parser.pos += c.length; // skip any character
     var value = String_codePointAt( c, 0 );
     if( value === undefined && DEFINE_REGEXP_COMPAT__DEBUG ){
         throw new Error('BUG: invalid character');
     };
-    return { type : REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw : c, range : [ begin, this.pos ] };
+    return { type : REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw : c, range : [ begin, parser.pos ] };
 };
 
 /** Parse `character class` pattern.
+ * 
+ * @param {Parser} parser
  * @return {RegExpPaternNode}
  */
-Parser.prototype.parseClass = function(){
-    var begin = this.pos;
-    ++this.pos; // skip '['
+function Parser_parseClass( parser ){
+    var begin = parser.pos;
+    ++parser.pos; // skip '['
 
     var invert = false;
-    if( this.current() === '^' ){
-        ++this.pos; // skip '^'
+    if( Parser_current( parser ) === '^' ){
+        ++parser.pos; // skip '^'
         invert = true;
     };
 
     var children = [];
 
     for( ;; ){
-        var c = this.current();
+        var c = Parser_current( parser );
         if( c === ']' ){
             break;
         };
-        children.push( this.parseClassItem() );
+        children.push( Parser_parseClassItem( parser ) );
     };
-    ++this.pos; // skip ']'
+    ++parser.pos; // skip ']'
 
-    return { type : REGEXP_COMPAT__PATTERN_IS_Class, invert : invert, children : children, range : [ begin, this.pos ] };
+    return { type : REGEXP_COMPAT__PATTERN_IS_Class, invert : invert, children : children, range : [ begin, parser.pos ] };
 };
 
 /** Parse an item of `character class` pattern.
+ * 
+ * @param {Parser} parser
  * @return {ClassItem}
  */
-Parser.prototype.parseClassItem = function(){
-    var beginPos = this.pos;
+function Parser_parseClassItem( parser ){
+    var beginPos = parser.pos;
 
-    var begin = this.parseClassAtom();
-    if( this.current() !== '-' ){
+    var begin = Parser_parseClassAtom( parser );
+    if( Parser_current( parser ) !== '-' ){
         return /** @type {Char|EscapeClass} */ (begin);
     };
-    if( String_startsWith( this.source, '-]', this.pos ) ){
+    if( String_startsWith( parser.source, '-]', parser.pos ) ){
         return /** @type {Char|EscapeClass} */ (begin);
     };
 
     if( begin.type === REGEXP_COMPAT__PATTERN_IS_EscapeClass ){
-        if( this.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !this.unicode ) ){
+        if( parser.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !parser.unicode ) ){
             return /** @type {EscapeClass} */ (begin);
         };
         if( DEFINE_REGEXP_COMPAT__DEBUG ){
@@ -657,12 +672,12 @@ Parser.prototype.parseClassItem = function(){
         };
     };
 
-    var save = this.pos;
-    ++this.pos; // skip '-'
-    var end = this.parseClassAtom();
+    var save = parser.pos;
+    ++parser.pos; // skip '-'
+    var end = Parser_parseClassAtom( parser );
     if( end.type === REGEXP_COMPAT__PATTERN_IS_EscapeClass ){
-        if( this.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !this.unicode ) ){
-            this.pos = save;
+        if( parser.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !parser.unicode ) ){
+            parser.pos = save;
             return begin;
         };
         if( DEFINE_REGEXP_COMPAT__DEBUG ){
@@ -674,45 +689,47 @@ Parser.prototype.parseClassItem = function(){
         throw new RegExpSyntaxError('range out of order in character class');
     };
 
-    return { type: REGEXP_COMPAT__PATTERN_IS_ClassRange, children : [ begin, end ], range: [ beginPos, this.pos ] };
+    return { type: REGEXP_COMPAT__PATTERN_IS_ClassRange, children : [ begin, end ], range: [ beginPos, parser.pos ] };
 };
 
 /** Parse an atom of `character class` range.
+ * 
+ * @param {Parser} parser
  * @return {Char|EscapeClass|undefined}
  */
-Parser.prototype.parseClassAtom = function(){
-    var begin = this.pos;
-    var c = this.current();
+function Parser_parseClassAtom( parser ){
+    var begin = parser.pos;
+    var c = Parser_current( parser );
 
     if( c === '' && DEFINE_REGEXP_COMPAT__DEBUG ){
         throw new RegExpSyntaxError('unterminated character class');
     };
 
     if( c !== '\\' ){
-        this.pos += c.length; // skip any character
+        parser.pos += c.length; // skip any character
         var value = String_codePointAt( c, 0 );
         if( value === undefined && DEFINE_REGEXP_COMPAT__DEBUG ){
             throw new Error('BUG: invalid character');
         };
-        return /** @type {Char} */ ({ type : REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw : c, range : [ begin, this.pos ] });
+        return /** @type {Char} */ ({ type : REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw : c, range : [ begin, parser.pos ] });
     };
 
-    if( String_startsWith( this.source, '\\-', this.pos ) ){
-        this.pos += 2; // skip '\\-'
-        return /** @type {Char} */ ({ type : REGEXP_COMPAT__PATTERN_IS_Char, value : 0x2d, raw : '\\-', range : [ begin, this.pos ] });
+    if( String_startsWith( parser.source, '\\-', parser.pos ) ){
+        parser.pos += 2; // skip '\\-'
+        return /** @type {Char} */ ({ type : REGEXP_COMPAT__PATTERN_IS_Char, value : 0x2d, raw : '\\-', range : [ begin, parser.pos ] });
     };
 
-    if( String_startsWith( this.source, '\\b', this.pos ) ){
-        this.pos += 2; // skip '\\b'
-        return /** @type {Char} */ ({ type : REGEXP_COMPAT__PATTERN_IS_Char, value : 0x08, raw : '\\b', range : [ begin, this.pos ] });
+    if( String_startsWith( parser.source, '\\b', parser.pos ) ){
+        parser.pos += 2; // skip '\\b'
+        return /** @type {Char} */ ({ type : REGEXP_COMPAT__PATTERN_IS_Char, value : 0x08, raw : '\\b', range : [ begin, parser.pos ] });
     };
 
-    var escapeClass = this.tryParseEscapeClass();
+    var escapeClass = Parser_tryParseEscapeClass( parser );
     if( escapeClass ){
         return escapeClass;
     };
 
-    var escape = this.tryParseEscape();
+    var escape = Parser_tryParseEscape( parser );
     if( escape ){
         return escape;
     };
@@ -725,25 +742,27 @@ Parser.prototype.parseClassAtom = function(){
 /**
  * Parse `escape sequence` pattern including `escape sequence character class`,
  * `back reference` and `word boundary assertion` patterns.
+ * 
+ * @param {Parser} parser
  * @return {RegExpPaternNode|undefined}
  */
-Parser.prototype.parseEscape = function(){
-    var wordBoundary = this.tryParseWordBoundary();
+function Parser_parseEscape( parser ){
+    var wordBoundary = Parser_tryParseWordBoundary( parser );
     if( wordBoundary ){
         return wordBoundary;
     };
 
-    var backRef = this.tryParseBackRef();
+    var backRef = Parser_tryParseBackRef( parser );
     if( backRef ){
         return backRef;
     };
 
-    var escapeClass = this.tryParseEscapeClass();
+    var escapeClass = Parser_tryParseEscapeClass( parser );
     if( escapeClass ){
         return escapeClass;
     };
 
-    var escape = this.tryParseEscape();
+    var escape = Parser_tryParseEscape( parser );
     if( escape ){
         return escape;
     };
@@ -754,70 +773,76 @@ Parser.prototype.parseEscape = function(){
 };
 
 /** Try to parse `word boundary` pattern.
+ * 
+ * @param {Parser} parser
  * @return {WordBoundary|undefined}
  */
-Parser.prototype.tryParseWordBoundary = function(){
-    var begin = this.pos;
+function Parser_tryParseWordBoundary( parser ){
+    var begin = parser.pos;
 
-    if( String_startsWith( this.source, '\\b', this.pos ) ){
-        this.pos += 2; // skip '\\b'
-        return { type : REGEXP_COMPAT__PATTERN_IS_WordBoundary, invert : false, range : [ begin, this.pos ] };
+    if( String_startsWith( parser.source, '\\b', parser.pos ) ){
+        parser.pos += 2; // skip '\\b'
+        return { type : REGEXP_COMPAT__PATTERN_IS_WordBoundary, invert : false, range : [ begin, parser.pos ] };
     };
 
-    if( String_startsWith( this.source, '\\B', this.pos ) ){
-        this.pos += 2; // skip '\\B'
-        return { type : REGEXP_COMPAT__PATTERN_IS_WordBoundary, invert : true, range : [ begin, this.pos ] };
+    if( String_startsWith( parser.source, '\\B', parser.pos ) ){
+        parser.pos += 2; // skip '\\B'
+        return { type : REGEXP_COMPAT__PATTERN_IS_WordBoundary, invert : true, range : [ begin, parser.pos ] };
     };
 };
 
 /** Try to parse `back reference` pattern
+ * 
+ * @param {Parser} parser
  * @return {BackRef|NamedBackRef|undefined}
  */
-Parser.prototype.tryParseBackRef = function(){
-    var begin = this.pos;
-    ++this.pos; // skip '\\';
+function Parser_tryParseBackRef( parser ){
+    var begin = parser.pos;
+    ++parser.pos; // skip '\\';
 
-    if( DEFINE_REGEXP_COMPAT__ES2018 && this.names._size > 0 ){
-        if( this.current() === 'k' ){
-            ++this.pos; // skip 'k'
-            if( DEFINE_REGEXP_COMPAT__DEBUG && this.current() !== '<' ){
+    if( DEFINE_REGEXP_COMPAT__ES2018 && parser.names._size > 0 ){
+        if( Parser_current( parser ) === 'k' ){
+            ++parser.pos; // skip 'k'
+            if( DEFINE_REGEXP_COMPAT__DEBUG && Parser_current( parser ) !== '<' ){
                 throw new RegExpSyntaxError('invalid named back reference');
             };
-            var namePos = ++this.pos; // skip '<'
-            var name = this.parseCaptureName();
+            var namePos = ++parser.pos; // skip '<'
+            var name = Parser_parseCaptureName( parser );
             return {
                 type  : REGEXP_COMPAT__PATTERN_IS_NamedBackRef,
                 name  : name,
-                raw   : this.source.slice( namePos, this.pos - 1 ),
-                range : [ begin, this.pos ]
+                raw   : parser.source.slice( namePos, parser.pos - 1 ),
+                range : [ begin, parser.pos ]
             };
         };
     };
 
-    if( this.current() !== '0' ){
-        var index = this.parseDigits();
+    if( Parser_current( parser ) !== '0' ){
+        var index = Parser_parseDigits( parser );
         if( index >= 1 ){
-            if( this.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !this.unicode ) ){
-                if( index <= this.captureParens ){
-                    return { type: REGEXP_COMPAT__PATTERN_IS_BackRef, index : index, range : [ begin, this.pos ] };
+            if( parser.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !parser.unicode ) ){
+                if( index <= parser.captureParens ){
+                    return { type: REGEXP_COMPAT__PATTERN_IS_BackRef, index : index, range : [ begin, parser.pos ] };
                 };
             } else {
-                return { type: REGEXP_COMPAT__PATTERN_IS_BackRef, index : index, range : [ begin, this.pos ] };
+                return { type: REGEXP_COMPAT__PATTERN_IS_BackRef, index : index, range : [ begin, parser.pos ] };
             };
         };
     };
 
-    this.pos = begin;
+    parser.pos = begin;
 };
 
 /** Try to parse `escape sequence` pattern.
+ * 
+ * @param {Parser} parser
  * @return {Char|undefined}
  */
-Parser.prototype.tryParseEscape = function(){
-    var begin = this.pos;
+function Parser_tryParseEscape( parser ){
+    var begin = parser.pos;
     var value, c;
 
-    var unicode = this.tryParseUnicodeEscape( true );
+    var unicode = Parser_tryParseUnicodeEscape( parser, true );
     if( unicode !== '' ){
         value = String_codePointAt( unicode, 0 );
         if( value === undefined && DEFINE_REGEXP_COMPAT__DEBUG ){
@@ -826,38 +851,38 @@ Parser.prototype.tryParseEscape = function(){
         return /** @type {Char} */ ({
             type  : REGEXP_COMPAT__PATTERN_IS_Char,
             value : value,
-            raw   : this.source.slice( begin, this.pos ),
-            range : [ begin, this.pos ]
+            raw   : parser.source.slice( begin, parser.pos ),
+            range : [ begin, parser.pos ]
         });
     };
 
-    ++this.pos; // skip '\\'
-    switch( this.current() ){
+    ++parser.pos; // skip '\\'
+    switch( Parser_current( parser ) ){
         case 't':
-            ++this.pos; // skip 't'
-            return { type: REGEXP_COMPAT__PATTERN_IS_Char, value: 0x09, raw: '\\t', range: [ begin, this.pos ] };
+            ++parser.pos; // skip 't'
+            return { type: REGEXP_COMPAT__PATTERN_IS_Char, value: 0x09, raw: '\\t', range: [ begin, parser.pos ] };
         case 'n':
-            ++this.pos; // skip 'n'
-            return { type: REGEXP_COMPAT__PATTERN_IS_Char, value: 0x0a, raw: '\\n', range: [ begin, this.pos ] };
+            ++parser.pos; // skip 'n'
+            return { type: REGEXP_COMPAT__PATTERN_IS_Char, value: 0x0a, raw: '\\n', range: [ begin, parser.pos ] };
         case 'v':
-            ++this.pos; // skip 'v'
-            return { type: REGEXP_COMPAT__PATTERN_IS_Char, value: 0x0b, raw: '\\v', range: [ begin, this.pos ] };
+            ++parser.pos; // skip 'v'
+            return { type: REGEXP_COMPAT__PATTERN_IS_Char, value: 0x0b, raw: '\\v', range: [ begin, parser.pos ] };
         case 'f':
-            ++this.pos; // skip 'f'
-            return { type: REGEXP_COMPAT__PATTERN_IS_Char, value: 0x0c, raw: '\\f', range: [ begin, this.pos ] };
+            ++parser.pos; // skip 'f'
+            return { type: REGEXP_COMPAT__PATTERN_IS_Char, value: 0x0c, raw: '\\f', range: [ begin, parser.pos ] };
         case 'r':
-            ++this.pos; // skip 'r'
-            return { type: REGEXP_COMPAT__PATTERN_IS_Char, value: 0x0d, raw: '\\r', range: [ begin, this.pos ] };
+            ++parser.pos; // skip 'r'
+            return { type: REGEXP_COMPAT__PATTERN_IS_Char, value: 0x0d, raw: '\\r', range: [ begin, parser.pos ] };
         case 'c': {
-            ++this.pos; // skip 'c'
-            c = this.current();
+            ++parser.pos; // skip 'c'
+            c = Parser_current( parser );
             value = 0;
             if( isControl( c ) ){
-                ++this.pos; // skip a-z or A-Z
+                ++parser.pos; // skip a-z or A-Z
                 value = c.charCodeAt( 0 ) % 32;
             } else {
-                if( this.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !this.unicode ) ){
-                    --this.pos; // go back 'c'
+                if( parser.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !parser.unicode ) ){
+                    --parser.pos; // go back 'c'
                     break;
                 };
                 if( DEFINE_REGEXP_COMPAT__DEBUG ){
@@ -867,31 +892,31 @@ Parser.prototype.tryParseEscape = function(){
             return {
                 type  : REGEXP_COMPAT__PATTERN_IS_Char,
                 value : value,
-                raw   : this.source.slice( begin, this.pos ),
-                range : [ begin, this.pos ]
+                raw   : parser.source.slice( begin, parser.pos ),
+                range : [ begin, parser.pos ]
             };
         }
         case 'x': {
-            ++this.pos; // skip 'x'
-            value = this.tryParseHexDigitsN( 2 );
+            ++parser.pos; // skip 'x'
+            value = Parser_tryParseHexDigitsN( parser, 2 );
             if( value < 0 ){
-                --this.pos; // go back 'x'
+                --parser.pos; // go back 'x'
                 break;
             };
             return {
                 type  : REGEXP_COMPAT__PATTERN_IS_Char,
                 value : value,
-                raw   : this.source.slice( begin, this.pos ),
-                range : [ begin, this.pos ]
+                raw   : parser.source.slice( begin, parser.pos ),
+                range : [ begin, parser.pos ]
             };
         }
         case '0':
-            ++this.pos; // skip '0'
-            if( isDigit( this.current() ) ){
-                --this.pos; // go back '0'
+            ++parser.pos; // skip '0'
+            if( isDigit( Parser_current( parser ) ) ){
+                --parser.pos; // go back '0'
                 break;
             };
-            return { type : REGEXP_COMPAT__PATTERN_IS_Char, value : 0, raw : '\\0', range : [ begin, this.pos ] };
+            return { type : REGEXP_COMPAT__PATTERN_IS_Char, value : 0, raw : '\\0', range : [ begin, parser.pos ] };
         case '':
             if( DEFINE_REGEXP_COMPAT__DEBUG ){
                 throw new RegExpSyntaxError('\\ at end of pattern');
@@ -899,66 +924,66 @@ Parser.prototype.tryParseEscape = function(){
     };
 
     // Legacy octal escape.
-    if( this.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !this.unicode ) ){
-        var octal = this.pos;
-        var c0 = this.current();
+    if( parser.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !parser.unicode ) ){
+        var octal = parser.pos;
+        var c0 = Parser_current( parser );
         if( '0' <= c0 && c0 <= '3' ){
-            ++this.pos;
-            var c1 = this.current();
+            ++parser.pos;
+            var c1 = Parser_current( parser );
             if( '0' <= c1 && c1 <= '7' ){
-                ++this.pos;
-                var c2 = this.current();
+                ++parser.pos;
+                var c2 = Parser_current( parser );
                 if( '0' <= c2 && c2 <= '7' ){
-                    ++this.pos;
+                    ++parser.pos;
                 };
             };
         } else if( '4' <= c0 && c0 <= '7' ){
-            ++this.pos;
-            c1 = this.current();
+            ++parser.pos;
+            c1 = Parser_current( parser );
             if( '0' <= c1 && c1 <= '7' ){
-                ++this.pos;
+                ++parser.pos;
             };
         };
-        if( octal !== this.pos ){
-            value = /* Number. */ parseInt( this.source.slice( octal, this.pos ), 8 );
+        if( octal !== parser.pos ){
+            value = /* Number. */ parseInt( parser.source.slice( octal, parser.pos ), 8 );
             return /** @type {Char} */ ({
                 type  : REGEXP_COMPAT__PATTERN_IS_Char,
                 value : value,
-                raw   : this.source.slice( begin, this.pos ),
-                range : [ begin, this.pos ]
+                raw   : parser.source.slice( begin, parser.pos ),
+                range : [ begin, parser.pos ]
             });
         };
     };
 
     // Identity escape.
-    c = this.current();
+    c = Parser_current( parser );
     value = String_codePointAt( c, 0 );
     if( value === undefined && DEFINE_REGEXP_COMPAT__DEBUG ){
         throw new Error( 'BUG: invalid character' );
     };
-    if( DEFINE_REGEXP_COMPAT__ES2018 && this.unicode ){
+    if( DEFINE_REGEXP_COMPAT__ES2018 && parser.unicode ){
         if( isSyntax( c ) || c === '/' ){
-            this.pos += c.length; // skip any char
-            return /** @type {Char} */ ({ type : REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw : '\\' + c, range : [ begin, this.pos ] });
+            parser.pos += c.length; // skip any char
+            return /** @type {Char} */ ({ type : REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw : '\\' + c, range : [ begin, parser.pos ] });
         };
     } else {
-        if( this.additional ){
+        if( parser.additional ){
             if( c === 'c' ){
-                return { type : REGEXP_COMPAT__PATTERN_IS_Char, value : 0x5c, raw : '\\', range : [ begin, this.pos ] };
+                return { type : REGEXP_COMPAT__PATTERN_IS_Char, value : 0x5c, raw : '\\', range : [ begin, parser.pos ] };
             };
-            if( DEFINE_REGEXP_COMPAT__ES2018 && this.names._size === 0 || c !== 'k' ){
-                this.pos += c.length; // skip any char
-                return /** @type {Char} */ ({ type : REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw : '\\' + c, range : [ begin, this.pos ] });
+            if( DEFINE_REGEXP_COMPAT__ES2018 && parser.names._size === 0 || c !== 'k' ){
+                parser.pos += c.length; // skip any char
+                return /** @type {Char} */ ({ type : REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw : '\\' + c, range : [ begin, parser.pos ] });
             };
         } else {
             if( !charSetIdContinue.has( value ) ){
-                this.pos += c.length; // skip any char
-                return /** @type {Char} */ ({ type: REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw: '\\' + c, range : [ begin, this.pos ] });
+                parser.pos += c.length; // skip any char
+                return /** @type {Char} */ ({ type: REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw: '\\' + c, range : [ begin, parser.pos ] });
             };
         };
     };
 
-    this.pos = begin;
+    parser.pos = begin;
 };
 
 /**
@@ -969,40 +994,41 @@ Parser.prototype.tryParseEscape = function(){
  *
  * When it is failed, it returns `''`.
  *
+ * @param {Parser} parser
  * @param {boolean} lead
  * @return {string}
  */
-Parser.prototype.tryParseUnicodeEscape = function( lead ){
-    var begin = this.pos;
+function Parser_tryParseUnicodeEscape( parser, lead ){
+    var begin = parser.pos;
     var c;
-    ++this.pos; // skip '\\'
+    ++parser.pos; // skip '\\'
 
-    if( this.current() !== 'u' ){
-        this.pos = begin;
+    if( Parser_current( parser ) !== 'u' ){
+        parser.pos = begin;
         return '';
     };
-    ++this.pos; // skip 'u'
+    ++parser.pos; // skip 'u'
 
-    if( DEFINE_REGEXP_COMPAT__ES2018 && this.unicode && this.current() === '{' ){
+    if( DEFINE_REGEXP_COMPAT__ES2018 && parser.unicode && Parser_current( parser ) === '{' ){
         if( !lead ){
-            this.pos = begin;
+            parser.pos = begin;
             return '';
         };
-        ++this.pos; // skip '{'
-        c = this.parseHexDigits();
+        ++parser.pos; // skip '{'
+        c = Parser_parseHexDigits( parser );
         if( DEFINE_REGEXP_COMPAT__DEBUG ){
-            if( c < 0 || 0x110000 <= c || this.current() !== '}' ){
+            if( c < 0 || 0x110000 <= c || Parser_current( parser ) !== '}' ){
                 throw new RegExpSyntaxError('invalid Unicode escape');
             };
         };
-        ++this.pos; // skip '}'
+        ++parser.pos; // skip '}'
         return String_fromCodePoint( c );
     };
 
-    c = this.tryParseHexDigitsN( 4 );
+    c = Parser_tryParseHexDigitsN( parser, 4 );
     if( c < 0 ){
-        if( this.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !this.unicode ) ){
-            this.pos = begin;
+        if( parser.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !parser.unicode ) ){
+            parser.pos = begin;
             return '';
         };
         if( DEFINE_REGEXP_COMPAT__DEBUG ){
@@ -1011,87 +1037,89 @@ Parser.prototype.tryParseUnicodeEscape = function( lead ){
     };
 
     var s = String_fromCharCode( c );
-    if( !DEFINE_REGEXP_COMPAT__ES2018 || !this.unicode ){
+    if( !DEFINE_REGEXP_COMPAT__ES2018 || !parser.unicode ){
         return s;
     };
 
-    if( lead && '\uD800' <= s && s <= '\uDBFF' && this.current() === '\\' ){
-        var save = this.pos;
-        var t = this.tryParseUnicodeEscape( false );
+    if( lead && '\uD800' <= s && s <= '\uDBFF' && Parser_current( parser ) === '\\' ){
+        var save = parser.pos;
+        var t = Parser_tryParseUnicodeEscape( parser, false );
         if( '\uDC00' <= t && t <= '\uDFFF' ){
             return s + t;
         };
-        this.pos = save;
+        parser.pos = save;
     };
 
     return s;
 };
 
 /** Try to parse `escape sequence character class` pattern.
+ * 
+ * @param {Parser} parser
  * @return {EscapeClass|undefined}
  */
-Parser.prototype.tryParseEscapeClass = function(){
-    var begin = this.pos;
-    ++this.pos; // skip '\\'
+function Parser_tryParseEscapeClass( parser ){
+    var begin = parser.pos;
+    ++parser.pos; // skip '\\'
 
-    var c = this.current();
+    var c = Parser_current( parser );
     switch( c ){
         case 'd':
         case 'D':
-            ++this.pos; // skip 'd' or 'D'
-            return { type: REGEXP_COMPAT__PATTERN_IS_EscapeClass, kind: REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_digit, invert: c === 'D', range: [ begin, this.pos ] };
+            ++parser.pos; // skip 'd' or 'D'
+            return { type: REGEXP_COMPAT__PATTERN_IS_EscapeClass, kind: REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_digit, invert: c === 'D', range: [ begin, parser.pos ] };
         case 'w':
         case 'W':
-            ++this.pos; // skip 'w' or 'W'
-            return { type: REGEXP_COMPAT__PATTERN_IS_EscapeClass, kind: REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_word, invert: c === 'W', range: [ begin, this.pos ] };
+            ++parser.pos; // skip 'w' or 'W'
+            return { type: REGEXP_COMPAT__PATTERN_IS_EscapeClass, kind: REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_word, invert: c === 'W', range: [ begin, parser.pos ] };
         case 's':
         case 'S':
-            ++this.pos; // skip 's' or 'S'
-            return { type: REGEXP_COMPAT__PATTERN_IS_EscapeClass, kind: REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_space, invert: c === 'S', range: [ begin, this.pos ] };
+            ++parser.pos; // skip 's' or 'S'
+            return { type: REGEXP_COMPAT__PATTERN_IS_EscapeClass, kind: REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_space, invert: c === 'S', range: [ begin, parser.pos ] };
         case 'p':
         case 'P': {
             if( DEFINE_REGEXP_COMPAT__ES2018 ){
-                if( !this.unicode ){
+                if( !parser.unicode ){
                     break;
                 };
                 var invert = c === 'P';
-                ++this.pos; // skip 'p' or 'P'
+                ++parser.pos; // skip 'p' or 'P'
 
-                if( DEFINE_REGEXP_COMPAT__DEBUG && this.current() !== '{' ){
+                if( DEFINE_REGEXP_COMPAT__DEBUG && Parser_current( parser ) !== '{' ){
                     throw new RegExpSyntaxError('invalid Unicode property escape');
                 };
-                ++this.pos; // skip '{'
+                ++parser.pos; // skip '{'
 
-                var property = this.parseUnicodePropertyName();
+                var property = Parser_parseUnicodePropertyName( parser );
                 if( property === '' && DEFINE_REGEXP_COMPAT__DEBUG ){
                     throw new RegExpSyntaxError('invalid Unicode property name');
                 };
 
-                if( this.current() === '}' ){
-                    ++this.pos; // skip '}'
+                if( Parser_current( parser ) === '}' ){
+                    ++parser.pos; // skip '}'
                     return {
                         type     : REGEXP_COMPAT__PATTERN_IS_EscapeClass,
                         kind     : REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_unicode_property,
                         property : property,
                         invert   : invert,
-                        range    : [ begin, this.pos ]
+                        range    : [ begin, parser.pos ]
                     };
                 };
 
-                if( DEFINE_REGEXP_COMPAT__DEBUG && this.current() !== '=' ){
+                if( DEFINE_REGEXP_COMPAT__DEBUG && Parser_current( parser ) !== '=' ){
                     throw new RegExpSyntaxError('invalid Unicode property escape');
                 };
-                ++this.pos; // skip '='
+                ++parser.pos; // skip '='
 
-                var value = this.parseUnicodePropertyValue();
+                var value = Parser_parseUnicodePropertyValue( parser );
                 if( DEFINE_REGEXP_COMPAT__DEBUG && value === '' ){
                     throw new RegExpSyntaxError('invalid Unicode property value');
                 };
 
-                if( DEFINE_REGEXP_COMPAT__DEBUG && this.current() !== '}' ){
+                if( DEFINE_REGEXP_COMPAT__DEBUG && Parser_current( parser ) !== '}' ){
                     throw new RegExpSyntaxError('invalid Unicode property escape');
                 };
-                ++this.pos; // skip '}'
+                ++parser.pos; // skip '}'
 
                 return {
                     type     : REGEXP_COMPAT__PATTERN_IS_EscapeClass,
@@ -1099,125 +1127,131 @@ Parser.prototype.tryParseEscapeClass = function(){
                     property : property,
                     value    : value,
                     invert   : invert,
-                    range    : [ begin, this.pos ]
+                    range    : [ begin, parser.pos ]
                 };
             };
         };
     };
 
-    this.pos = begin;
+    parser.pos = begin;
 };
 
 /** Parse the first component of `\p{XXX=XXX}` escape sequence.
+ * 
+ * @param {Parser} parser
  * @return {string}
  */
-Parser.prototype.parseUnicodePropertyName = function(){
+function Parser_parseUnicodePropertyName( parser ){
     var p = '';
 
-    for( var c; isUnicodeProperty( c = this.current() ); ){
+    for( var c; isUnicodeProperty( c = Parser_current( parser ) ); ){
         p += c;
-        this.pos += c.length; // skip any character
+        parser.pos += c.length; // skip any character
     };
     return p;
 };
 
 /** Parse the second component of `\p{XXX=XXX}` escape sequence.
+ * 
+ * @param {Parser} parser
  * @return {string}
  */
-Parser.prototype.parseUnicodePropertyValue = function(){
+function Parser_parseUnicodePropertyValue( parser ){
     var v = '';
 
-    for( var c; isUnicodePropertyValue( c = this.current() ); ){
+    for( var c; isUnicodePropertyValue( c = Parser_current( parser ) ); ){
         v += c;
-        this.pos += c.length; // skip any character
+        parser.pos += c.length; // skip any character
     };
     return v;
 };
 
 /** Parse grouping pattern by paren.
+ * 
+ * @param {Parser} parser
  * @return {Capture|Group|LookAhead|LookBehind|NamedCapture|undefined}
  */
-Parser.prototype.parseParen = function(){
-    var begin = this.pos;
+function Parser_parseParen( parser ){
+    var begin = parser.pos;
     var child, index;
 
-    if( !String_startsWith( this.source, '(?', this.pos ) ){
-        ++this.pos; // skip '('
-        index = ++this.captureParensIndex;
-        child = this.parseDisjunction();
-        if( DEFINE_REGEXP_COMPAT__DEBUG && this.current() !== ')' ){
+    if( !String_startsWith( parser.source, '(?', parser.pos ) ){
+        ++parser.pos; // skip '('
+        index = ++parser.captureParensIndex;
+        child = Parser_parseDisjunction( parser );
+        if( DEFINE_REGEXP_COMPAT__DEBUG && Parser_current( parser ) !== ')' ){
             throw new RegExpSyntaxError('unterminated capture');
         };
-        ++this.pos; // skip ')'
-        return { type: REGEXP_COMPAT__PATTERN_IS_Capture, index : index, child : child, range : [ begin, this.pos ] };
+        ++parser.pos; // skip ')'
+        return { type: REGEXP_COMPAT__PATTERN_IS_Capture, index : index, child : child, range : [ begin, parser.pos ] };
     };
 
-    if( String_startsWith( this.source, '(?:', this.pos ) ){
-        this.pos += 3; // skip '(?:'
-        child = this.parseDisjunction();
-        if( DEFINE_REGEXP_COMPAT__DEBUG && this.current() !== ')' ){
+    if( String_startsWith( parser.source, '(?:', parser.pos ) ){
+        parser.pos += 3; // skip '(?:'
+        child = Parser_parseDisjunction( parser );
+        if( DEFINE_REGEXP_COMPAT__DEBUG && Parser_current( parser ) !== ')' ){
             throw new RegExpSyntaxError('unterminated group');
         };
-        ++this.pos; // skip ')'
-        return { type : REGEXP_COMPAT__PATTERN_IS_Group, child : child, range : [ begin, this.pos ] };
+        ++parser.pos; // skip ')'
+        return { type : REGEXP_COMPAT__PATTERN_IS_Group, child : child, range : [ begin, parser.pos ] };
     };
 
-    if( String_startsWith( this.source, '(?=', this.pos ) ){
-        this.pos += 3; // skip '(?='
-        child = this.parseDisjunction();
-        if( DEFINE_REGEXP_COMPAT__DEBUG && this.current() !== ')' ){
+    if( String_startsWith( parser.source, '(?=', parser.pos ) ){
+        parser.pos += 3; // skip '(?='
+        child = Parser_parseDisjunction( parser );
+        if( DEFINE_REGEXP_COMPAT__DEBUG && Parser_current( parser ) !== ')' ){
             throw new RegExpSyntaxError('unterminated look-ahead');
         };
-        ++this.pos; // skip ')'
-        return { type : REGEXP_COMPAT__PATTERN_IS_LookAhead, negative : false, child : child, range : [ begin, this.pos ] };
+        ++parser.pos; // skip ')'
+        return { type : REGEXP_COMPAT__PATTERN_IS_LookAhead, negative : false, child : child, range : [ begin, parser.pos ] };
     };
 
-    if( String_startsWith( this.source, '(?!', this.pos ) ){
-        this.pos += 3; // skip '(?!'
-        child = this.parseDisjunction();
-        if( DEFINE_REGEXP_COMPAT__DEBUG && this.current() !== ')' ){
+    if( String_startsWith( parser.source, '(?!', parser.pos ) ){
+        parser.pos += 3; // skip '(?!'
+        child = Parser_parseDisjunction( parser );
+        if( DEFINE_REGEXP_COMPAT__DEBUG && Parser_current( parser ) !== ')' ){
             throw new RegExpSyntaxError('unterminated look-ahead');
         };
-        ++this.pos; // skip ')'
-        return { type : REGEXP_COMPAT__PATTERN_IS_LookAhead, negative : true, child : child, range : [ begin, this.pos ] };
+        ++parser.pos; // skip ')'
+        return { type : REGEXP_COMPAT__PATTERN_IS_LookAhead, negative : true, child : child, range : [ begin, parser.pos ] };
     };
 
     if( DEFINE_REGEXP_COMPAT__ES2018 ){
-        if( String_startsWith( this.source, '(?<=', this.pos ) ){
-            this.pos += 4; // skip '(?<='
-            child = this.parseDisjunction();
-            if( DEFINE_REGEXP_COMPAT__DEBUG && this.current() !== ')' ){
+        if( String_startsWith( parser.source, '(?<=', parser.pos ) ){
+            parser.pos += 4; // skip '(?<='
+            child = Parser_parseDisjunction( parser );
+            if( DEFINE_REGEXP_COMPAT__DEBUG && Parser_current( parser ) !== ')' ){
                 throw new RegExpSyntaxError('unterminated look-behind');
             };
-            ++this.pos; // skip ')'
-            return { type : REGEXP_COMPAT__PATTERN_IS_LookBehind, negative : false, child : child, range : [ begin, this.pos ] };
+            ++parser.pos; // skip ')'
+            return { type : REGEXP_COMPAT__PATTERN_IS_LookBehind, negative : false, child : child, range : [ begin, parser.pos ] };
         };
 
-        if( String_startsWith( this.source, '(?<!', this.pos ) ){
-            this.pos += 4; // skip '(?<!'
-            child = this.parseDisjunction();
-            if( DEFINE_REGEXP_COMPAT__DEBUG && this.current() !== ')' ){
+        if( String_startsWith( parser.source, '(?<!', parser.pos ) ){
+            parser.pos += 4; // skip '(?<!'
+            child = Parser_parseDisjunction( parser );
+            if( DEFINE_REGEXP_COMPAT__DEBUG && Parser_current( parser ) !== ')' ){
                 throw new RegExpSyntaxError('unterminated look-behind');
             };
-            ++this.pos; // skip ')'
-            return { type : REGEXP_COMPAT__PATTERN_IS_LookBehind, negative : true, child : child, range : [ begin, this.pos ] };
+            ++parser.pos; // skip ')'
+            return { type : REGEXP_COMPAT__PATTERN_IS_LookBehind, negative : true, child : child, range : [ begin, parser.pos ] };
         };
 
-        if( String_startsWith( this.source, '(?<', this.pos ) ){
-            index = ++this.captureParensIndex;
-            this.pos += 3; // skip '(?<'
-            var namePos = this.pos;
-            var name = this.parseCaptureName();
-            var raw = this.source.slice( namePos, this.pos - 1 );
-            if( DEFINE_REGEXP_COMPAT__DEBUG && this.names[ name ] !== index ){
+        if( String_startsWith( parser.source, '(?<', parser.pos ) ){
+            index = ++parser.captureParensIndex;
+            parser.pos += 3; // skip '(?<'
+            var namePos = parser.pos;
+            var name = Parser_parseCaptureName( parser );
+            var raw = parser.source.slice( namePos, parser.pos - 1 );
+            if( DEFINE_REGEXP_COMPAT__DEBUG && parser.names[ name ] !== index ){
                 throw new Error('BUG: invalid named capture');
             };
-            child = this.parseDisjunction();
-            if( DEFINE_REGEXP_COMPAT__DEBUG && this.current() !== ')' ){
+            child = Parser_parseDisjunction( parser );
+            if( DEFINE_REGEXP_COMPAT__DEBUG && Parser_current( parser ) !== ')' ){
                 throw new RegExpSyntaxError('unterminated named capture');
             };
-            ++this.pos; // skip ')'
-            return { type : REGEXP_COMPAT__PATTERN_IS_NamedCapture, name : name, raw : raw, child : child, range : [ begin, this.pos ] };
+            ++parser.pos; // skip ')'
+            return { type : REGEXP_COMPAT__PATTERN_IS_NamedCapture, name : name, raw : raw, child : child, range : [ begin, parser.pos ] };
         };
     };
 
@@ -1231,11 +1265,12 @@ Parser.prototype.parseParen = function(){
  *
  * This method is used by `preprocessParens`, `tryParseBackRef` and `parseParen`.
  *
+ * @param {Parser} parser
  * @return {string}
  */
-Parser.prototype.parseCaptureName = function(){
+function Parser_parseCaptureName( parser ){
     var name = '';
-    var start = this.parseCaptureNameChar();
+    var start = Parser_parseCaptureNameChar( parser );
 
     if( DEFINE_REGEXP_COMPAT__DEBUG ){
         if( !isIDStart( start ) ){
@@ -1245,19 +1280,19 @@ Parser.prototype.parseCaptureName = function(){
     name += start;
 
     for( ;; ){
-        var save = this.pos;
-        var part = this.parseCaptureNameChar();
+        var save = parser.pos;
+        var part = Parser_parseCaptureNameChar( parser );
         if( !isIDPart( part ) ){
-            this.pos = save;
+            parser.pos = save;
             break;
         };
         name += part;
     };
 
-    if( DEFINE_REGEXP_COMPAT__DEBUG && this.current() !== '>' ){
+    if( DEFINE_REGEXP_COMPAT__DEBUG && Parser_current( parser ) !== '>' ){
         throw new RegExpSyntaxError('invalid capture group name');
     };
-    ++this.pos; // skip '>'
+    ++parser.pos; // skip '>'
 
     return name;
 };
@@ -1267,76 +1302,82 @@ Parser.prototype.parseCaptureName = function(){
  *
  * Unicode escape sequences are used as capture name character.
  *
+ * @param {Parser} parser
  * @return {string}
  */
-Parser.prototype.parseCaptureNameChar = function(){
-    var c = this.current();
+function Parser_parseCaptureNameChar( parser ){
+    var c = Parser_current( parser );
 
     if( c === '\\' ){
-        return this.tryParseUnicodeEscape( true );
+        return Parser_tryParseUnicodeEscape( parser, true );
     };
-    this.pos += c.length; // skip any character
+    parser.pos += c.length; // skip any character
     return c;
 };
 
 /** Parse digits. If parsing is failed, return `-1`.
  *
+ * @param {Parser} parser
  * @return {number}
  */
-Parser.prototype.parseDigits = function(){
+function Parser_parseDigits( parser ){
     var s = '', c;
 
-    while( isDigit( c = this.current() ) ){
+    while( isDigit( c = Parser_current( parser ) ) ){
         s += c;
-        ++this.pos; // skip digit
+        ++parser.pos; // skip digit
     };
     return s === '' ? -1 : /* Number. */ parseInt( s, 10 );
 };
 
 /** Parse hex digits. If parsing is failed, return `-1`.
  *
+ * @param {Parser} parser
  * @return {number}
  */
-Parser.prototype.parseHexDigits = function(){
+function Parser_parseHexDigits( parser ){
     var s = '', c;
 
-    for( ; isHexDigit( c = this.current() ); ){
+    for( ; isHexDigit( c = Parser_current( parser ) ); ){
         s += c;
-        this.pos += c.length; // skip hex digit
+        parser.pos += c.length; // skip hex digit
     };
     return s === '' ? -1 : /* Number. */ parseInt( s, 16 );
 };
 
 /** Try to parse `n` characters of hex digits.  If parsing is faield, return `-1`.
  *
+ * @param {Parser} parser
  * @param {number} n
  * @return {number}
  */
-Parser.prototype.tryParseHexDigitsN = function( n ){
-    var save = this.pos;
+function Parser_tryParseHexDigitsN( parser, n ){
+    var save = parser.pos;
     var s = '';
     while( n-- > 0 ){
-        var c = this.current();
+        var c = Parser_current( parser );
         if( !isHexDigit( c ) ){
-            this.pos = save;
+            parser.pos = save;
             return -1;
         };
         s += c;
-        this.pos += c.length; // skip hex digit
+        parser.pos += c.length; // skip hex digit
     };
     return /* Number. */ parseInt( s, 16 );
 };
 
 /** Return the current character.
+ * 
+ * @param {Parser} parser
  * @return {string}
  */
-Parser.prototype.current = function(){
+function Parser_current( parser ){
     var c;
 
-    if( DEFINE_REGEXP_COMPAT__ES2018 && this.unicode ){
-        c = String_codePointAt( this.source, this.pos );
+    if( DEFINE_REGEXP_COMPAT__ES2018 && parser.unicode ){
+        c = String_codePointAt( parser.source, parser.pos );
         return c === undefined ? '' : String_fromCodePoint( c );
     };
-    c = this.source.charCodeAt( this.pos );
+    c = parser.source.charCodeAt( parser.pos );
     return /* Number.isNaN( c ) */ c !== c ? '' : String_fromCharCode( c );
 };

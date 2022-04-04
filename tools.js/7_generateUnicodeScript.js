@@ -169,7 +169,7 @@ module.exports = function(){
         for( const c of base ){
             baseSet.add( c, c + 1 );
         };
-        script[ canonical ] = baseSet.data;
+        script[ canonical ] = baseSet;
 
         const extSet = new CharSet();
         for( const c of ext ){
@@ -177,8 +177,8 @@ module.exports = function(){
                 extSet.add( c, c + 1 );
             };
         };
-        if( extSet.data.length ){
-            scriptExtensions[ canonical ] = extSet.data;
+        if( extSet.length ){
+            scriptExtensions[ canonical ] = extSet;
         };
     };
     return 'm_unicodeScript = ' + JSON.stringify( script, null, '    ' ) + ';\n' +

@@ -11,7 +11,7 @@ var m_unicodeCategory, m_unicodeProperty,
 var m_propertyAliases,
     m_propertyValueAliasesGeneralCategory, m_propertyValueAliasesScript, m_propertyValueAliasesScriptExtensions;
 
-var m_escapeCodePointAsRegExpSpurceChar, CharSet;
+var m_escapeCodePointAsRegExpSpurceChar, m_createCharSetFromArray;
 
 var m_charSetDigit, m_charSetInvertDigit,
     m_charSetWord, m_charSetInvertWord,

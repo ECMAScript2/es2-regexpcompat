@@ -53,7 +53,7 @@ module.exports = function(){
 // See https://www.ecma-international.org/ecma-262/10.0/index.html#sec-characterclassescape.
 
 /** A CharSet which contains ASCII digits. */
-m_charSetDigit = new CharSet(
+m_charSetDigit = m_createCharSetFromArray(
     [ 0x30, 0x39 + 1 ] // 0..9
 );
 
@@ -61,7 +61,7 @@ m_charSetDigit = new CharSet(
 m_charSetInvertDigit = m_charSetDigit.clone().invert();
 
 /** A CharSet which contains ASCII word characters. */
-m_charSetWord = new CharSet( [ ${charSetWord.data.join( ', ' )} ] );
+m_charSetWord = m_createCharSetFromArray( [ ${charSetWord.join( ', ' )} ] );
 
 /** A CharSet which does not contain ASCII word characters. */
 m_charSetInvertWord = m_charSetWord.clone().invert();
@@ -72,7 +72,7 @@ if( DEFINE_REGEXP_COMPAT__ES2018 ){
  *
  * See https://www.ecma-international.org/ecma-262/10.0/index.html#sec-runtime-semantics-wordcharacters-abstract-operation.
  */
-    m_charSetUnicodeWord = new CharSet( [ ${charSetUnicodeWord.data.join( ', ' )} ] );
+    m_charSetUnicodeWord = m_createCharSetFromArray( [ ${charSetUnicodeWord.join( ', ' )} ] );
 
 /** A CharSet which does not contain Unicode word characters. */
     m_charSetInvertUnicodeWord = m_charSetUnicodeWord.clone().invert();
@@ -84,7 +84,7 @@ if( DEFINE_REGEXP_COMPAT__ES2018 ){
  * See https://www.ecma-international.org/ecma-262/10.0/index.html#prod-WhiteSpace
  * and https://www.ecma-international.org/ecma-262/10.0/index.html#prod-LineTerminator.
  */
-m_charSetSpace = new CharSet( [ ${charSetSpace.data.join( ', ' )} ] );
+m_charSetSpace = m_createCharSetFromArray( [ ${charSetSpace.join( ', ' )} ] );
 
 /** A CharSet which does not contain space characters. */
 m_charSetInvertSpace = m_charSetSpace.clone().invert();

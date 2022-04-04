@@ -55,7 +55,7 @@ module.exports = function(){
         for( const c of data ){
             set.add(c, c + 1);
         };
-        category[ canonical ] = set.data;
+        category[ canonical ] = set;
     };
     return 'm_unicodeCategory =\n' + JSON.stringify( category, null, '    ' ) + ';\n';
 };
