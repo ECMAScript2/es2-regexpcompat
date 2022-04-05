@@ -90,8 +90,12 @@ RegExpCompat = function( source, flags ){
     };
 
     if( DEFINE_REGEXP_COMPAT__DEBUG ){
-        this.regExp = new RegExp( source, flags );
+        this.regExp = new RegExp( source, this.flags ); // 機能がパージされてる場合もあるので RegExpCompat で処理済のものを使う
         // this.regExp.compile();
+        if( RegExpCompat_debug( this ) && this.regExp.source !== this.source ){
+            console.log( 'RegExpCompat.source missmatch! RegExpCompat("' + source + '", "' + ( flags || '' ) + '")' );
+            --RegExpCompat_debugCount;
+        };
     };
 };
 
@@ -122,7 +126,7 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
       // RegExpCompat.prototype[ Symbol.replace ] = function(){ throw "Called Symbol.replace!!" };
     };
 
-    /** @type {{log:Function,dir:Function}} */
+    /** @type {!{log:!Function,dir:!Function}} */
     var console = this.console;
 };
 
@@ -131,6 +135,74 @@ RegExpCompat.prototype.toString = function(){
 };
 
 var RegExpCompat_debugCount = 10;
+var RegExpCompat_skipCompare = true;
+
+/**
+ * @param {RegExpCompat} regExpCompat 
+ * @return {boolean}
+ */
+function RegExpCompat_debug( regExpCompat ){
+    return DEFINE_REGEXP_COMPAT__DEBUG && console && regExpCompat.regExp && 0 < RegExpCompat_debugCount;
+};
+
+/**
+ * 
+ * @param {RegExpCompat} regExpCompat 
+ * @param {string} functionName 
+ * @param {*} result1 
+ * @param {*} result2 
+ * @param {Array} args
+ */
+function RegExpCompat_compare( regExpCompat, functionName, result1, result2, args ){
+    if( RegExpCompat_skipCompare ){
+        return;
+    };
+
+    if( !!regExpCompat.lastIndex !== !!regExpCompat.regExp.lastIndex && regExpCompat.lastIndex !== regExpCompat.regExp.lastIndex ){
+        console.log( 'regExpCompat.lastIndex missmatch! RegExpCompat("' + regExpCompat.source + '", "' + regExpCompat.flags + '").' + functionName + '("' + args.join( ',' ) + '") ' +
+        regExpCompat.lastIndex + '/' + regExpCompat.regExp.lastIndex );
+        --RegExpCompat_debugCount;
+    };
+
+    if( !result1 && !result2 ){
+        return;
+    };
+
+    if( !result1 && result2 || result1 && !result2 ){
+        console.log( '[0]Invalid Result! RegExpCompat("' + regExpCompat.source + '", "' + regExpCompat.flags + '").' + functionName + '("' + args.join( ',' ) + '")' );
+        console.dir( result1 );
+        console.dir( result2 );
+        --RegExpCompat_debugCount;
+        return;
+    };
+
+    if( result1.pop && result2.pop ){ // isArray
+        if( result2.length   !== result1.length ||
+            result2.input    !== result1.input  ||
+            result2.index    !== result1.index  ||
+            !!result2.groups !== !!result1.groups
+        ){
+            console.log( '[1]Invalid Result! RegExpCompat("' + regExpCompat.source + '", "' + regExpCompat.flags + '").' + functionName + '("' + args.join( ',' ) + '")' );
+            console.dir( result1 );
+            console.dir( result2 );
+            --RegExpCompat_debugCount;
+        } else {
+            for( var i = 0, l = result2.length; i < l; ++i ){
+                if( result2[ i ] !== result1[ i ] &&
+                    !( result2[ i ] === '' && result1[ i ] === undefined ) // for ie8-
+                ){
+                    console.log( '[2]Invalid Result! RegExpCompat("' + regExpCompat.source + '", "' + regExpCompat.flags + '").' + functionName + '("' + args.join( ',' ) + '")' );
+                    console.dir( result1 );
+                    console.dir( result2 );
+                    --RegExpCompat_debugCount;
+                    break;
+                };
+            };
+        };
+    } else {
+
+    };
+};
 
 /**
  * @param {*} string 
@@ -148,49 +220,13 @@ RegExpCompat.prototype.exec = function( string ){
         this.lastIndex = match ? match.lastIndex : 0;
     };
 
-    if( !DEFINE_REGEXP_COMPAT__DEBUG || !console || !this.regExp || RegExpCompat_debugCount < 0 ){
-        return match ? match.toArray() : null;
-    };
-    var regExpResult = this.regExp.exec( string );
+    var regExpResultCompat = match ? match.toArray() : null;
 
-    if( !match && !regExpResult ){
-        return null;
+    if( !RegExpCompat_debug( this ) ){
+        return regExpResultCompat;
     };
 
-    // console.dir( this );
-
-    if( !match && regExpResult ){
-        console.log( '[0]Invalid Result! RegExpCompat("' + this.source + '", "' + this.flags + '").exec("' + string + '")' );
-        console.dir( match );
-        console.dir( regExpResult );
-        --RegExpCompat_debugCount;
-        return null;
-    };
-
-    var regExpResultCompat = match.toArray();
-
-    if( regExpResult.length   !== regExpResultCompat.length ||
-        regExpResult.input    !== regExpResultCompat.input  ||
-        regExpResult.index    !== regExpResultCompat.index  ||
-        !!regExpResult.groups !== !!regExpResultCompat.groups
-    ){
-        console.log( '[1]Invalid Result! RegExpCompat("' + this.source + '", "' + this.flags + '").exec("' + string + '")' );
-        console.dir( regExpResultCompat );
-        console.dir( regExpResult );
-        --RegExpCompat_debugCount;
-    } else {
-        for( var i = 0, l = regExpResult.length; i < l; ++i ){
-            if( regExpResult[ i ] !== regExpResultCompat[ i ] &&
-                !( regExpResult[ i ] === '' && regExpResultCompat[ i ] === undefined ) // for ie8-
-            ){
-                console.log( '[2]Invalid Result! RegExpCompat("' + this.source + '", "' + this.flags + '").exec("' + string + '")' );
-                console.dir( regExpResultCompat );
-                console.dir( regExpResult );
-                --RegExpCompat_debugCount;
-                break;
-            };
-        };
-    };
+    RegExpCompat_compare( this, 'exec', regExpResultCompat, this.regExp.exec( string ), [ string ] );
 
     return regExpResultCompat;
 };
@@ -200,7 +236,18 @@ RegExpCompat.prototype.exec = function( string ){
  * @return {boolean}
  */
 RegExpCompat.prototype.test = function( string ){
-    return !!this.exec( string );
+    RegExpCompat_skipCompare = true;
+
+    var result = !!this.exec( string );
+
+    if( !RegExpCompat_debug( this ) ){
+        return result;
+    };
+
+    RegExpCompat_skipCompare = false;
+    RegExpCompat_compare( this, 'test', result, this.regExp.test( string ), [ string ] );
+
+    return result;
 };
 
 /**
@@ -208,18 +255,30 @@ RegExpCompat.prototype.test = function( string ){
  * @return {RegExpResult|Array<string>|null}
  */
 RegExpCompat.prototype[ 'match' ] = function( string ){
+    RegExpCompat_skipCompare = true;
+    var result;
+    
     if( this.global ){
         this.lastIndex = 0;
-        var result = [];
+        result = [];
         for( var r; r = this.exec( string ) ; ){
             result.push( r[ 0 ] );
             if( r[ 0 ] === '' ){
                 this.lastIndex = DEFINE_REGEXP_COMPAT__ES2018 ? advance( string, this.lastIndex, this.unicode ) : advance( string, this.lastIndex );
             };
         };
-        return result.length === 0 ? null : result;
+        result = result.length === 0 ? null : result;
+    } else {
+        result = this.exec( string );
     };
-    return this.exec( string );
+    if( !RegExpCompat_debug( this ) ){
+        return result;
+    };
+
+    RegExpCompat_skipCompare = false;
+    RegExpCompat_compare( this, 'match', result, string.match( this.regExp ), [ string ] );
+
+    return result;
 };
 
 /**
@@ -228,8 +287,11 @@ RegExpCompat.prototype[ 'match' ] = function( string ){
  * @return {string}
  */
 RegExpCompat.prototype[ 'replace' ] = function( string, replacer ){
+    RegExpCompat_skipCompare = true;
+
     var replacerIsFunction = typeof replacer === 'function';
     var matches = [];
+
     if( this.global ){
         this.lastIndex = 0;
     };
@@ -332,7 +394,16 @@ RegExpCompat.prototype[ 'replace' ] = function( string, replacer ){
     };
 
     result[ ++resultIndex ] = string.slice( pos );
-    return result.join( '' );
+    result = result.join( '' );
+
+    if( !RegExpCompat_debug( this ) ){
+        return result;
+    };
+
+    RegExpCompat_skipCompare = false;
+    RegExpCompat_compare( this, 'replace', result, string.replace( this.regExp, replacer ), [ string, replacer ] );
+
+    return result;
 };
 
 /**
@@ -340,11 +411,22 @@ RegExpCompat.prototype[ 'replace' ] = function( string, replacer ){
  * @return {number}
  */
 RegExpCompat.prototype.search = function( string ){
+    RegExpCompat_skipCompare = true;
+
     var prevLastIndex = this.lastIndex;
     this.lastIndex = 0;
     var m = this.exec( string );
     this.lastIndex = prevLastIndex;
-    return m ? m.index : -1;
+    var result = m ? m.index : -1;
+
+    if( !RegExpCompat_debug( this ) ){
+        return result;
+    };
+
+    RegExpCompat_skipCompare = false;
+    RegExpCompat_compare( this, 'search', result, this.regExp.search( string ), [ string ] );
+
+    return result;
 };
 
 /**
@@ -353,6 +435,8 @@ RegExpCompat.prototype.search = function( string ){
  * @return {Array.<string>}
  */
 RegExpCompat.prototype.split = function( string, limit ){
+    RegExpCompat_skipCompare = true;
+
     var flags       = this.sticky ? this.flags : this.flags + 'y';
     var constructor = this.constructor;
     var species     = /* constructor && constructor[Symbol.species] || */ RegExpCompat;
@@ -372,45 +456,52 @@ RegExpCompat.prototype.split = function( string, limit ){
         if( !match ){
             result.push( string );
         };
-        return result;
-    };
+    } else {
+        var len = string.length;
+        var p = 0;
+        var q = p;
+        var t;
+        while( q < len ){
+            splitter.lastIndex = q;
+            match = splitter.exec( string );
+            if( !match ){
+                q = DEFINE_REGEXP_COMPAT__ES2018 ? advance( string, q, this.unicode ) : advance( string, q );
+                continue;
+            };
 
-    var len = string.length;
-    var p = 0;
-    var q = p;
-    var t;
-    while( q < len ){
-        splitter.lastIndex = q;
-        match = splitter.exec( string );
-        if( !match ){
-            q = DEFINE_REGEXP_COMPAT__ES2018 ? advance( string, q, this.unicode ) : advance( string, q );
-            continue;
-        };
+            var e = Math.min( splitter.lastIndex, len );
+            if( e === p ){
+                q = DEFINE_REGEXP_COMPAT__ES2018 ? advance( string, q, this.unicode ) : advance( string, q );
+                continue;
+            };
 
-        var e = Math.min( splitter.lastIndex, len );
-        if( e === p ){
-            q = DEFINE_REGEXP_COMPAT__ES2018 ? advance( string, q, this.unicode ) : advance( string, q );
-            continue;
-        };
-
-        t = string.slice( p, q );
-        result.push( t );
-        if( limit === result.length ){
-            return result;
-        };
-        p = e;
-        for( var i = 1, l = match.length; i < l; ++i ){
-            result.push( match[ i ] );
+            t = string.slice( p, q );
+            result.push( t );
             if( limit === result.length ){
                 return result;
             };
+            p = e;
+            for( var i = 1, l = match.length; i < l; ++i ){
+                result.push( match[ i ] );
+                if( limit === result.length ){
+                    return result;
+                };
+            };
+
+            q = p;
         };
 
-        q = p;
+        t = string.slice( p );
+        result.push( t );
     };
 
-    t = string.slice( p );
-    result.push( t );
+    if( !RegExpCompat_debug( this ) ){
+        return result;
+    };
+
+    RegExpCompat_skipCompare = false;
+    RegExpCompat_compare( this, 'split', result, this.regExp.split( string, limit ), [ string, limit ] );
+
     return result;
 };
 
