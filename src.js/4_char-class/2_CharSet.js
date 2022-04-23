@@ -11,7 +11,7 @@ var MAX_CODE_POINT = 0x110000;
  * So, this array's size must be even always.
  *
  * ```js
- * var set = m_createCharSetFromArray();
+ * var set = m_createCharSetFromArray([]);
  * set.add(10, 20);
  * set.add(30, 40)
  * console.log(set);
