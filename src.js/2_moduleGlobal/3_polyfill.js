@@ -36,7 +36,7 @@ function String_fromCodePoint( codePoint ){
 /**
  * original:
  *   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/codePointAt#polyfill
- * @param {string} string 
+ * @param {string|String} string 
  * @param {number} index
  * @return {number|undefined}
  */

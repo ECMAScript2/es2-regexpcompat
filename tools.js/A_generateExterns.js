@@ -47,6 +47,9 @@ module.exports = function(){
     };
 
     return `
+/** @const {!Global} */
+var global;
+
 var UnicodeCategory =
     ${JSON.stringify(UnicodeCategory)};
 

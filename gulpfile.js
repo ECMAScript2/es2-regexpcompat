@@ -95,7 +95,7 @@ gulp.task( '__compile', gulp.series(
                     // labelGlobal        : 'global',
                     labelPackageGlobal : '*',
                     // labelModuleGlobal  : 'moduleGlobal',
-                    packageGlobalArgs  : [ 'Math,Infinity,undefined', 'Math,1/0,void 0' ],
+                    packageGlobalArgs  : [ 'global,RegExp,String,Math,Infinity,undefined', 'this,this.RegExp,String,Math,1/0,void 0' ],
                     basePath           : './src.js/',
                     // wrapAll            : true
                 }
@@ -123,8 +123,8 @@ gulp.task( '__compile', gulp.series(
                         '// ReRE.js for ES' + minTargetECMAVersion + '[' + strCompileType + '], Compat feature:ES' + ecmaFeatureVersion + ', (https://githug.com/itozyun/rerejs)\n' +
                         (
                             strCompileType === 'develop' ?
-                                'var RgExpCompat=(function(){%output%})();' :
-                                'var RgExpCompat=%output%'
+                                'var RegExpCompat=(function(){%output%})();' :
+                                'var RegExpCompat=%output%'
                         ),
                     js_output_file    : minTargetECMAVersion !== 2 ?
                                             'ReRE.es' + minTargetECMAVersion + '.' + ecmaFeatureVersion + '.' + strCompileType + '.js' :
