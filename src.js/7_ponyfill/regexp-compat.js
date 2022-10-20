@@ -101,7 +101,7 @@ RegExpCompat = function( source, flags ){
         };
     };
 
-    this.lastIndex = 0; // Bugfix!!
+    this.lastIndex = 0;
 };
 
 if( DEFINE_REGEXP_COMPAT__DEBUG ){
@@ -374,7 +374,7 @@ function RegExpCompat_replace( regExp, string, replacer ){
             for( ;; ){
                 var j = replacer.indexOf( '$', i );
                 if( j === -1 ){
-                    result[ ++resultIndex ] = replacer.slice( i ); // Bugfix!!
+                    result[ ++resultIndex ] = replacer.slice( i );
                     break;
                 };
                 result[ ++resultIndex ] = replacer.slice( i, j );
