@@ -13,7 +13,7 @@ Match = function( input, caps, names ){
     this.input  = input;
     this._caps  = caps;
 
-    if( DEFINE_REGEXP_COMPAT__ES2018 ){
+    if( CONST_SUPPORT_ES2018 ){
         this._names = names;
     };
 
@@ -81,7 +81,7 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
  * @return {Array.<number>}
  */
 function Match_resolve( match, k ){
-    if( DEFINE_REGEXP_COMPAT__ES2018 && k === k + '' ){ // typeof k === 'string'
+    if( CONST_SUPPORT_ES2018 && k === k + '' ){ // typeof k === 'string'
         k = match._names[ k ];
         k  = k !== undefined ? k : -1;
     };
@@ -108,7 +108,7 @@ Match.prototype.toArray = function(){
         array[ i ] = this.get( i );
     };
 
-    if( DEFINE_REGEXP_COMPAT__ES2018 && this._names._size > 0 ){
+    if( CONST_SUPPORT_ES2018 && this._names._size > 0 ){
         var groups = {}, // <- Object.create( null ),
             names  = this._names;
         for( var name in names ){
@@ -143,7 +143,7 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
         Match.prototype[ Symbol[ 'for' ]( 'nodejs.util.inspect.custom' ) ] = function( depth, options ){
             var s = options.stylize( 'Match', 'special' ) + ' [\n';
             var inverseNames = new Map(
-                    Array.from( DEFINE_REGEXP_COMPAT__ES2018 ? this._names : {} ).map( function( ki ){ return [ ki[ 1 ], ki[ 0 ] ]; } ) );
+                    Array.from( CONST_SUPPORT_ES2018 ? this._names : {} ).map( function( ki ){ return [ ki[ 1 ], ki[ 0 ] ]; } ) );
 
             for( var i = 0, _i; i < this.length; i++ ){
                 _i = inverseNames.get( i );

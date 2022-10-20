@@ -66,7 +66,7 @@ m_charSetWord = m_createCharSetFromArray( [ ${charSetWord.join( ', ' )} ] );
 /** A CharSet which does not contain ASCII word characters. */
 m_charSetInvertWord = m_charSetWord.clone().invert();
 
-if( DEFINE_REGEXP_COMPAT__ES2018 ){
+if( CONST_SUPPORT_ES2018 ){
 /**
  * A CharSet which contains Unicode word characters.
  *

@@ -15,7 +15,7 @@ module.exports = function(){
     return `
 if( DEFINE_REGEXP_COMPAT__DEBUG ){
     charSetIdStart = m_createCharSetFromArray(
-        DEFINE_REGEXP_COMPAT__ES2018 ?
+        CONST_SUPPORT_ES2018 ?
             m_unicodeProperty[ 'ID_Start' ]
             :
             [${charSetIdStart.join( ', ' )}]
@@ -23,7 +23,7 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
 };
 
 charSetIdContinue = m_createCharSetFromArray(
-    DEFINE_REGEXP_COMPAT__ES2018 ?
+    CONST_SUPPORT_ES2018 ?
         m_unicodeProperty[ 'ID_Continue' ]
         :
         [${charSetIdContinue.join( ', ' )}]

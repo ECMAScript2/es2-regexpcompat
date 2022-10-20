@@ -17,7 +17,7 @@ m_charSetWord = m_createCharSetFromArray( [ 48, 58, 65, 91, 95, 96, 97, 123 ] );
 /** A CharSet which does not contain ASCII word characters. */
 m_charSetInvertWord = m_charSetWord.clone().invert();
 
-if( DEFINE_REGEXP_COMPAT__ES2018 ){
+if( CONST_SUPPORT_ES2018 ){
 /**
  * A CharSet which contains Unicode word characters.
  *

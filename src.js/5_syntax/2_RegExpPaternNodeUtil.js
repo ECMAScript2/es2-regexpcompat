@@ -41,11 +41,11 @@ function classItemToString( n ){
                 case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_space :
                     return /** @type {SimpleEscapeClass} */ (n).invert ? '\\S' : '\\s';
                 case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_unicode_property :
-                    if( DEFINE_REGEXP_COMPAT__ES2018 ){
+                    if( CONST_SUPPORT_ES2018 ){
                         return '\\' + ( /** @type {UnicodePropertyEscapeClass} */ (n).invert ? 'P' : 'p' ) + /** @type {UnicodePropertyEscapeClass} */ (n).property;
                     };
                 case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_unicode_property_value :
-                    if( DEFINE_REGEXP_COMPAT__ES2018 ){
+                    if( CONST_SUPPORT_ES2018 ){
                         return '\\' + ( /** @type {UnicodePropertyValueEscapeClass} */ (n).invert ? 'P' : 'p' ) + /** @type {UnicodePropertyValueEscapeClass} */ (n).property + '=' + n.value;
                     };
             };
@@ -103,15 +103,15 @@ m_nodeToString = function( n ){
         case REGEXP_COMPAT__PATTERN_IS_BackRef :
             return '\\' + n.index;
         case REGEXP_COMPAT__PATTERN_IS_NamedBackRef :
-            if( DEFINE_REGEXP_COMPAT__ES2018 ){
+            if( CONST_SUPPORT_ES2018 ){
                 return '\\k<' + n.raw + '>';
             };
         case REGEXP_COMPAT__PATTERN_IS_NamedCapture :
-            if( DEFINE_REGEXP_COMPAT__ES2018 ){
+            if( CONST_SUPPORT_ES2018 ){
                 return '(?<' + n.raw + '>' + m_nodeToString( n.child ) + ')';
             };
         case REGEXP_COMPAT__PATTERN_IS_LookBehind :
-            if( DEFINE_REGEXP_COMPAT__ES2018 ){
+            if( CONST_SUPPORT_ES2018 ){
                 return '(?<' + ( n.negative ? '!' : '=' ) + m_nodeToString( n.child ) + ')';
             };
     };
@@ -134,13 +134,13 @@ m_flagSetToString = function( flagSet ){
     if( flagSet.multiline ){
         s += 'm';
     };
-    if( flagSet.sticky ){ // ES2015
+    if( flagSet.sticky /* && CONST_SUPPORT_ES2015 */ ){
         s += 'y';
     };
-    if( flagSet.dotAll && DEFINE_REGEXP_COMPAT__ES2018 ){
+    if( flagSet.dotAll && CONST_SUPPORT_ES2018 ){
         s += 's';
     };
-    if( flagSet.unicode && DEFINE_REGEXP_COMPAT__ES2018 ){
+    if( flagSet.unicode && CONST_SUPPORT_ES2018 ){
         s += 'u';
     };
     return s;

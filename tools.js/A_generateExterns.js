@@ -50,6 +50,9 @@ module.exports = function(){
 /** @const {!Global} */
 var global;
 
+String.prototype.search = function(){};
+String.prototype.split  = function(){};
+
 var UnicodeCategory =
     ${JSON.stringify(UnicodeCategory)};
 

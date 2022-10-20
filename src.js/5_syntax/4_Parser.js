@@ -9,7 +9,7 @@ function isAssertion( n ){
     //   以下の通りに書き換えた
     if( DEFINE_REGEXP_COMPAT__MINIFY ){
         return REGEXP_COMPAT__PATTERN_IS_WordBoundary <= n.type &&
-               n.type <= ( DEFINE_REGEXP_COMPAT__ES2018 ? REGEXP_COMPAT__PATTERN_IS_LookBehind : REGEXP_COMPAT__PATTERN_IS_LookAhead );
+               n.type <= ( CONST_SUPPORT_ES2018 ? REGEXP_COMPAT__PATTERN_IS_LookBehind : REGEXP_COMPAT__PATTERN_IS_LookAhead );
     } else {
         switch( n.type ){
             case REGEXP_COMPAT__PATTERN_IS_WordBoundary :
@@ -18,7 +18,7 @@ function isAssertion( n ){
             case REGEXP_COMPAT__PATTERN_IS_LookAhead :
                 return true;
             case REGEXP_COMPAT__PATTERN_IS_LookBehind :
-                if( DEFINE_REGEXP_COMPAT__ES2018 ){
+                if( CONST_SUPPORT_ES2018 ){
                     return true;
                 };
         };
@@ -124,7 +124,7 @@ var RepeatQuantifier;
 Parser = function( source, flags, additional ){
      /** Precalculated number of capture group parens. */
     this.captureParens = 0;
-    if( DEFINE_REGEXP_COMPAT__ES2018 ){
+    if( CONST_SUPPORT_ES2018 ){
         /** @type {Object<string, number>} Precalculated `Map` associate from capture group name to its index. */
         this.names = { _size : 0 };
     };
@@ -151,7 +151,7 @@ Parser.prototype.parse = function(){
     /** @type {FlagSet} Parsed flags. */
     this.flagSet = Parser_preprocessFlags( this.flags );
 
-    if( DEFINE_REGEXP_COMPAT__ES2018 ){
+    if( CONST_SUPPORT_ES2018 ){
         this.unicode = /** @type {boolean} Is the `flagSet` has `unicode`? */ (this.flagSet.unicode);
     };
 
@@ -163,7 +163,7 @@ Parser.prototype.parse = function(){
         throw new RegExpSyntaxError( "too many ')'" );
     };
 
-    if( DEFINE_REGEXP_COMPAT__ES2018 ){
+    if( CONST_SUPPORT_ES2018 ){
         return {
             type          : REGEXP_COMPAT__PATTERN_IS_Pattern,
             flagSet       : this.flagSet,
@@ -190,7 +190,7 @@ Parser.prototype.parse = function(){
 function Parser_preprocessFlags( flags ){
     var flagSet;
 
-    if( DEFINE_REGEXP_COMPAT__ES2018 ){
+    if( CONST_SUPPORT_ES2018 ){
         flagSet = {
             global     : false,
             ignoreCase : false,
@@ -232,13 +232,15 @@ function Parser_preprocessFlags( flags ){
                 flagSet.multiline = true;
                 break;
             case 'y':
-                if( flagSet.sticky && DEFINE_REGEXP_COMPAT__DEBUG ){
-                    throw new RegExpSyntaxError("duplicated 'y' flag");
-                };
-                flagSet.sticky = true;
+                // if( CONST_SUPPORT_ES2015 ){
+                    if( flagSet.sticky && DEFINE_REGEXP_COMPAT__DEBUG ){
+                        throw new RegExpSyntaxError("duplicated 'y' flag");
+                    };
+                    flagSet.sticky = true;
+                // };
                 break;
             case 's':
-                if( DEFINE_REGEXP_COMPAT__ES2018 ){
+                if( CONST_SUPPORT_ES2018 ){
                     if( flagSet.dotAll && DEFINE_REGEXP_COMPAT__DEBUG ){
                         throw new RegExpSyntaxError("duplicated 's' flag");
                     };
@@ -246,7 +248,7 @@ function Parser_preprocessFlags( flags ){
                 };
                 break;
             case 'u':
-                if( DEFINE_REGEXP_COMPAT__ES2018 ){
+                if( CONST_SUPPORT_ES2018 ){
                     if( flagSet.unicode && DEFINE_REGEXP_COMPAT__DEBUG ){
                         throw new RegExpSyntaxError("duplicated 'u' flag");
                     };
@@ -277,7 +279,7 @@ function Parser_preprocessCaptures( parser ){
         var c = Parser_current( parser );
         switch( c ){
             case '(' :
-                if( DEFINE_REGEXP_COMPAT__ES2018 && String_startsWith( parser.source, '(?<', parser.pos ) ){
+                if( CONST_SUPPORT_ES2018 && String_startsWith( parser.source, '(?<', parser.pos ) ){
                     parser.pos += 3; // skip '(?<'
                     var d = Parser_current( parser );
                     if( d !== '=' && d !== '!' ){
@@ -403,7 +405,7 @@ function Parser_parseQuantifier( parser ){
 
     if( isAssertion( child ) ){
         if( parser.additional &&
-            ( !DEFINE_REGEXP_COMPAT__ES2018 || !parser.unicode ) &&
+            ( !CONST_SUPPORT_ES2018 || !parser.unicode ) &&
             child.type === REGEXP_COMPAT__PATTERN_IS_LookAhead
         ){} else {
             return child;
@@ -462,7 +464,7 @@ function Parser_parseRepeat( parser, begin, child ){
     var quantifier = Parser_tryParseRepeatQuantifier( parser );
 
     if( !quantifier ){
-        if( parser.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !parser.unicode ) ){
+        if( parser.additional && ( !CONST_SUPPORT_ES2018 || !parser.unicode ) ){
             parser.pos = save;
             return child;
         };
@@ -576,7 +578,7 @@ function Parser_parseAtom( parser ){
                 throw new RegExpSyntaxError('nothing to repeat');
             };
         case '{':
-            if( parser.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !parser.unicode ) ){
+            if( parser.additional && ( !CONST_SUPPORT_ES2018 || !parser.unicode ) ){
                 if( DEFINE_REGEXP_COMPAT__DEBUG && Parser_tryParseRepeatQuantifier( parser ) ){
                     throw new RegExpSyntaxError('nothing to repeat');
                 };
@@ -586,14 +588,14 @@ function Parser_parseAtom( parser ){
                 throw new RegExpSyntaxError('lone quantifier brackets');
             };
         case '}':
-            if( parser.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !parser.unicode ) ){
+            if( parser.additional && ( !CONST_SUPPORT_ES2018 || !parser.unicode ) ){
                 break;
             };
             if( DEFINE_REGEXP_COMPAT__DEBUG ){
                 throw new RegExpSyntaxError('lone quantifier brackets');
             };
         case ']':
-            if( parser.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !parser.unicode ) ){
+            if( parser.additional && ( !CONST_SUPPORT_ES2018 || !parser.unicode ) ){
                 break;
             };
             if( DEFINE_REGEXP_COMPAT__DEBUG ){
@@ -664,7 +666,7 @@ function Parser_parseClassItem( parser ){
     };
 
     if( begin.type === REGEXP_COMPAT__PATTERN_IS_EscapeClass ){
-        if( parser.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !parser.unicode ) ){
+        if( parser.additional && ( !CONST_SUPPORT_ES2018 || !parser.unicode ) ){
             return /** @type {EscapeClass} */ (begin);
         };
         if( DEFINE_REGEXP_COMPAT__DEBUG ){
@@ -676,7 +678,7 @@ function Parser_parseClassItem( parser ){
     ++parser.pos; // skip '-'
     var end = Parser_parseClassAtom( parser );
     if( end.type === REGEXP_COMPAT__PATTERN_IS_EscapeClass ){
-        if( parser.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !parser.unicode ) ){
+        if( parser.additional && ( !CONST_SUPPORT_ES2018 || !parser.unicode ) ){
             parser.pos = save;
             return begin;
         };
@@ -800,7 +802,7 @@ function Parser_tryParseBackRef( parser ){
     var begin = parser.pos;
     ++parser.pos; // skip '\\';
 
-    if( DEFINE_REGEXP_COMPAT__ES2018 && parser.names._size > 0 ){
+    if( CONST_SUPPORT_ES2018 && parser.names._size > 0 ){
         if( Parser_current( parser ) === 'k' ){
             ++parser.pos; // skip 'k'
             if( DEFINE_REGEXP_COMPAT__DEBUG && Parser_current( parser ) !== '<' ){
@@ -820,7 +822,7 @@ function Parser_tryParseBackRef( parser ){
     if( Parser_current( parser ) !== '0' ){
         var index = Parser_parseDigits( parser );
         if( index >= 1 ){
-            if( parser.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !parser.unicode ) ){
+            if( parser.additional && ( !CONST_SUPPORT_ES2018 || !parser.unicode ) ){
                 if( index <= parser.captureParens ){
                     return { type: REGEXP_COMPAT__PATTERN_IS_BackRef, index : index, range : [ begin, parser.pos ] };
                 };
@@ -881,7 +883,7 @@ function Parser_tryParseEscape( parser ){
                 ++parser.pos; // skip a-z or A-Z
                 value = c.charCodeAt( 0 ) % 32;
             } else {
-                if( parser.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !parser.unicode ) ){
+                if( parser.additional && ( !CONST_SUPPORT_ES2018 || !parser.unicode ) ){
                     --parser.pos; // go back 'c'
                     break;
                 };
@@ -924,7 +926,7 @@ function Parser_tryParseEscape( parser ){
     };
 
     // Legacy octal escape.
-    if( parser.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !parser.unicode ) ){
+    if( parser.additional && ( !CONST_SUPPORT_ES2018 || !parser.unicode ) ){
         var octal = parser.pos;
         var c0 = Parser_current( parser );
         if( '0' <= c0 && c0 <= '3' ){
@@ -961,7 +963,7 @@ function Parser_tryParseEscape( parser ){
     if( value === undefined && DEFINE_REGEXP_COMPAT__DEBUG ){
         throw new Error( 'BUG: invalid character' );
     };
-    if( DEFINE_REGEXP_COMPAT__ES2018 && parser.unicode ){
+    if( CONST_SUPPORT_ES2018 && parser.unicode ){
         if( isSyntax( c ) || c === '/' ){
             parser.pos += c.length; // skip any char
             return /** @type {Char} */ ({ type : REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw : '\\' + c, range : [ begin, parser.pos ] });
@@ -971,7 +973,7 @@ function Parser_tryParseEscape( parser ){
             if( c === 'c' ){
                 return { type : REGEXP_COMPAT__PATTERN_IS_Char, value : 0x5c, raw : '\\', range : [ begin, parser.pos ] };
             };
-            if( DEFINE_REGEXP_COMPAT__ES2018 && parser.names._size === 0 || c !== 'k' ){
+            if( CONST_SUPPORT_ES2018 && parser.names._size === 0 || c !== 'k' ){
                 parser.pos += c.length; // skip any char
                 return /** @type {Char} */ ({ type : REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw : '\\' + c, range : [ begin, parser.pos ] });
             };
@@ -1009,7 +1011,7 @@ function Parser_tryParseUnicodeEscape( parser, lead ){
     };
     ++parser.pos; // skip 'u'
 
-    if( DEFINE_REGEXP_COMPAT__ES2018 && parser.unicode && Parser_current( parser ) === '{' ){
+    if( CONST_SUPPORT_ES2018 && parser.unicode && Parser_current( parser ) === '{' ){
         if( !lead ){
             parser.pos = begin;
             return '';
@@ -1027,7 +1029,7 @@ function Parser_tryParseUnicodeEscape( parser, lead ){
 
     c = Parser_tryParseHexDigitsN( parser, 4 );
     if( c < 0 ){
-        if( parser.additional && ( !DEFINE_REGEXP_COMPAT__ES2018 || !parser.unicode ) ){
+        if( parser.additional && ( !CONST_SUPPORT_ES2018 || !parser.unicode ) ){
             parser.pos = begin;
             return '';
         };
@@ -1037,7 +1039,7 @@ function Parser_tryParseUnicodeEscape( parser, lead ){
     };
 
     var s = String_fromCharCode( c );
-    if( !DEFINE_REGEXP_COMPAT__ES2018 || !parser.unicode ){
+    if( !CONST_SUPPORT_ES2018 || !parser.unicode ){
         return s;
     };
 
@@ -1078,7 +1080,7 @@ function Parser_tryParseEscapeClass( parser ){
             return { type: REGEXP_COMPAT__PATTERN_IS_EscapeClass, kind: REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_space, invert: c === 'S', range: [ begin, parser.pos ] };
         case 'p':
         case 'P': {
-            if( DEFINE_REGEXP_COMPAT__ES2018 ){
+            if( CONST_SUPPORT_ES2018 ){
                 if( !parser.unicode ){
                     break;
                 };
@@ -1216,7 +1218,7 @@ function Parser_parseParen( parser ){
         return { type : REGEXP_COMPAT__PATTERN_IS_LookAhead, negative : true, child : child, range : [ begin, parser.pos ] };
     };
 
-    if( DEFINE_REGEXP_COMPAT__ES2018 ){
+    if( CONST_SUPPORT_ES2018 ){
         if( String_startsWith( parser.source, '(?<=', parser.pos ) ){
             parser.pos += 4; // skip '(?<='
             child = Parser_parseDisjunction( parser );
@@ -1374,7 +1376,7 @@ function Parser_tryParseHexDigitsN( parser, n ){
 function Parser_current( parser ){
     var c;
 
-    if( DEFINE_REGEXP_COMPAT__ES2018 && parser.unicode ){
+    if( CONST_SUPPORT_ES2018 && parser.unicode ){
         c = String_codePointAt( parser.source, parser.pos );
         return c === undefined ? '' : String_fromCodePoint( c );
     };

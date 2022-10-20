@@ -5,7 +5,7 @@
  * @return {number} 
  */
 canonicalize = function( c, unicode ){
-    if( DEFINE_REGEXP_COMPAT__ES2018 && unicode ){
+    if( CONST_SUPPORT_ES2018 && unicode ){
         return m_unicodeFoldMap[ c ] || c;
     };
 
@@ -31,7 +31,7 @@ canonicalize = function( c, unicode ){
  * @return {Array.<number>} 
  */
 uncanonicalize = function( c, unicode ){
-    if( DEFINE_REGEXP_COMPAT__ES2018 && unicode ){
+    if( CONST_SUPPORT_ES2018 && unicode ){
         return m_unicodeInverseFoldMap[ c ] || [];
     };
 

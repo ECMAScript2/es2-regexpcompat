@@ -12,7 +12,7 @@ Compiler = function( pattern ){
     this.pattern            = pattern;
     this.ignoreCase         = pattern.flagSet.ignoreCase;
     this.captureParens      = pattern.captureParens;
-    if( DEFINE_REGEXP_COMPAT__ES2018 ){
+    if( CONST_SUPPORT_ES2018 ){
         this.names   = pattern.names;
         this.unicode = pattern.flagSet.unicode;
     };
@@ -75,15 +75,15 @@ function Compiler_compileNode( compiler, node ){
         case REGEXP_COMPAT__PATTERN_IS_BackRef :
             return Compiler_compileBackRef( compiler, /** @type {BackRef} */ (node) );
         case REGEXP_COMPAT__PATTERN_IS_NamedBackRef :
-            if( DEFINE_REGEXP_COMPAT__ES2018 ){
+            if( CONST_SUPPORT_ES2018 ){
                 return Compiler_compileNamedBackRef( compiler, /** @type {NamedBackRef} */ (node) );
             };
         case REGEXP_COMPAT__PATTERN_IS_NamedCapture :
-            if( DEFINE_REGEXP_COMPAT__ES2018 ){
+            if( CONST_SUPPORT_ES2018 ){
                 return Compiler_compileNamedCapture( compiler, /** @type {NamedCapture} */ (node) );
             };
         case REGEXP_COMPAT__PATTERN_IS_LookBehind :
-            if( DEFINE_REGEXP_COMPAT__ES2018 ){
+            if( CONST_SUPPORT_ES2018 ){
                 return Compiler_compileLookBehind( compiler, /** @type {LookBehind} */ (node) );
             };
     };
@@ -444,7 +444,7 @@ function Compiler_compileLookAround( compiler, node ){
 function Compiler_compileChar( compiler, node ){
     var value = node.value;
     if( compiler.ignoreCase ){
-        value = DEFINE_REGEXP_COMPAT__ES2018 ? canonicalize( value, compiler.unicode ) : canonicalize( value );
+        value = CONST_SUPPORT_ES2018 ? canonicalize( value, compiler.unicode ) : canonicalize( value );
     };
     compiler.advance = true;
     return Compiler_insertBack( compiler, [ { op: REGEXP_COMPAT__OPCODE_IS_CHAR, value : value } ] );
@@ -501,7 +501,7 @@ function Compiler_escapeClassToSet( compiler, _node ){
             return node.invert ? m_charSetInvertDigit : m_charSetDigit;
         case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_word :
             node = /** @type {SimpleEscapeClass} */ ( _node );
-            if( DEFINE_REGEXP_COMPAT__ES2018 ){
+            if( CONST_SUPPORT_ES2018 ){
                 if( compiler.unicode && compiler.ignoreCase ){
                     return node.invert ? m_charSetInvertUnicodeWord : m_charSetUnicodeWord;
                 };
@@ -511,7 +511,7 @@ function Compiler_escapeClassToSet( compiler, _node ){
             node = /** @type {SimpleEscapeClass} */ ( _node );
             return node.invert ? m_charSetInvertSpace : m_charSetSpace;
         case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_unicode_property :
-            if( DEFINE_REGEXP_COMPAT__ES2018 ){
+            if( CONST_SUPPORT_ES2018 ){
                 node = /** @type {UnicodePropertyEscapeClass} */ ( _node );
                 var set = m_loadCategory( node.property ) || m_loadProperty( node.property );
                 
@@ -521,7 +521,7 @@ function Compiler_escapeClassToSet( compiler, _node ){
                 return node.invert ? set.clone().invert() : set;
             };
         case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_unicode_property_value :
-            if( DEFINE_REGEXP_COMPAT__ES2018 ){
+            if( CONST_SUPPORT_ES2018 ){
                 node = /** @type {UnicodePropertyValueEscapeClass} */ ( _node );
                 var set = m_loadPropertyValue( node.property, node.value );
 

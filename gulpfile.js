@@ -108,8 +108,8 @@ gulp.task( '__compile', gulp.series(
                         'DEFINE_REGEXP_COMPAT__DEBUG='  + ( strCompileType !== 'release' ),
                         'DEFINE_REGEXP_COMPAT__MINIFY=' + ( strCompileType !== 'develop' ),
                         'DEFINE_REGEXP_COMPAT__NODEJS=false',
-                        'DEFINE_REGEXP_COMPAT__ES2015=' + ( 2015 <= ecmaFeatureVersion ),
-                        'DEFINE_REGEXP_COMPAT__ES2018=' + ( 2018 <= ecmaFeatureVersion ),
+                        'DEFINE_REGEXP_COMPAT__CLIENT_MIN_ES_VERSION=' + clientMinEsVersion,
+                        'DEFINE_REGEXP_COMPAT__ES_FEATURE_VERSION='    + ecmaFeatureVersion,
                         'DEFINE_REGEXP_COMPAT__EXPORT_BY_RETURN=true'
                     ],
                     compilation_level : strCompileType === 'develop' ? 'SIMPLE' : 'ADVANCED',
@@ -120,21 +120,21 @@ gulp.task( '__compile', gulp.series(
                     language_in       : 'ECMASCRIPT3',
                     language_out      : 'ECMASCRIPT3',
                     output_wrapper    :
-                        '// ReRE.js for ES' + minTargetECMAVersion + '[' + strCompileType + '], Compat feature:ES' + ecmaFeatureVersion + ', (https://githug.com/itozyun/rerejs)\n' +
+                        '// ReRE.js for ES' + clientMinEsVersion + '[' + strCompileType + '], Compat feature:ES' + ecmaFeatureVersion + ', (https://githug.com/itozyun/rerejs)\n' +
                         (
                             strCompileType === 'develop' ?
                                 'var RegExpCompat=(function(){%output%})();' :
                                 'var RegExpCompat=%output%'
                         ),
-                    js_output_file    : minTargetECMAVersion !== 2 ?
-                                            'ReRE.es' + minTargetECMAVersion + '.' + ecmaFeatureVersion + '.' + strCompileType + '.js' :
+                    js_output_file    : clientMinEsVersion !== 2 ?
+                                            'ReRE.es' + clientMinEsVersion + '.' + ecmaFeatureVersion + '.' + strCompileType + '.js' :
                                             'ReRE.es2.js'
                 }
             )
-        ).pipe( gulp.dest( minTargetECMAVersion !== 2 ? 'dist/' + strCompileType : tempDir ) );
+        ).pipe( gulp.dest( clientMinEsVersion !== 2 ? 'dist/' + strCompileType : tempDir ) );
     },
     function( cb ){
-        if( minTargetECMAVersion !== 2 ){
+        if( clientMinEsVersion !== 2 ){
             return cb();
         };
         return gulp.src(
@@ -161,9 +161,9 @@ gulp.task( '__compile', gulp.series(
     }
 ) );
 
-var strCompileType       = 'release'; // .release .debug .develop
-var ecmaFeatureVersion   = 3;
-var minTargetECMAVersion = 2;
+var strCompileType     = 'release'; // .release .debug .develop
+var ecmaFeatureVersion = 3;
+var clientMinEsVersion = 2;
 
 gulp.task( '__compile_all_compileTypes', gulp.series(
     function( cb ){
@@ -197,15 +197,15 @@ gulp.task( '__compile_all_furetre', gulp.series(
 
 gulp.task( '__compile_all_target', gulp.series(
     function( cb ){
-        minTargetECMAVersion = 2;cb();
+        clientMinEsVersion = 2;cb();
     },
     '__compile_all_furetre',
     function( cb ){
-        minTargetECMAVersion = 3;cb();
+        clientMinEsVersion = 3;cb();
     },
     '__compile_all_furetre',
     function( cb ){
-        minTargetECMAVersion = 6;cb();
+        clientMinEsVersion = 2015;cb();
     },
     '__compile_all_furetre'
 ) );

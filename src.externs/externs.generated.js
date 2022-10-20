@@ -4,6 +4,9 @@
 /** @const {!Global} */
 var global;
 
+String.prototype.search = function(){};
+String.prototype.split  = function(){};
+
 var UnicodeCategory =
     {"Cased_Letter":[0],"Close_Punctuation":[0],"Connector_Punctuation":[0],"Control":[0],"Currency_Symbol":[0],"Dash_Punctuation":[0],"Decimal_Number":[0],"Enclosing_Mark":[0],"Final_Punctuation":[0],"Format":[0],"Initial_Punctuation":[0],"Letter":[0],"Letter_Number":[0],"Line_Separator":[0],"Lowercase_Letter":[0],"Mark":[0],"Math_Symbol":[0],"Modifier_Letter":[0],"Modifier_Symbol":[0],"Nonspacing_Mark":[0],"Number":[0],"Open_Punctuation":[0],"Other":[0],"Other_Letter":[0],"Other_Number":[0],"Other_Punctuation":[0],"Other_Symbol":[0],"Paragraph_Separator":[0],"Private_Use":[0],"Punctuation":[0],"Separator":[0],"Space_Separator":[0],"Spacing_Mark":[0],"Surrogate":[0],"Symbol":[0],"Titlecase_Letter":[0],"Unassigned":[0],"Uppercase_Letter":[0]};
 
