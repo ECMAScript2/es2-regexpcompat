@@ -15,7 +15,8 @@ test('legacy methods', (t) => {
   t.throws(() => RegExpCompat.lastMatch);
 
   const re = new RegExpCompat('');
-  t.is(re.compile(), re);
+  t.is(re.compile(''), re);
+  t.is(re.compile('', ''), re);
 });
 
 test('constructor', (t) => {
@@ -126,6 +127,11 @@ const testCases: TestCase[] = [
     source: 'a|bb',
     flags: 'y',
     strings: ['a', 'bb', 'bab'],
+  },
+  {
+    source: '(a(b))',
+    flags: '',
+    strings: ['abc'],
   },
 ];
 
