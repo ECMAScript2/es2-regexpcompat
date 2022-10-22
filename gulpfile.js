@@ -87,7 +87,7 @@ gulp.task( '__compile', gulp.series(
         return gulp.src(
             [
                 './src.js/**/*.js',
-                '!./src.js/0_global/2_polyfill.js'
+                '!./src.js/1_global/2_polyfill.js'
             ]
         ).pipe(
             gulpDPZ(
@@ -139,7 +139,7 @@ gulp.task( '__compile', gulp.series(
         };
         return gulp.src(
             [
-                './src.js/0_global/2_polyfill.js',
+                './src.js/1_global/2_polyfill.js',
                 tempDir + '/ReRE.es2.js'
             ]
         ).pipe(
