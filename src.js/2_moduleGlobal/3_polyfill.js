@@ -130,7 +130,7 @@ function Array_from( array ){
  * @param {Function} callback
  * @return {Array}
  */
- function Array_map( array, callback ){
+function Array_map( array, callback ){
   var l = array.length,
       result = [];
 

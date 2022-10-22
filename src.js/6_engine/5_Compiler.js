@@ -133,14 +133,15 @@ function Compiler_compileSequence( compiler, node ){
     var children = Array_from( node.children );
 
     if( compiler.direction === Compiler_DIRECTION_BACKWARD ){
-        if( false && children.reverse ){
+        children.reverse(); // Array.prototype.reverse IE4+
+        /* if( false && children.reverse ){ // 
             children.reverse();
         } else {
             for( var i = 1, child, l = children.length; i < l; ++i ){ // for ie5
                 child = children.pop();
                 children.unshift( child );
             };
-        };
+        }; */
     };
 
     var codes = [];

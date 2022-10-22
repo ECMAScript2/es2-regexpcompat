@@ -36,7 +36,7 @@ function RegExpCompat_advance( s, i, unicode ){
  * @param {string|RegExp|RegExpCompat} source 
  * @param {string=} flags
  */
-RegExpCompat = function( source, flags ){
+function RegExpCompat( source, flags ){
     if( DEFINE_REGEXP_COMPAT__DEBUG ){
         if( /*new.target === undefined*/ !this || this.constructor !== RegExpCompat ){
             if( RegExpCompat_isRegExp( source ) && flags === undefined ){
@@ -266,16 +266,6 @@ if( DEFINE_REGEXP_COMPAT__NODEJS || ( 6 <= DEFINE_REGEXP_COMPAT__CLIENT_MIN_ES_V
 
     String.prototype._replaceNativeForRegExpCompat = String.prototype.replace;
     String.prototype.replace = function( regExp, replacer ){
-        if( regExp.constructor === RegExp ){
-          RegExpCompat_skipCompare = true;
-            var result2 = this._replaceNativeForRegExpCompat( regExp, replacer );
-            var lastIndex = regExp.lastIndex;
-            var result1 = RegExpCompat_replace( /** @type {RegExpCompat|RegExp} */ (regExp), '' + this, replacer );
-            
-            if(result1 !== result2){
-                console.log('>>> ', 'replace(', regExp.source, '\n-\n', replacer, ') => ', lastIndex, regExp.lastIndex);
-            };
-        };
         return RegExpCompat_isRegExp( regExp ) ? RegExpCompat_replace( /** @type {RegExpCompat|RegExp} */ (regExp), this, replacer ) : this._replaceNativeForRegExpCompat( regExp, replacer );
     };
 
@@ -285,8 +275,9 @@ if( DEFINE_REGEXP_COMPAT__NODEJS || ( 6 <= DEFINE_REGEXP_COMPAT__CLIENT_MIN_ES_V
     };
 
     String.prototype._splitNativeForRegExpCompat = String.prototype.split;
+    /** @type {function(this:(String|string), *=, number=):!Array<string>} */
     String.prototype.split = function( regExp, limit ){
-        return RegExpCompat_isRegExp( regExp ) ? RegExpCompat_split( /** @type {RegExpCompat|RegExp} */ (regExp), this, limit ) : this._splitNativeForRegExpCompat( regExp, limit );
+        return RegExpCompat_isRegExp( regExp ) ? RegExpCompat_split( /** @type {RegExpCompat|RegExp} */ (regExp), /** @type {!String} */ (this), limit ) : this._splitNativeForRegExpCompat( regExp, limit );
     };
 };
 
