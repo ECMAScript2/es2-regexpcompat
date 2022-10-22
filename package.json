@@ -1,6 +1,6 @@
 {
   "name": "rerejs",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Re-implementation of ECMA-262 (JavaScript) RegExp",
   "author": "TSUYUSATO Kitsune <make.just.on@gmail.com>",
   "bugs": "https://github.com/MakeNowJust/rerejs/issues",
@@ -25,33 +25,32 @@
     "type-check": "tsc -p ."
   },
   "devDependencies": {
-    "@istanbuljs/nyc-config-typescript": "1.0.1",
-    "@rollup/plugin-commonjs": "21.0.1",
-    "@rollup/plugin-node-resolve": "13.0.0",
-    "@rollup/plugin-sucrase": "4.0.1",
-    "@types/node": "16.11.9",
-    "@typescript-eslint/eslint-plugin": "4.25.0",
-    "@typescript-eslint/parser": "4.25.0",
-    "ava": "^3.15.0",
-    "codecov": "3.8.3",
-    "eslint": "7.32.0",
-    "eslint-config-prettier": "7.2.0",
-    "eslint-plugin-import": "2.25.3",
-    "eslint-plugin-prettier": "4.0.0",
+    "@istanbuljs/nyc-config-typescript": "1.0.2",
+    "@rollup/plugin-commonjs": "23.0.2",
+    "@rollup/plugin-node-resolve": "15.0.1",
+    "@rollup/plugin-sucrase": "5.0.1",
+    "@types/node": "16.11.68",
+    "@typescript-eslint/eslint-plugin": "5.40.1",
+    "@typescript-eslint/parser": "5.40.1",
+    "ava": "4.2.0",
+    "eslint": "8.26.0",
+    "eslint-config-prettier": "8.5.0",
+    "eslint-plugin-import": "2.26.0",
+    "eslint-plugin-prettier": "4.2.1",
     "google-closure-compiler": "^20211107.0.0",
     "gulp": "^4.0.2",
     "gulp-diamond-princess-zoning": "^0.9.11",
     "nyc": "15.1.0",
-    "prettier": "2.3.2",
-    "rollup": "2.60.1",
-    "rollup-plugin-dts": "4.0.1",
-    "source-map-support": "0.5.19",
-    "sucrase": "3.20.3",
-    "typescript": "4.2.4",
+    "prettier": "2.5.1",
+    "rollup": "3.2.3",
+    "rollup-plugin-dts": "5.0.0",
+    "source-map-support": "0.5.21",
+    "sucrase": "3.28.0",
+    "typescript": "4.8.4",
     "unicode-12.0.0": "0.8.0",
-    "unicode-match-property-value-ecmascript": "1.1.0",
-    "unicode-property-aliases-ecmascript": "1.0.5",
-    "unicode-property-value-aliases-ecmascript": "1.0.4"
+    "unicode-match-property-value-ecmascript": "2.0.0",
+    "unicode-property-aliases-ecmascript": "2.1.0",
+    "unicode-property-value-aliases-ecmascript": "2.1.0"
   },
   "ava": {
     "extensions": [
@@ -91,7 +90,7 @@
       "plugin:@typescript-eslint/eslint-recommended",
       "plugin:@typescript-eslint/recommended",
       "plugin:prettier/recommended",
-      "prettier/@typescript-eslint"
+      "prettier"
     ],
     "ignorePatterns": [
       "node_modules/",
@@ -100,6 +99,14 @@
       "src/data/"
     ],
     "rules": {
+      "import/no-unresolved": [
+        "error",
+        {
+          "ignore": [
+            "ava"
+          ]
+        }
+      ],
       "import/order": [
         "error",
         {
@@ -134,6 +141,7 @@
   "renovate": {
     "extends": [
       "config:base"
-    ]
+    ],
+    "automerge": true
   }
 }

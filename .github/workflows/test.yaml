@@ -6,13 +6,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
-    - uses: actions/setup-node@v2
+    - uses: actions/setup-node@v3
       with:
-        node-version: '13.x'
+        node-version: '17.x'
     - run: yarn install
     - run: yarn lint
     - run: yarn type-check
     - run: yarn ci
-    - run: yarn codecov
-      env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+    - uses: codecov/codecov-action@v3
