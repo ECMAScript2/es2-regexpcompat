@@ -18,7 +18,7 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
         CONST_SUPPORT_ES2018 ?
             m_unicodeProperty[ 'ID_Start' ]
             :
-            [${charSetIdStart.join( ', ' )}]
+            [${charSetIdStart.data.join( ', ' )}]
     );
 };
 
@@ -26,7 +26,7 @@ charSetIdContinue = m_createCharSetFromArray(
     CONST_SUPPORT_ES2018 ?
         m_unicodeProperty[ 'ID_Continue' ]
         :
-        [${charSetIdContinue.join( ', ' )}]
+        [${charSetIdContinue.data.join( ', ' )}]
 );
 `;
 };

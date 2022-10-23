@@ -70,7 +70,7 @@ module.exports = function(){
         for( const c of data ){
             set.add(c, c + 1);
         };
-        property[ canonical ] = set;
+        property[ canonical ] = set.data;
     };
     return 'm_unicodeProperty =\n' + JSON.stringify( property, null, '    ' ) + ';\n';
 };

@@ -4,6 +4,11 @@
 function CharSet(){};
 
 /**
+ * @type {!Array.<number>}
+ */
+ CharSet.prototype.data;
+
+/**
  * @type {number}
  */
 CharSet.prototype.length;

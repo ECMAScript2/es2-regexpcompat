@@ -61,7 +61,7 @@ m_charSetDigit = m_createCharSetFromArray(
 m_charSetInvertDigit = m_charSetDigit.clone().invert();
 
 /** A CharSet which contains ASCII word characters. */
-m_charSetWord = m_createCharSetFromArray( [ ${charSetWord.join( ', ' )} ] );
+m_charSetWord = m_createCharSetFromArray( [ ${charSetWord.data.join( ', ' )} ] );
 
 /** A CharSet which does not contain ASCII word characters. */
 m_charSetInvertWord = m_charSetWord.clone().invert();
@@ -72,7 +72,7 @@ if( CONST_SUPPORT_ES2018 ){
  *
  * See https://www.ecma-international.org/ecma-262/10.0/index.html#sec-runtime-semantics-wordcharacters-abstract-operation.
  */
-    m_charSetUnicodeWord = m_createCharSetFromArray( [ ${charSetUnicodeWord.join( ', ' )} ] );
+    m_charSetUnicodeWord = m_createCharSetFromArray( [ ${charSetUnicodeWord.data.join( ', ' )} ] );
 
 /** A CharSet which does not contain Unicode word characters. */
     m_charSetInvertUnicodeWord = m_charSetUnicodeWord.clone().invert();
@@ -84,7 +84,7 @@ if( CONST_SUPPORT_ES2018 ){
  * See https://www.ecma-international.org/ecma-262/10.0/index.html#prod-WhiteSpace
  * and https://www.ecma-international.org/ecma-262/10.0/index.html#prod-LineTerminator.
  */
-m_charSetSpace = m_createCharSetFromArray( [ ${charSetSpace.join( ', ' )} ] );
+m_charSetSpace = m_createCharSetFromArray( [ ${charSetSpace.data.join( ', ' )} ] );
 
 /** A CharSet which does not contain space characters. */
 m_charSetInvertSpace = m_charSetSpace.clone().invert();
