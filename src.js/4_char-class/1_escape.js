@@ -82,3 +82,7 @@ m_escapeCodePointAsRegExpSpurceChar = function( c, opt_inCharClass ){
     // Other code point use `\u{XXXXXX}`.
     return '\\u{' + c.toString( 16 ) + '}';
 };
+
+if( DEFINE_REGEXP_COMPAT__NODEJS ){
+    module[ 'exports' ][ 'escape' ] = m_escapeCodePointAsRegExpSpurceChar;
+};

@@ -447,3 +447,7 @@ function Program_createProc( pos, captureParens, maxStackSize ){
 
     return new Proc( pos, 0, stack, 0, caps );
 };
+
+if( DEFINE_REGEXP_COMPAT__NODEJS ){
+    module[ 'exports' ][ 'Program' ] = Program;
+};

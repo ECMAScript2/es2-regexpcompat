@@ -1,6 +1,6 @@
 import test from 'ava';
 
-import { codesToString } from '../../src/engine/op-code';
+import { codesToString } from '../../lib/index.develop.js';
 
 test('codesToString', (t) => {
   let s = '';

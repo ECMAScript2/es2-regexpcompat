@@ -615,3 +615,7 @@ function Compiler_pushFlattenedOpCodesToOpCodeList( targetArray, _args ){
     };
     return targetArray;
 };
+
+if( DEFINE_REGEXP_COMPAT__NODEJS ){
+    module[ 'exports' ][ 'Compiler' ] = Compiler;
+};

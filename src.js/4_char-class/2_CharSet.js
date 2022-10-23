@@ -23,7 +23,7 @@ var MAX_CODE_POINT = 0x110000;
  * @param {Array.<number>} data
  * @return {CharSet}
  */
- m_createCharSetFromArray = function( data ){
+m_createCharSetFromArray = function( data ){
     data.add        = CharSet_add;
     data.addCharSet = CharSet_addCharSet;
     data.invert     = CharSet_invert;
@@ -195,4 +195,8 @@ function CharSet_searchEnd( data, c ){
         };
     };
     return min;
+};
+
+if( DEFINE_REGEXP_COMPAT__NODEJS ){
+    module[ 'exports' ][ 'CharSet' ] = m_createCharSetFromArray;
 };

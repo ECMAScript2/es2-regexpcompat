@@ -114,4 +114,8 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
 
         return lines.join( '\n' );
     };
+
+    if( DEFINE_REGEXP_COMPAT__NODEJS ){
+        module[ 'exports' ][ 'codesToString' ] = codesToString;
+    };
 };

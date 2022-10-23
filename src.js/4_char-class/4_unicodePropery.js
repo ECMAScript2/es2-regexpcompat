@@ -134,3 +134,8 @@ m_loadPropertyValue = function( p, v ){
             return loadScriptExtensions( v );
     };
 };
+
+if( DEFINE_REGEXP_COMPAT__NODEJS ){
+    module[ 'exports' ][ 'loadProperty'      ] = m_loadProperty;
+    module[ 'exports' ][ 'loadPropertyValue' ] = m_loadPropertyValue;
+};

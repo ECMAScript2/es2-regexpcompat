@@ -50,6 +50,9 @@ module.exports = function(){
 /** @const {!Global} */
 var global;
 
+/** @const {!Module} */
+var module;
+
 String.prototype.search = function(){};
 String.prototype.split  = function(){};
 

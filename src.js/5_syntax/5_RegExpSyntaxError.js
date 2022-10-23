@@ -7,4 +7,8 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
     RegExpSyntaxError = function( message ){
         SyntaxError.call( this, 'invalid regular expression: ' + message );
     };
+
+    if( DEFINE_REGEXP_COMPAT__NODEJS ){
+        module[ 'exports' ][ 'RegExpSyntaxError' ] = RegExpSyntaxError;
+    };
 };

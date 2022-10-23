@@ -1383,3 +1383,7 @@ function Parser_current( parser ){
     c = parser.source.charCodeAt( parser.pos );
     return /* Number.isNaN( c ) */ c !== c ? '' : String_fromCharCode( c );
 };
+
+if( DEFINE_REGEXP_COMPAT__NODEJS ){
+    module[ 'exports' ][ 'Parser' ] = Parser;
+};

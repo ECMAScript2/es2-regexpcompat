@@ -140,7 +140,7 @@ var RegExpCompat_debugCount = 10;
 var RegExpCompat_skipCompare = true;
 
 /**
- * @param {RegExpCompat|RegExp} regExp 
+ * @param {!RegExp|RegExpCompat} regExp 
  * @return {boolean}
  */
 function RegExpCompat_debug( regExp ){
@@ -261,28 +261,28 @@ if( DEFINE_REGEXP_COMPAT__NODEJS || ( 6 <= DEFINE_REGEXP_COMPAT__CLIENT_MIN_ES_V
 } else {
     String.prototype._matchNativeForRegExpCompat = String.prototype.match;
     String.prototype.match = function( regExp ){
-        return RegExpCompat_isRegExp( regExp ) ? RegExpCompat_match( /** @type {RegExpCompat|RegExp} */ (regExp), this ) : this._matchNativeForRegExpCompat( regExp );
+        return RegExpCompat_isRegExp( regExp ) ? RegExpCompat_match( /** @type {!RegExp|RegExpCompat} */ (regExp), this ) : this._matchNativeForRegExpCompat( regExp );
     };
 
     String.prototype._replaceNativeForRegExpCompat = String.prototype.replace;
     String.prototype.replace = function( regExp, replacer ){
-        return RegExpCompat_isRegExp( regExp ) ? RegExpCompat_replace( /** @type {RegExpCompat|RegExp} */ (regExp), this, replacer ) : this._replaceNativeForRegExpCompat( regExp, replacer );
+        return RegExpCompat_isRegExp( regExp ) ? RegExpCompat_replace( /** @type {!RegExp|RegExpCompat} */ (regExp), this, replacer ) : this._replaceNativeForRegExpCompat( regExp, replacer );
     };
 
     String.prototype._searchNativeForRegExpCompat = String.prototype.search;
     String.prototype.search = function( regExp ){
-        return RegExpCompat_isRegExp( regExp ) ? RegExpCompat_search( /** @type {RegExpCompat|RegExp} */ (regExp), this ) : this._searchNativeForRegExpCompat( regExp );
+        return RegExpCompat_isRegExp( regExp ) ? RegExpCompat_search( /** @type {!RegExp|RegExpCompat} */ (regExp), this ) : this._searchNativeForRegExpCompat( regExp );
     };
 
     String.prototype._splitNativeForRegExpCompat = String.prototype.split;
     /** @type {function(this:(String|string), *=, number=):!Array<string>} */
     String.prototype.split = function( regExp, limit ){
-        return RegExpCompat_isRegExp( regExp ) ? RegExpCompat_split( /** @type {RegExpCompat|RegExp} */ (regExp), /** @type {!String} */ (this), limit ) : this._splitNativeForRegExpCompat( regExp, limit );
+        return RegExpCompat_isRegExp( regExp ) ? RegExpCompat_split( /** @type {!RegExp|RegExpCompat} */ (regExp), /** @type {!String} */ (this), limit ) : this._splitNativeForRegExpCompat( regExp, limit );
     };
 };
 
 /**
- * @param {RegExpCompat|RegExp} regExp
+ * @param {!RegExp|RegExpCompat} regExp
  * @param {String} string 
  * @return {RegExpResult|Array<string>|null}
  */
@@ -314,7 +314,7 @@ function RegExpCompat_match( regExp, string ){
 };
 
 /**
- * @param {RegExpCompat|RegExp} regExp
+ * @param {!RegExp|RegExpCompat} regExp
  * @param {String} string 
  * @param {Function|string} replacer 
  * @return {string}
@@ -441,7 +441,7 @@ function RegExpCompat_replace( regExp, string, replacer ){
 };
 
 /**
- * @param {RegExpCompat|RegExp} regExp
+ * @param {!RegExp|RegExpCompat} regExp
  * @param {String} string
  * @return {number}
  */
@@ -465,7 +465,7 @@ function RegExpCompat_search( regExp, string ){
 };
 
 /**
- * @param {RegExpCompat|RegExp} regExp
+ * @param {!RegExp|RegExpCompat} regExp
  * @param {String} string
  * @param {number=} limit
  * @return {!Array.<string>}
@@ -540,9 +540,7 @@ function RegExpCompat_split( regExp, string, limit ){
 };
 
 if( DEFINE_REGEXP_COMPAT__NODEJS ){
-    if( global.module ){
-        global.module.exports = RegExpCompat;
-    };
+    module[ 'exports' ][ 'RegExpCompat' ] = RegExpCompat;
 };
 
 if( DEFINE_REGEXP_COMPAT__EXPORT_BY_RETURN ){

@@ -165,3 +165,7 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
         };
     };
 };
+
+if( DEFINE_REGEXP_COMPAT__NODEJS ){
+    module[ 'exports' ][ 'Match' ] = Match;
+};

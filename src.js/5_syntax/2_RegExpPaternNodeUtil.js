@@ -160,3 +160,7 @@ m_patternToString = function( p ){
     s += m_flagSetToString( p.flagSet );
     return s;
 };
+
+if( DEFINE_REGEXP_COMPAT__NODEJS ){
+    module[ 'exports' ][ 'patternToString' ] = m_patternToString;
+};

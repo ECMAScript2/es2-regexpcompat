@@ -2,12 +2,12 @@
   "name": "rerejs",
   "version": "0.2.1",
   "description": "Re-implementation of ECMA-262 (JavaScript) RegExp",
-  "author": "TSUYUSATO Kitsune <make.just.on@gmail.com>",
-  "bugs": "https://github.com/MakeNowJust/rerejs/issues",
-  "homepage": "https://github.com/MakeNowJust/rerejs#readme",
+  "author": "itozyun <make.just.on@gmail.com>",
+  "bugs": "https://github.com/itozyun/rerejs/issues",
+  "homepage": "https://github.com/itozyun/rerejs#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MakeNowJust/rerejs.git"
+    "url": "https://github.com/itozyun/rerejs.git"
   },
   "main": "lib/index.js",
   "module": "lib/index.mjs",
@@ -55,7 +55,7 @@
   },
   "ava": {
     "extensions": [
-      "ts"
+      "ts", "js"
     ],
     "require": [
       "sucrase/register/ts"

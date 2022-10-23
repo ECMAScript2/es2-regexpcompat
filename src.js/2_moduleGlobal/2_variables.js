@@ -26,3 +26,7 @@ var RegExpSyntaxError, Parser, Compiler, Program;
 
 /** @typedef {{stylize:Function}} */
 var InspectOptionsStylized;
+
+if( DEFINE_REGEXP_COMPAT__NODEJS ){
+    module[ 'exports' ] = {};
+};
