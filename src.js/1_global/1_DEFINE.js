@@ -3,7 +3,7 @@ var /** @define {boolean} */
     /** @define {boolean} */
     DEFINE_REGEXP_COMPAT__MINIFY = false,
     /** @define {boolean} */
-    DEFINE_REGEXP_COMPAT__NODEJS = true,
+    DEFINE_REGEXP_COMPAT__NODEJS = false,
     /** @define {number} */
     DEFINE_REGEXP_COMPAT__CLIENT_MIN_ES_VERSION =    2, // 2, 3, 5, 6(2015), 2018
     /** @define {number} */
