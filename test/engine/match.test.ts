@@ -5,7 +5,7 @@ import test from 'ava';
 import { Match } from '../../lib/index.develop.js';
 
 test('getters', (t) => {
-  const m = new Match('test', [0, 4, -1, -1, 1, 3], new Map([['x', 2]]));
+  const m = new Match('test', [0, 4, -1, -1, 1, 3], ['x' , 2]);
   t.is(m.input, 'test');
   t.is(m.index, 0);
   t.is(m.lastIndex, 4);
@@ -27,7 +27,7 @@ test('getters', (t) => {
 });
 
 test('toArray', (t) => {
-  const m = new Match('test', [0, 4, -1, -1, 1, 3], new Map([['x', 2]]));
+  const m = new Match('test', [0, 4, -1, -1, 1, 3], ['x' , 2]);
   const a = m.toArray();
 
   const b: RegExpMatchArray = [];
@@ -43,12 +43,12 @@ test('toArray', (t) => {
 });
 
 test('toString', (t) => {
-  const m = new Match('test', [0, 4, -1, -1, 1, 3], new Map([['x', 2]]));
+  const m = new Match('test', [0, 4, -1, -1, 1, 3], ['x' , 2]);
   t.is(m.toString(), 'Match["test", undefined, "es"]');
 });
 
 test('util.inspect.custom', (t) => {
-  const m = new Match('test', [0, 4, -1, -1, 1, 3], new Map([['x', 2]]));
+  const m = new Match('test', [0, 4, -1, -1, 1, 3], ['x' , 2]);
   let s = '';
   s += 'Match [\n';
   s += '  0 [0:4] => "test",\n';

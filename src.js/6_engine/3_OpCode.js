@@ -67,7 +67,7 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
      */
     codesToString = function( codes ){
         function pc( i ){
-            return String_padStringWithZero( i + '', 3 );
+            return '#' + String_padStringWithZero( i + '', 3 );
         };
         function op( s ){
             return String_padEndWithSpace( s, 13 );

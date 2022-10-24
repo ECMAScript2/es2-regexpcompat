@@ -10,7 +10,7 @@ test('loadProperty', (t) => {
   t.true(ahex && ahex.has(0x41));
 
   const unknown = loadProperty('not defined in unicode');
-  t.is(unknown, null);
+  t.is(unknown, undefined);
 });
 
 test('loadPropertyValue', (t) => {
@@ -28,5 +28,5 @@ test('loadPropertyValue', (t) => {
     loadPropertyValue('General_Category', 'not defined') ??
     loadPropertyValue('Script', 'not defined') ??
     loadPropertyValue('Script_Extensions', 'not defined');
-  t.is(unknown, null);
+  t.is(unknown, undefined);
 });
