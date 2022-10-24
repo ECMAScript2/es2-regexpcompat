@@ -62,7 +62,7 @@ var OpCode;
 
 if( DEFINE_REGEXP_COMPAT__DEBUG ){
     /** Show op-codes as string.
-     * @param {Array.<OpCode>} codes
+     * @param {!Array.<!OpCode>} codes
      * @return {string}
      */
     codesToString = function( codes ){

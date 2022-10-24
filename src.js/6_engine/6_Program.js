@@ -57,7 +57,7 @@ function isLineTerminator( c ){
 };
 
 /** Calculate the maximum stack size without execution.
- * @param {Array.<OpCode>} codes
+ * @param {!Array.<!OpCode>} codes
  * @return {number}
  */
 function calculateMaxStackSize( codes ){
@@ -89,9 +89,9 @@ function calculateMaxStackSize( codes ){
  * 
  * @param {number} pos
  * @param {number} pc
- * @param {Array.<number>} stack
+ * @param {!Array.<number>} stack
  * @param {number} stackSize
- * @param {Array.<number>} caps
+ * @param {!Array.<number>} caps
  */
 function Proc( pos, pc, stack, stackSize, caps ){
     /** A current position of `input` string.
@@ -111,7 +111,7 @@ function Proc( pos, pc, stack, stackSize, caps ){
      * Note that this stack is allocated to available size before execution.
      * So, the real stack size is managed by `stackSize` property.
      * 
-     * @type {Array.<number>}
+     * @type {!Array.<number>}
      */
     this.stack = stack;
     /** A current stack size.
@@ -119,7 +119,7 @@ function Proc( pos, pc, stack, stackSize, caps ){
      */
     this.stackSize = stackSize;
     /** A capture indexes.
-     * @type {Array.<number>}
+     * @type {!Array.<number>}
      */
     this.caps = caps;
 };
@@ -144,7 +144,7 @@ Proc.prototype.clone = function(){
  * 
  * @constructor
  * @param {Pattern} pattern
- * @param {Array.<OpCode>} codes
+ * @param {!Array.<!OpCode>} codes
  */
 Program = function( pattern, codes ){
     if( DEFINE_REGEXP_COMPAT__DEBUG ){
@@ -154,7 +154,7 @@ Program = function( pattern, codes ){
     };
 
     /** An array of op-codes compiled `pattern`.
-     * @type {Array.<OpCode>}
+     * @type {!Array.<!OpCode>}
      */
     this.codes = codes;
 

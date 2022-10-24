@@ -122,11 +122,10 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
         /* return this; */
     };
 
-    if( 6 <= DEFINE_REGEXP_COMPAT__CLIENT_MIN_ES_VERSION && global.Symbol ){
-      // Not for ES2
+    // if( 6 <= DEFINE_REGEXP_COMPAT__CLIENT_MIN_ES_VERSION && global.Symbol ){
       // RegExpCompat.prototype[ Symbol.match   ] = function(){ throw "Called Symbol.match!!" };
       // RegExpCompat.prototype[ Symbol.replace ] = function(){ throw "Called Symbol.replace!!" };
-    };
+    // };
 
     /** @type {!{log:!Function,dir:!Function}} */
     var console = global.console;

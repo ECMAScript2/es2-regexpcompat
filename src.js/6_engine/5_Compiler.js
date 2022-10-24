@@ -26,7 +26,7 @@ Compiler.prototype.compile = function(){
     var codes0 = Compiler_compileNode( this, this.pattern.child );
     var codes1 = Compiler_pushFlattenedOpCodesToOpCodeList( [],
         { op: REGEXP_COMPAT__OPCODE_IS_CAP_BEGIN, index: 0 },
-        /* ... */ /** @type {Array.<OpCode>} */ (codes0),
+        /* ... */ /** @type {!Array.<!OpCode>} */ (codes0),
         { op: REGEXP_COMPAT__OPCODE_IS_CAP_END, index: 0 },
         { op: REGEXP_COMPAT__OPCODE_IS_MATCH }
     );
@@ -92,7 +92,7 @@ function Compiler_compileNode( compiler, node ){
 /**
  * @param {Compiler} compiler
  * @param {Disjunction} node 
- * @return {Array.<OpCode>}
+ * @return {!Array.<!OpCode>}
  */
 function Compiler_compileDisjunction( compiler, node ){
     var _children = node.children,
@@ -112,14 +112,14 @@ function Compiler_compileDisjunction( compiler, node ){
 
     compiler.advance = advance;
 
-    return /** @type {Array.<OpCode>} */ (Array_reduceRight( children, toOpCodeArray ));
+    return /** @type {!Array.<!OpCode>} */ (Array_reduceRight( children, toOpCodeArray ));
 
     function toOpCodeArray( codes, codes0 ){
         return Compiler_pushFlattenedOpCodesToOpCodeList( [],
             { op: REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes0.length + 1 },
-            /* ... */ /** @type {Array.<OpCode>} */ (codes0),
+            /* ... */ /** @type {!Array.<!OpCode>} */ (codes0),
             { op: REGEXP_COMPAT__OPCODE_IS_JUMP, cont: codes.length },
-            /* ... */ /** @type {Array.<OpCode>} */ (codes)
+            /* ... */ /** @type {!Array.<!OpCode>} */ (codes)
         );
     };
 };
@@ -127,7 +127,7 @@ function Compiler_compileDisjunction( compiler, node ){
 /**
  * @param {Compiler} compiler
  * @param {Sequence} node 
- * @return {Array.<OpCode>}
+ * @return {!Array.<!OpCode>}
  */
 function Compiler_compileSequence( compiler, node ){
     var children = Array_from( node.children );
@@ -148,7 +148,7 @@ function Compiler_compileSequence( compiler, node ){
     var advance = false;
     for( var i = -1, child; child = children[ ++i ]; ){
         var codes0 = Compiler_compileNode( compiler, child );
-        Compiler_pushFlattenedOpCodesToOpCodeList( codes, /** @type {Array.<OpCode>} */ (codes0) );
+        Compiler_pushFlattenedOpCodesToOpCodeList( codes, /** @type {!Array.<!OpCode>} */ (codes0) );
         advance = advance || compiler.advance;
     };
     compiler.advance = advance;
@@ -159,16 +159,16 @@ function Compiler_compileSequence( compiler, node ){
 /**
  * @param {Compiler} compiler
  * @param {Group} node 
- * @return {Array.<OpCode>}
+ * @return {!Array.<!OpCode>}
  */
 function Compiler_compileGroup( compiler, node ){
-    return /** @type {Array.<OpCode>} */ ( Compiler_compileNode( compiler, node.child ) );
+    return /** @type {!Array.<!OpCode>} */ ( Compiler_compileNode( compiler, node.child ) );
 };
 
 /**
  * @param {Compiler} compiler
  * @param {Capture} node 
- * @return {Array.<OpCode>}
+ * @return {!Array.<!OpCode>}
  */
 function Compiler_compileCapture( compiler, node ){
     var current = compiler.captureParensIndex++;
@@ -181,7 +181,7 @@ function Compiler_compileCapture( compiler, node ){
     };
     return Compiler_pushFlattenedOpCodesToOpCodeList( [],
         { op: compiler.direction === Compiler_DIRECTION_BACKWARD ? REGEXP_COMPAT__OPCODE_IS_CAP_END : REGEXP_COMPAT__OPCODE_IS_CAP_BEGIN, index: current },
-        /* ... */ /** @type {Array.<OpCode>} */ (codes0),
+        /* ... */ /** @type {!Array.<!OpCode>} */ (codes0),
         { op: compiler.direction === Compiler_DIRECTION_BACKWARD ? REGEXP_COMPAT__OPCODE_IS_CAP_BEGIN : REGEXP_COMPAT__OPCODE_IS_CAP_END, index: current }
     );
 };
@@ -189,7 +189,7 @@ function Compiler_compileCapture( compiler, node ){
 /**
  * @param {Compiler} compiler
  * @param {NamedCapture} node 
- * @return {Array.<OpCode>}
+ * @return {!Array.<!OpCode>}
  */
 function Compiler_compileNamedCapture( compiler, node ){
     var current = compiler.captureParensIndex++;
@@ -203,7 +203,7 @@ function Compiler_compileNamedCapture( compiler, node ){
     };
     return Compiler_pushFlattenedOpCodesToOpCodeList( [],
         { op: REGEXP_COMPAT__OPCODE_IS_CAP_BEGIN, index : index },
-        /* ... */ /** @type {Array.<OpCode>} */ (codes0),
+        /* ... */ /** @type {!Array.<!OpCode>} */ (codes0),
         { op: REGEXP_COMPAT__OPCODE_IS_CAP_END, index : index }
     );
 };
@@ -211,12 +211,12 @@ function Compiler_compileNamedCapture( compiler, node ){
 /**
  * @param {Compiler} compiler
  * @param {Many} node 
- * @return {Array.<OpCode>}
+ * @return {!Array.<!OpCode>}
  */
 function Compiler_compileMany( compiler, node ){
     var from = compiler.captureParensIndex;
-    var codes0 = Compiler_insertEmptyCheck( compiler, /** @type {Array.<OpCode>} */ (Compiler_compileNode( compiler, node.child )) );
-    var codes1 = Compiler_insertCapReset( compiler, from, /** @type {Array.<OpCode>} */ (codes0) );
+    var codes0 = Compiler_insertEmptyCheck( compiler, /** @type {!Array.<!OpCode>} */ (Compiler_compileNode( compiler, node.child )) );
+    var codes1 = Compiler_insertCapReset( compiler, from, /** @type {!Array.<!OpCode>} */ (codes0) );
     compiler.advance = false;
 
     return Compiler_pushFlattenedOpCodesToOpCodeList( [],
@@ -229,15 +229,15 @@ function Compiler_compileMany( compiler, node ){
 /**
  * @param {Compiler} compiler
  * @param {Some} node 
- * @return {Array.<OpCode>}
+ * @return {!Array.<!OpCode>}
  */
 function Compiler_compileSome( compiler, node ){
     var from = compiler.captureParensIndex;
     var codes0 = Compiler_compileNode( compiler, node.child );
-    var codes1 = Compiler_insertCapReset( compiler, from, Compiler_insertEmptyCheck( compiler, /** @type {Array.<OpCode>} */ (codes0 ) ) );
+    var codes1 = Compiler_insertCapReset( compiler, from, Compiler_insertEmptyCheck( compiler, /** @type {!Array.<!OpCode>} */ (codes0 ) ) );
 
     return Compiler_pushFlattenedOpCodesToOpCodeList( [],
-        /* ... */ /** @type {Array.<OpCode>} */ (codes0),
+        /* ... */ /** @type {!Array.<!OpCode>} */ (codes0),
         { op: node.nonGreedy ? REGEXP_COMPAT__OPCODE_IS_FORK_NEXT : REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes1.length + 1 },
         /* ... */ codes1,
         { op: REGEXP_COMPAT__OPCODE_IS_JUMP, cont: -1 - codes1.length - 1 }
@@ -247,7 +247,7 @@ function Compiler_compileSome( compiler, node ){
 /**
  * @param {Compiler} compiler
  * @param {Optional} node 
- * @return {Array.<OpCode>}
+ * @return {!Array.<!OpCode>}
  */
 function Compiler_compileOptional( compiler, node ){
     var codes0 = Compiler_compileNode( compiler, node.child );
@@ -262,7 +262,7 @@ function Compiler_compileOptional( compiler, node ){
 /**
  * @param {Compiler} compiler
  * @param {Repeat} node 
- * @return {Array.<OpCode>}
+ * @return {!Array.<!OpCode>}
  */
 function Compiler_compileRepeat( compiler, node ){
     var from = compiler.captureParensIndex;
@@ -272,10 +272,10 @@ function Compiler_compileRepeat( compiler, node ){
     var codes1;
 
     if( min === 1 ){
-        Compiler_pushFlattenedOpCodesToOpCodeList( codes, /** @type {Array.<OpCode>} */ (codes0) );
+        Compiler_pushFlattenedOpCodesToOpCodeList( codes, /** @type {!Array.<!OpCode>} */ (codes0) );
         // codes.push(...codes0);
     } else if( min > 1 ){
-        codes1 = Compiler_insertCapReset( compiler, from, /** @type {Array.<OpCode>} */ (codes0) );
+        codes1 = Compiler_insertCapReset( compiler, from, /** @type {!Array.<!OpCode>} */ (codes0) );
         Compiler_pushFlattenedOpCodesToOpCodeList(
             codes,
             { op: REGEXP_COMPAT__OPCODE_IS_PUSH, value: min },
@@ -290,7 +290,7 @@ function Compiler_compileRepeat( compiler, node ){
 
     var max = node.max != null ? node.max : min;
     if( max === Infinity ){
-        codes1 = Compiler_insertCapReset( compiler, from, Compiler_insertEmptyCheck( compiler, /** @type {Array.<OpCode>} */ (codes0) ) );
+        codes1 = Compiler_insertCapReset( compiler, from, Compiler_insertEmptyCheck( compiler, /** @type {!Array.<!OpCode>} */ (codes0) ) );
         Compiler_pushFlattenedOpCodesToOpCodeList(
             codes,
             { op: node.nonGreedy ? REGEXP_COMPAT__OPCODE_IS_FORK_NEXT : REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes1.length + 1 }, // next: は (1) を指す
@@ -299,7 +299,7 @@ function Compiler_compileRepeat( compiler, node ){
         );
     } else if( max > min ){
         var remain = max - min;
-        codes1 = Compiler_insertCapReset( compiler, from, Compiler_insertEmptyCheck( compiler, /** @type {Array.<OpCode>} */ (codes0) ) );
+        codes1 = Compiler_insertCapReset( compiler, from, Compiler_insertEmptyCheck( compiler, /** @type {!Array.<!OpCode>} */ (codes0) ) );
         if( remain === 1 ){
             Compiler_pushFlattenedOpCodesToOpCodeList(
                 codes,
@@ -325,8 +325,8 @@ function Compiler_compileRepeat( compiler, node ){
 
 /**
  * @param {Compiler} compiler
- * @param {Array.<OpCode>} codes0 
- * @return {Array.<OpCode>}
+ * @param {!Array.<!OpCode>} codes0 
+ * @return {!Array.<!OpCode>}
  */
 function Compiler_insertEmptyCheck( compiler, codes0 ){
     return compiler.advance ? codes0 : Compiler_pushFlattenedOpCodesToOpCodeList( [],
@@ -339,8 +339,8 @@ function Compiler_insertEmptyCheck( compiler, codes0 ){
 /**
  * @param {Compiler} compiler
  * @param {number} from
- * @param {Array.<OpCode>} codes0 
- * @return {Array.<OpCode>}
+ * @param {!Array.<!OpCode>} codes0 
+ * @return {!Array.<!OpCode>}
  */
 function Compiler_insertCapReset( compiler, from, codes0 ){
     if( from === compiler.captureParensIndex ){
@@ -355,7 +355,7 @@ function Compiler_insertCapReset( compiler, from, codes0 ){
 /**
  * @param {Compiler} compiler
  * @param {WordBoundary} node 
- * @return {Array.<OpCode>}
+ * @return {!Array.<!OpCode>}
  */
 function Compiler_compileWordBoundary( compiler, node ){
     compiler.advance = false;
@@ -364,7 +364,7 @@ function Compiler_compileWordBoundary( compiler, node ){
 
 /**
  * @param {Compiler} compiler
- * @return {Array.<OpCode>}
+ * @return {!Array.<!OpCode>}
  */
 function Compiler_compileLineBegin( compiler ){
     compiler.advance = false;
@@ -373,7 +373,7 @@ function Compiler_compileLineBegin( compiler ){
 
 /**
  * @param {Compiler} compiler
- * @return {Array.<OpCode>}
+ * @return {!Array.<!OpCode>}
  */
 function Compiler_compileLineEnd( compiler ){
     compiler.advance = false;
@@ -383,7 +383,7 @@ function Compiler_compileLineEnd( compiler ){
 /**
  * @param {Compiler} compiler
  * @param {LookAhead} node 
- * @return {Array.<OpCode>}
+ * @return {!Array.<!OpCode>}
  */
 function Compiler_compileLookAhead( compiler, node ){
     var oldDirection = compiler.direction;
@@ -396,7 +396,7 @@ function Compiler_compileLookAhead( compiler, node ){
 /**
  * @param {Compiler} compiler
  * @param {LookBehind} node 
- * @return {Array.<OpCode>}
+ * @return {!Array.<!OpCode>}
  */
 function Compiler_compileLookBehind( compiler, node ){
     var oldDirection = compiler.direction;
@@ -409,7 +409,7 @@ function Compiler_compileLookBehind( compiler, node ){
 /**
  * @param {Compiler} compiler
  * @param {LookAhead|LookBehind} node 
- * @return {Array.<OpCode>}
+ * @return {!Array.<!OpCode>}
  */
 function Compiler_compileLookAround( compiler, node ){
     var codes0 = Compiler_compileNode( compiler, node.child );
@@ -420,7 +420,7 @@ function Compiler_compileLookAround( compiler, node ){
             { op: REGEXP_COMPAT__OPCODE_IS_PUSH_POS },
             { op: REGEXP_COMPAT__OPCODE_IS_PUSH_PROC },
             { op: REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes0.length + 2 },
-            /* ... */ /** @type {Array.<OpCode>} */ (codes0),
+            /* ... */ /** @type {!Array.<!OpCode>} */ (codes0),
             { op: REGEXP_COMPAT__OPCODE_IS_REWIND_PROC },
             { op: REGEXP_COMPAT__OPCODE_IS_FAIL },
             { op: REGEXP_COMPAT__OPCODE_IS_POP },
@@ -431,7 +431,7 @@ function Compiler_compileLookAround( compiler, node ){
     return Compiler_pushFlattenedOpCodesToOpCodeList( [],
         { op: REGEXP_COMPAT__OPCODE_IS_PUSH_POS },
         { op: REGEXP_COMPAT__OPCODE_IS_PUSH_PROC },
-        /* ... */ /** @type {Array.<OpCode>} */ (codes0),
+        /* ... */ /** @type {!Array.<!OpCode>} */ (codes0),
         { op: REGEXP_COMPAT__OPCODE_IS_REWIND_PROC },
         { op: REGEXP_COMPAT__OPCODE_IS_RESTORE_POS }
     );
@@ -440,7 +440,7 @@ function Compiler_compileLookAround( compiler, node ){
 /**
  * @param {Compiler} compiler
  * @param {Char} node 
- * @return {Array.<OpCode>}
+ * @return {!Array.<!OpCode>}
  */
 function Compiler_compileChar( compiler, node ){
     var value = node.value;
@@ -454,7 +454,7 @@ function Compiler_compileChar( compiler, node ){
 /**
  * @param {Compiler} compiler
  * @param {EscapeClass} node 
- * @return {Array.<OpCode>}
+ * @return {!Array.<!OpCode>}
  */
 function Compiler_compileEscapeClass( compiler, node ){
     var set = Compiler_escapeClassToSet( compiler, node );
@@ -465,7 +465,7 @@ function Compiler_compileEscapeClass( compiler, node ){
 /**
  * @param {Compiler} compiler
  * @param {Class} node 
- * @return {Array.<OpCode>}
+ * @return {!Array.<!OpCode>}
  */
 function Compiler_compileClass( compiler, node ){
     var set = m_createCharSetFromArray( [] ),
@@ -536,7 +536,7 @@ function Compiler_escapeClassToSet( compiler, _node ){
 
 /**
  * @param {Compiler} compiler
- * @return {Array.<OpCode>}
+ * @return {!Array.<!OpCode>}
  */
 function Compiler_compileDot( compiler ){
     compiler.advance = true;
@@ -545,8 +545,8 @@ function Compiler_compileDot( compiler ){
 
 /**
  * @param {Compiler} compiler
- * @param {Array.<OpCode>} codes 
- * @return {Array.<OpCode>}
+ * @param {!Array.<!OpCode>} codes 
+ * @return {!Array.<!OpCode>}
  */
 function Compiler_insertBack( compiler, codes ){
     if( compiler.direction === Compiler_DIRECTION_FORWARD ){
@@ -562,7 +562,7 @@ function Compiler_insertBack( compiler, codes ){
 /**
  * @param {Compiler} compiler
  * @param {BackRef} node 
- * @return {Array.<OpCode>}
+ * @return {!Array.<!OpCode>}
  */
 function Compiler_compileBackRef( compiler, node ){
     if( node.index < 1 || compiler.captureParens < node.index ){
@@ -577,7 +577,7 @@ function Compiler_compileBackRef( compiler, node ){
 /**
  * @param {Compiler} compiler
  * @param {NamedBackRef} node
- * @return {Array.<OpCode>}
+ * @return {!Array.<!OpCode>}
  */
 function Compiler_compileNamedBackRef( compiler, node ){
     var index = m_getCaptureGroupIndexByName( /** @type {!Array.<string|number>} */ (compiler.names), node.name );
@@ -592,21 +592,21 @@ function Compiler_compileNamedBackRef( compiler, node ){
 };
 
 /**
- * @param {Array.<OpCode>} targetArray
+ * @param {!Array.<!OpCode>} targetArray
  * @param {...(OpCode|Array.<OpCode>)} _args
- * @return {Array.<OpCode>}
+ * @return {!Array.<!OpCode>}
  */
 function Compiler_pushFlattenedOpCodesToOpCodeList( targetArray, _args ){
     var args = arguments,
         l    = args.length,
         i    = 1,
         j    = targetArray.length - 1,
-        val;
+        val, k, m;
 
     for( ; i < l; ++i ){
         val = args[ i ];
         if( val && val.pop ){ // isArray
-            for( var k = 0, m = val.length; k < m; ++k ){
+            for( k = 0, m = val.length; k < m; ++k ){
                 targetArray[ ++j ] = val[ k ];
             };
         } else {
