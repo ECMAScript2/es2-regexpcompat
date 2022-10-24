@@ -3,8 +3,8 @@
  * @constructor
  *
  * @param {string} input 
- * @param {Array.<number>} caps 
- * @param {Object<string, number>=} names 
+ * @param {!Array.<number>} caps 
+ * @param {!Array<string|number>=} names 
  */
 Match = function( input, caps, names ){
     /** An input string of this matching.
@@ -76,14 +76,13 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
  *
  * If not resolved, it returns `-1`.
  * 
- * @param {Match} match
+ * @param {!Match} match
  * @param {string|number} k 
- * @return {Array.<number>}
+ * @return {!Array.<number>}
  */
 function Match_resolve( match, k ){
     if( CONST_SUPPORT_ES2018 && k === k + '' ){ // typeof k === 'string'
-        k = match._names[ k ];
-        k  = k !== undefined ? k : -1;
+        k = m_getCaptureGroupIndexByName( /** @type {!Array.<string|number>} */ (match._names), k ); //
     };
     var i = match._caps[ k * 2 ],
         j = match._caps[ k * 2 + 1 ];
@@ -108,15 +107,20 @@ Match.prototype.toArray = function(){
         array[ i ] = this.get( i );
     };
 
-    if( CONST_SUPPORT_ES2018 && this._names._size > 0 ){
-        var groups = {}, // <- Object.create( null ),
-            names  = this._names;
-        for( var name in names ){
-            groups[ name ] = array[ names[ name ] ];
-        };
+    if( CONST_SUPPORT_ES2018 ){
+        var names = this._names;
 
-        // `RegExpExecArray`'s group does not accept `undefined` value, so cast to `any` for now.
-        array.groups = groups;
+        l = names.length;
+        if( 0 < l ){
+            var groups = {}; // <- Object.create( null ),
+
+            for( i = 0; i < l; i += 2 ){
+                groups[ names[ i ] ] = array[ names[ i + 1 ] ];
+            };
+
+            // `RegExpExecArray`'s group does not accept `undefined` value, so cast to `any` for now.
+            array.groups = groups;
+        };
     // } else {
         // (array).groups = undefined;
     };

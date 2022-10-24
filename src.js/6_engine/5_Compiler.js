@@ -194,9 +194,9 @@ function Compiler_compileCapture( compiler, node ){
 function Compiler_compileNamedCapture( compiler, node ){
     var current = compiler.captureParensIndex++;
     var codes0  = Compiler_compileNode( compiler, node.child );
-    var index   = compiler.names[ node.name ];
+    var index   = m_getCaptureGroupIndexByName( /** @type {!Array.<string|number>} */ (compiler.names), node.name );
 
-    if( index === undefined || index !== current ){
+    if( index === -1 || index !== current ){
         if( DEFINE_REGEXP_COMPAT__DEBUG ){
             throw new Error('BUG: invalid pattern');
         };
@@ -580,9 +580,9 @@ function Compiler_compileBackRef( compiler, node ){
  * @return {Array.<OpCode>}
  */
 function Compiler_compileNamedBackRef( compiler, node ){
-    var index = compiler.names[ node.name ];
+    var index = m_getCaptureGroupIndexByName( /** @type {!Array.<string|number>} */ (compiler.names), node.name );
 
-    if( index === undefined || index < 1 || compiler.captureParens < index ){
+    if( index === -1 || index < 1 || compiler.captureParens < index ){
         if( DEFINE_REGEXP_COMPAT__DEBUG ){
             throw new Error('invalid named back reference');
         };

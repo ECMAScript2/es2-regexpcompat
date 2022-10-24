@@ -108,7 +108,7 @@ function CharSet_invert(){
  * @return {!CharSet}
  */
 function CharSet_clone(){
-    return m_createCharSetFromArray( Array_from( this.data ) );
+    return m_createCharSetFromArray( /** @type {!Array.<number>} */ (Array_from( this.data )) );
 };
 
 /** Check is a code point contained in this set.

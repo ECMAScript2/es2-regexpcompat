@@ -172,7 +172,7 @@ Program = function( pattern, codes ){
     if( CONST_SUPPORT_ES2018 ){
         this.dotAll  = /** @type {boolean} */ (pattern.flagSet.dotAll);
         this.unicode = /** @type {boolean} */ (pattern.flagSet.unicode);
-        this.names   = /** @type {Object<string, number>} */ (pattern.names);
+        this.names   = /** @type {!Array.<string|number>} */ (pattern.names);
     };
 
     this.sticky = /** @type {boolean} */ (pattern.flagSet.sticky);

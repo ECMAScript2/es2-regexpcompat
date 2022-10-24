@@ -18,7 +18,7 @@ var FlagSet;
  *     type: (string|number),
  *     flagSet: FlagSet,
  *     captureParens: number,
- *     names: (Object<string, number>|undefined),
+ *     names: (!Array.<string,number>|undefined),
  *     child: RegExpPaternNode,
  *     range: Array.<number>
  *   }

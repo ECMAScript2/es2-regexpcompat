@@ -22,6 +22,8 @@ var m_loadCategory, m_loadProperty, m_loadPropertyValue;
 
 var m_nodeToString, m_flagSetToString, m_patternToString;
 
+var m_getCaptureGroupIndexByName;
+
 var RegExpSyntaxError, Parser, Compiler, Program;
 
 /** @typedef {{stylize:Function}} */

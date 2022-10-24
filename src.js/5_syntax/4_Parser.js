@@ -102,6 +102,17 @@ function isIDPart( c ){
     return c === '$' || c === '\u200C' || c === '\u200D' || charSetIdContinue.has( ( cp = String_codePointAt( c, 0 ) ) !== undefined ? cp : -1 );
 };
 
+/**
+ * @param {!Array.<string|number>} captureGroupNames
+ * @param {string} name
+ * @return {number}
+ */
+m_getCaptureGroupIndexByName = function( captureGroupNames, name ){
+    var index = captureGroupNames.indexOf( name );
+
+    return index === -1 ? -1 : /** @type {number} */ (captureGroupNames[ index + 1 ]);
+};
+
 /** Type of repeat quantifier.
  * @typedef {{min: number, max: (number|null)}}
  */
@@ -125,8 +136,8 @@ Parser = function( source, flags, additional ){
      /** Precalculated number of capture group parens. */
     this.captureParens = 0;
     if( CONST_SUPPORT_ES2018 ){
-        /** @type {Object<string, number>} Precalculated `Map` associate from capture group name to its index. */
-        this.names = { _size : 0 };
+        /** @type {(!Array<string|number>|undefined)} Associate from capture group name to its index. [ 'name1', index1, 'name2', index2, ... ] */
+        this.names = [];
     };
     /** The current position of `source` string on parsing. */
     this.pos = 0;
@@ -273,22 +284,26 @@ function Parser_preprocessFlags( flags ){
  * @param {Parser} parser
  */
 function Parser_preprocessCaptures( parser ){
-    var len = parser.source.length;
+    var len = parser.source.length,
+        c, name, names, index;
 
     while( parser.pos < len ){
-        var c = Parser_current( parser );
+        c = Parser_current( parser );
         switch( c ){
             case '(' :
                 if( CONST_SUPPORT_ES2018 && String_startsWith( parser.source, '(?<', parser.pos ) ){
                     parser.pos += 3; // skip '(?<'
-                    var d = Parser_current( parser );
-                    if( d !== '=' && d !== '!' ){
+                    c = Parser_current( parser );
+                    if( c !== '=' && c !== '!' ){
                         ++parser.captureParens;
-                        var name = Parser_parseCaptureName( parser );
-                        if( !parser.names[ name ] ){
-                            ++parser.names._size;
+                        name  = Parser_parseCaptureName( parser );
+                        names = parser.names;
+                        index = names.indexOf( name );
+                        if( index === -1 ){
+                            names.push( name, parser.captureParens );
+                        } else {
+                            names[ index + 1 ] = parser.captureParens;
                         };
-                        parser.names[ name ] = parser.captureParens;
                     };
                 } else {
                     if( !String_startsWith( parser.source, '(?', parser.pos ) ){
@@ -802,7 +817,7 @@ function Parser_tryParseBackRef( parser ){
     var begin = parser.pos;
     ++parser.pos; // skip '\\';
 
-    if( CONST_SUPPORT_ES2018 && parser.names._size > 0 ){
+    if( CONST_SUPPORT_ES2018 && 0 < parser.names.length ){
         if( Parser_current( parser ) === 'k' ){
             ++parser.pos; // skip 'k'
             if( DEFINE_REGEXP_COMPAT__DEBUG && Parser_current( parser ) !== '<' ){
@@ -973,7 +988,7 @@ function Parser_tryParseEscape( parser ){
             if( c === 'c' ){
                 return { type : REGEXP_COMPAT__PATTERN_IS_Char, value : 0x5c, raw : '\\', range : [ begin, parser.pos ] };
             };
-            if( CONST_SUPPORT_ES2018 && parser.names._size === 0 || c !== 'k' ){
+            if( CONST_SUPPORT_ES2018 && parser.names.length === 0 || c !== 'k' ){
                 parser.pos += c.length; // skip any char
                 return /** @type {Char} */ ({ type : REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw : '\\' + c, range : [ begin, parser.pos ] });
             };
@@ -1245,7 +1260,7 @@ function Parser_parseParen( parser ){
             var namePos = parser.pos;
             var name = Parser_parseCaptureName( parser );
             var raw = parser.source.slice( namePos, parser.pos - 1 );
-            if( DEFINE_REGEXP_COMPAT__DEBUG && parser.names[ name ] !== index ){
+            if( DEFINE_REGEXP_COMPAT__DEBUG && m_getCaptureGroupIndexByName( /** @type {!Array.<string|number>} */ (parser.names), name ) !== index ){
                 throw new Error('BUG: invalid named capture');
             };
             child = Parser_parseDisjunction( parser );

@@ -392,7 +392,7 @@ function RegExpCompat_replace( regExp, string, replacer ){
                         //   $<Name> 	ここで、Name はキャプチャするグループ名です。... 名前付きキャプチャグループに対応しているブラウザーのバージョンでのみ利用可能です。
                         if( CONST_SUPPORT_ES2018 ){
                             var k = replacer.indexOf( '>', j + 2 );
-                            if( regExp.program.names._size === 0 || k === -1 ){
+                            if( regExp.program.names.length === 0 || k === -1 ){
                                 i = j + 2;
                                 result[ ++resultIndex ] = '$<';
                                 break;
