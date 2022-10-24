@@ -16,11 +16,11 @@ var FlagSet;
  * @typedef {
  *   {
  *     type: (string|number),
- *     flagSet: FlagSet,
+ *     flagSet: !FlagSet,
  *     captureParens: number,
  *     names: (!Array.<string,number>|undefined),
  *     child: RegExpPaternNode,
- *     range: Array.<number>
+ *     range: !Array.<number>
  *   }
  * }
  */
@@ -44,8 +44,8 @@ var ASTElement;
 /** Type for select pattern `/(a|b)/`.
  * @typedef {{
  *   type: (string|number),
- *   children: Array.<RegExpPaternNode>,
- *   range: Array.<number>
+ *   children: !Array.<RegExpPaternNode>,
+ *   range: !Array.<number>
  * }}
  */
 var Disjunction;
@@ -53,8 +53,8 @@ var Disjunction;
 /** Type for sequence pattern `/(ab)/`.
  * @typedef {{
  *   type: (string|number),
- *   children: Array.<RegExpPaternNode>,
- *   range: Array.<number>
+ *   children: !Array.<RegExpPaternNode>,
+ *   range: !Array.<number>
  * }}
  */
 var Sequence;
@@ -63,8 +63,8 @@ var Sequence;
  * @typedef {{
  *   type: (string|number),
  *   index: number,
- *   child: RegExpPaternNode,
- *   range: Array.<number>
+ *   child: !RegExpPaternNode,
+ *   range: !Array.<number>
  * }}
  */
 var Capture;
@@ -74,8 +74,8 @@ var Capture;
  *   type: (string|number),
  *   name: string,
  *   raw: string,
- *   child: RegExpPaternNode,
- *   range: Array.<number>
+ *   child: !RegExpPaternNode,
+ *   range: !Array.<number>
  * }}
  */
 var NamedCapture;
@@ -83,8 +83,8 @@ var NamedCapture;
 /** Type for non-capture group `/(?:...)/`.
  * @typedef {{
  *   type: (string|number),
- *   child: RegExpPaternNode,
- *   range: Array.<number>
+ *   child: !RegExpPaternNode,
+ *   range: !Array.<number>
  * }}
  */
 var Group;
@@ -93,8 +93,8 @@ var Group;
  * @typedef {{
  *   type: (string|number),
  *   nonGreedy: boolean,
- *   child: RegExpPaternNode,
- *   range: Array.<number>
+ *   child: !RegExpPaternNode,
+ *   range: !Array.<number>
  * }}
  */
 var Many;
@@ -103,8 +103,8 @@ var Many;
  * @typedef {{
  *   type: (string|number),
  *   nonGreedy: boolean,
- *   child: RegExpPaternNode,
- *   range: Array.<number>
+ *   child: !RegExpPaternNode,
+ *   range: !Array.<number>
  * }}
  */
 var Some;
@@ -113,8 +113,8 @@ var Some;
  * @typedef {{
  *   type: (string|number),
  *   nonGreedy: boolean,
- *   child: RegExpPaternNode,
- *   range: Array.<number>
+ *   child: !RegExpPaternNode,
+ *   range: !Array.<number>
  * }}
  */
 var Optional;
@@ -125,8 +125,8 @@ var Optional;
  *   min: number,
  *   max: (number|null),
  *   nonGreedy: boolean,
- *   child: RegExpPaternNode,
- *   range: Array.<number>
+ *   child: !RegExpPaternNode,
+ *   range: !Array.<number>
  * }}
  */
 var Repeat;
@@ -135,7 +135,7 @@ var Repeat;
  * @typedef {{
  *   type: (string|number),
  *   invert: boolean,
- *   range: Array.<number>
+ *   range: !Array.<number>
  * }}
  */
 var WordBoundary;
@@ -143,7 +143,7 @@ var WordBoundary;
 /** Type for line begin assertion pattern `/(^)/`.
  * @typedef {{
  *   type: (string|number),
- *   range: Array.<number>
+ *   range: !Array.<number>
  * }}
  */
 var LineBegin;
@@ -151,7 +151,7 @@ var LineBegin;
 /** Type for line end assertion pattern `/($)/`.
  * @typedef {{
  *   type: (string|number),
- *   range: Array.<number>
+ *   range: !Array.<number>
  * }}
  */
 var LineEnd;
@@ -160,8 +160,8 @@ var LineEnd;
  * @typedef {{
  *   type: (string|number),
  *   negative: boolean,
- *   child: RegExpPaternNode,
- *   range: Array.<number>
+ *   child: !RegExpPaternNode,
+ *   range: !Array.<number>
  * }}
  */
 var LookAhead;
@@ -170,8 +170,8 @@ var LookAhead;
  * @typedef {{
  *   type: (string|number),
  *   negative: boolean,
- *   child: RegExpPaternNode,
- *   range: Array.<number>
+ *   child: !RegExpPaternNode,
+ *   range: !Array.<number>
  * }}
  */
 var LookBehind;
@@ -181,7 +181,7 @@ var LookBehind;
  *   type: (string|number),
  *   value: number,
  *   raw: string,
- *   range: Array.<number>
+ *   range: !Array.<number>
  * }}
  */
 var Char;
@@ -200,7 +200,7 @@ var EscapeClass;
  *   type: (string|number),
  *   kind: (string|number),
  *   invert: boolean,
- *   range: Array.<number>
+ *   range: !Array.<number>
  * }}
  */
 var SimpleEscapeClass;
@@ -213,7 +213,7 @@ var SimpleEscapeClass;
  *   kind: (string|number),
  *   invert: boolean,
  *   property: string,
- *   range: Array.<number>
+ *   range: !Array.<number>
  * }}
  */
 var UnicodePropertyEscapeClass;
@@ -227,7 +227,7 @@ var UnicodePropertyEscapeClass;
  *   invert: boolean,
  *   property: string,
  *   value: string,
- *   range: Array.<number>
+ *   range: !Array.<number>
  * }}
  */
 var UnicodePropertyValueEscapeClass;
@@ -237,8 +237,8 @@ var UnicodePropertyValueEscapeClass;
  * @typedef {{
  *   type: (string|number),
  *   invert: boolean,
- *   children: Array.<ClassItem>,
- *   range: Array.<number>
+ *   children: !Array.<ClassItem>,
+ *   range: !Array.<number>
  * }}
  */
 var Class;
@@ -247,8 +247,8 @@ var Class;
  *
  * @typedef {{
  *   type: (string|number),
- *   children: Array.<Char>,
- *   range: Array.<number>
+ *   children: !Array.<Char>,
+ *   range: !Array.<number>
  * }}
  */
 var ClassRange;
@@ -257,7 +257,7 @@ var ClassRange;
  *
  * @typedef {{
  *   type: (string|number),
- *   range: Array.<number>
+ *   range: !Array.<number>
  * }}
  */
 var Dot;
@@ -267,7 +267,7 @@ var Dot;
  * @typedef {{
  *   type: (string|number),
  *   index: number,
- *   range: Array.<number>
+ *   range: !Array.<number>
  * }}
  */
 var BackRef;
@@ -278,7 +278,7 @@ var BackRef;
  *   type: (string|number),
  *   name: string,
  *   raw: string,
- *   range: Array.<number>
+ *   range: !Array.<number>
  * }}
  */
 var NamedBackRef;
