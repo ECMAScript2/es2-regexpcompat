@@ -164,14 +164,8 @@ gulp.task( '__compile', gulp.series(
         ).pipe(
             closureCompiler(
                 {
-                    // externs           : [ './src.externs/externs.generated.js' ],
-                    // compilation_level : 'ADVANCED',
                     compilation_level : 'WHITESPACE_ONLY',
-                    // env               : 'CUSTOM',
                     formatting        : strCompileType !== 'release' ? 'PRETTY_PRINT' : 'SINGLE_QUOTES',
-                    // warning_level     : 'QUIET',
-                    // language_in       : 'ECMASCRIPT3',
-                    // language_out      : 'ECMASCRIPT3',
                     output_wrapper    : '// ReRE.js for ES2[' + strCompileType + '], Compatible:ES' + ecmaFeatureVersion + ', ' + aboutReREjs + '\n%output%',
                     js_output_file    : 'ReRE.es2.' + ecmaFeatureVersion + '.' + strCompileType + '.js'
                 }
@@ -230,7 +224,7 @@ gulp.task( '__compile_all_target', gulp.series(
     '__compile_all_furetre',
     function( cb ){
         isNodejsLibrary    = true;
-        ecmaFeatureVersion = 3;
+        clientMinEsVersion = 3;
         ecmaFeatureVersion = 2018;cb();
     },
     '__compile_all_compileTypes'
