@@ -146,14 +146,19 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
        */
         Match.prototype[ Symbol[ 'for' ]( 'nodejs.util.inspect.custom' ) ] = function( depth, options ){
             var s = options.stylize( 'Match', 'special' ) + ' [\n';
-            var inverseNames = new Map(
-                    Array.from( CONST_SUPPORT_ES2018 ? this._names : {} ).map( function( ki ){ return [ ki[ 1 ], ki[ 0 ] ]; } ) );
+            var names = CONST_SUPPORT_ES2018 ? this._names : [];
+
+            function getNameByIndex( index ){
+                var _index = names.indexOf( index );
+
+                return _index === -1 ? null : names[ _index - 1 ];
+            };
 
             for( var i = 0, _i; i < this.length; i++ ){
-                _i = inverseNames.get( i );
+                _i = getNameByIndex( i );
                 var name = options.stylize(
                     JSON.stringify( _i != null ? _i : i ),
-                    inverseNames.has( i ) ? 'string' : 'number'
+                    _i != null ? 'string' : 'number'
                 );
                 var capture = this.get( i );
                 if( capture === undefined ){
