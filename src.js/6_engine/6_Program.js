@@ -79,7 +79,7 @@ function calculateMaxStackSize( codes ){
                 --stackSize;
                 break;
         };
-        maxStackSize = Math.max( stackSize, maxStackSize );
+        maxStackSize = Math_max( stackSize, maxStackSize );
     };
     return maxStackSize;
 };

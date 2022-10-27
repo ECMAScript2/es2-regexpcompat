@@ -1,5 +1,10 @@
 var String_fromCharCode = String.fromCharCode;
-var Math_floor = Math.floor; // function( n ){ return n <= 0x7FFFFFFF ? ( n | 0 ) : Math.floor( n ) };
+
+function Math_floor( n ){ return n <= 0x7FFFFFFF ? ( n | 0 ) : Math.floor( n ) };
+
+function Math_min( n1, n2 ){ return n1 < n2 ? n1 : n2 };
+
+function Math_max( n1, n2 ){ return n1 < n2 ? n2 : n1 };
 
 // Math_min, Math_max
 

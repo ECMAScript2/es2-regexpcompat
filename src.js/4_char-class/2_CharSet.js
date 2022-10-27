@@ -57,8 +57,8 @@ function CharSet_add( begin, opt_end ){
 
     var removed = data.splice( i * 2, ( j - i + 1 ) * 2 );
     if( removed.length > 0 ){
-        begin = Math.min( begin, removed[ 0 ] );
-        end   = Math.max( end, removed[ removed.length - 1 ] );
+        begin = Math_min( begin, removed[ 0 ] );
+        end   = Math_max( end, removed[ removed.length - 1 ] );
     };
 
     data.splice( i * 2, 0, begin, end );

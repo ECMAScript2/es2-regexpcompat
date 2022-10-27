@@ -147,10 +147,17 @@ function Compiler_compileSequence( compiler, node ){
     };
 
     var codes = [];
+    var i = -1, child, codes0, l, k, j = -1;
     var advance = false;
-    for( var i = -1, child; child = children[ ++i ]; ){
-        var codes0 = Compiler_compileNode( compiler, child );
-        Compiler_pushFlattenedOpCodesToOpCodeList( codes, /** @type {!Array.<!OpCode>} */ (codes0) );
+    for( ; child = children[ ++i ]; ){
+        codes0 = Compiler_compileNode( compiler, child );
+        if( l = codes0.length ){
+            for( k = 0; k < l; ++k ){
+                codes[ ++j ] = codes0[ k ];
+            };
+        } else {
+            codes[ ++j ] = codes0;
+        };
         advance = advance || compiler.advance;
     };
     compiler.advance = advance;
@@ -277,8 +284,7 @@ function Compiler_compileRepeat( compiler, node ){
     var codes1;
 
     if( min === 1 ){
-        // Compiler_pushFlattenedOpCodesToOpCodeList( codes, /** @type {!Array.<!OpCode>} */ (codes0) );
-        codes = codes0.concat();
+        codes = codes0; //.concat();
         // codes.push(...codes0);
     } else if( min > 1 ){
         codes1 = Compiler_insertCapReset( compiler, from, /** @type {!Array.<!OpCode>} */ (codes0) );
@@ -298,32 +304,32 @@ function Compiler_compileRepeat( compiler, node ){
     var max = node.max != null ? node.max : min;
     if( max === Infinity ){
         codes1 = Compiler_insertCapReset( compiler, from, Compiler_insertEmptyCheck( compiler, /** @type {!Array.<!OpCode>} */ (codes0) ) );
-        Compiler_pushFlattenedOpCodesToOpCodeList(
-            codes,
-            { op: node.nonGreedy ? REGEXP_COMPAT__OPCODE_IS_FORK_NEXT : REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes1.length + 1 }, // next: は (1) を指す
-            /* ... */ codes1,
-            { op: REGEXP_COMPAT__OPCODE_IS_JUMP, cont: -1 - codes1.length - 1 } // cont: は (1) を指す
-        );
+        codes =
+            codes.concat(
+                { op: node.nonGreedy ? REGEXP_COMPAT__OPCODE_IS_FORK_NEXT : REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes1.length + 1 }, // next: は (1) を指す
+                /* ... */ codes1,
+                { op: REGEXP_COMPAT__OPCODE_IS_JUMP, cont: -1 - codes1.length - 1 } // cont: は (1) を指す
+            );
     } else if( max > min ){
         var remain = max - min;
         codes1 = Compiler_insertCapReset( compiler, from, Compiler_insertEmptyCheck( compiler, /** @type {!Array.<!OpCode>} */ (codes0) ) );
         if( remain === 1 ){
-            Compiler_pushFlattenedOpCodesToOpCodeList(
-                codes,
-                { op: node.nonGreedy ? REGEXP_COMPAT__OPCODE_IS_FORK_NEXT : REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes1.length }, // next: は (2) を指す
-                /* ... */ codes1 // (2)
-            );
+            codes =
+                codes.concat(
+                    { op: node.nonGreedy ? REGEXP_COMPAT__OPCODE_IS_FORK_NEXT : REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes1.length }, // next: は (2) を指す
+                    /* ... */ codes1 // (2)
+                );
         } else {
-            Compiler_pushFlattenedOpCodesToOpCodeList(
-                codes,
-                { op: REGEXP_COMPAT__OPCODE_IS_PUSH, value: remain + 1 }, // (3)
-                { op: node.nonGreedy ? REGEXP_COMPAT__OPCODE_IS_FORK_NEXT : REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes1.length + 4 }, // next: は (4) を指す
-                /* ... */ codes1,
-                { op: REGEXP_COMPAT__OPCODE_IS_DEC },
-                { op: REGEXP_COMPAT__OPCODE_IS_LOOP, cont: -1 - codes1.length - 2 }, // cont: は (3) を指す
-                { op: REGEXP_COMPAT__OPCODE_IS_FAIL },
-                { op: REGEXP_COMPAT__OPCODE_IS_POP } // (4)
-            );
+            codes =
+                codes.concat(
+                    { op: REGEXP_COMPAT__OPCODE_IS_PUSH, value: remain + 1 }, // (3)
+                    { op: node.nonGreedy ? REGEXP_COMPAT__OPCODE_IS_FORK_NEXT : REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes1.length + 4 }, // next: は (4) を指す
+                    /* ... */ codes1,
+                    { op: REGEXP_COMPAT__OPCODE_IS_DEC },
+                    { op: REGEXP_COMPAT__OPCODE_IS_LOOP, cont: -1 - codes1.length - 2 }, // cont: は (3) を指す
+                    { op: REGEXP_COMPAT__OPCODE_IS_FAIL },
+                    { op: REGEXP_COMPAT__OPCODE_IS_POP } // (4)
+                );
         };
     };
 
@@ -601,31 +607,6 @@ function Compiler_compileNamedBackRef( compiler, node ){
     };
     compiler.advance = false;
     return [ { op: compiler.direction === Compiler_DIRECTION_BACKWARD ? REGEXP_COMPAT__OPCODE_IS_REF_BACK : REGEXP_COMPAT__OPCODE_IS_REF, index : index } ];
-};
-
-/**
- * @param {!Array.<!OpCode>} targetArray
- * @param {...(!OpCode|!Array.<!OpCode>)} _args
- * @return {!Array.<!OpCode>}
- */
-function Compiler_pushFlattenedOpCodesToOpCodeList( targetArray, _args ){
-    var args = arguments,
-        l    = args.length,
-        i    = 1,
-        j    = targetArray.length - 1,
-        val, k, m;
-
-    for( ; i < l; ++i ){
-        val = args[ i ];
-        if( val && val.pop ){ // isArray
-            for( k = 0, m = val.length; k < m; ++k ){
-                targetArray[ ++j ] = val[ k ];
-            };
-        } else {
-            targetArray[ ++j ] = val;
-        };
-    };
-    return targetArray;
 };
 
 if( DEFINE_REGEXP_COMPAT__NODEJS ){

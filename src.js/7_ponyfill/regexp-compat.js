@@ -504,7 +504,7 @@ function RegExpCompat_split( regExp, string, limit ){
                 continue;
             };
 
-            e = Math.min( splitter.lastIndex, strLength );
+            e = Math_min( splitter.lastIndex, strLength );
             if( e === p ){
                 q = CONST_SUPPORT_ES2018 ? RegExpCompat_advance( string, q, regExp.unicode ) : RegExpCompat_advance( string, q );
                 continue;
