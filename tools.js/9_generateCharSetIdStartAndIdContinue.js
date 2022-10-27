@@ -14,16 +14,16 @@ module.exports = function(){
     };
     return `
 if( DEFINE_REGEXP_COMPAT__DEBUG ){
-    charSetIdStart = new CharSet(
-        DEFINE_REGEXP_COMPAT__ES2018 ?
+    charSetIdStart = m_createCharSetFromArray(
+        CONST_SUPPORT_ES2018 ?
             m_unicodeProperty[ 'ID_Start' ]
             :
             [${charSetIdStart.data.join( ', ' )}]
     );
 };
 
-charSetIdContinue = new CharSet(
-    DEFINE_REGEXP_COMPAT__ES2018 ?
+charSetIdContinue = m_createCharSetFromArray(
+    CONST_SUPPORT_ES2018 ?
         m_unicodeProperty[ 'ID_Continue' ]
         :
         [${charSetIdContinue.data.join( ', ' )}]

@@ -2,21 +2,24 @@
  * @param {*} argument 
  * @return {boolean}
  */
-function isRegExp( argument ){
-    if( argument && typeof argument === 'object' ){
+function RegExpCompat_isRegExp( argument ){
+    if( argument ){
+        if( RegExp && argument.exec === RegExp.prototype.exec ){
+            return true;
+        };
         return argument.exec === RegExpCompat.prototype.exec;
     };
     return false;
 };
 
 /**
- * @param {string} s
+ * @param {String} s
  * @param {number} i
  * @param {boolean=} unicode
  * @return {number}
  */
-function advance( s, i, unicode ){
-    if( !DEFINE_REGEXP_COMPAT__ES2018 || !unicode || i + 1 >= s.length ){
+function RegExpCompat_advance( s, i, unicode ){
+    if( !CONST_SUPPORT_ES2018 || !unicode || i + 1 >= s.length ){
         return i + 1;
     };
     var c = String_codePointAt( s, i );
@@ -33,10 +36,10 @@ function advance( s, i, unicode ){
  * @param {string|RegExp|RegExpCompat} source 
  * @param {string=} flags
  */
-RegExpCompat = function( source, flags ){
+function RegExpCompat( source, flags ){
     if( DEFINE_REGEXP_COMPAT__DEBUG ){
         if( /*new.target === undefined*/ !this || this.constructor !== RegExpCompat ){
-            if( isRegExp( source ) && flags === undefined ){
+            if( RegExpCompat_isRegExp( source ) && flags === undefined ){
                 if( source.constructor === RegExpCompat ){
                     return source;
                 };
@@ -84,15 +87,21 @@ RegExpCompat = function( source, flags ){
 
     this.sticky = /** @type {boolean} */ (pattern.flagSet.sticky);
 
-    if( DEFINE_REGEXP_COMPAT__ES2018 ){
+    if( CONST_SUPPORT_ES2018 ){
         this.dotAll  = /** @type {boolean} */ (pattern.flagSet.dotAll);
         this.unicode = /** @type {boolean} */ (pattern.flagSet.unicode);
     };
 
     if( DEFINE_REGEXP_COMPAT__DEBUG ){
-        this.regExp = new RegExp( source, flags );
+        this.regExp = new RegExp( source, this.flags ); // flags : 機能がパージされてる場合もあるので RegExpCompat で処理済のものを使う
         // this.regExp.compile();
+        if( RegExpCompat_debug( this ) && this.regExp.source !== this.source ){
+            console.log( 'RegExpCompat.source missmatch! RegExpCompat("' + source + '", "' + ( flags || '' ) + '")' );
+            --RegExpCompat_debugCount;
+        };
     };
+
+    this.lastIndex = 0;
 };
 
 if( DEFINE_REGEXP_COMPAT__DEBUG ){
@@ -108,22 +117,18 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
             }
         );
     };
-
-
     // RegExpCompat[ Symbol.species ] = RegExpCompat;
-
     RegExpCompat.prototype.compile = function(){
         /* return this; */
     };
 
-    if( this.Symbol ){
-      // Not for ES2
+    // if( 6 <= DEFINE_REGEXP_COMPAT__CLIENT_MIN_ES_VERSION && global.Symbol ){
       // RegExpCompat.prototype[ Symbol.match   ] = function(){ throw "Called Symbol.match!!" };
       // RegExpCompat.prototype[ Symbol.replace ] = function(){ throw "Called Symbol.replace!!" };
-    };
+    // };
 
-    /** @type {{log:Function,dir:Function}} */
-    var console = this.console;
+    /** @type {!{log:!Function,dir:!Function}} */
+    var console = global.console;
 };
 
 RegExpCompat.prototype.toString = function(){
@@ -131,6 +136,74 @@ RegExpCompat.prototype.toString = function(){
 };
 
 var RegExpCompat_debugCount = 10;
+var RegExpCompat_skipCompare = true;
+
+/**
+ * @param {!RegExp|RegExpCompat} regExp 
+ * @return {boolean}
+ */
+function RegExpCompat_debug( regExp ){
+    return DEFINE_REGEXP_COMPAT__DEBUG && console && regExp.regExp && 0 < RegExpCompat_debugCount;
+};
+
+/**
+ * 
+ * @param {RegExpCompat} regExpCompat 
+ * @param {string} functionName 
+ * @param {*} result1 
+ * @param {*} result2 
+ * @param {Array} args
+ */
+function RegExpCompat_compare( regExpCompat, functionName, result1, result2, args ){
+    if( RegExpCompat_skipCompare ){
+        return;
+    };
+
+    if( !!regExpCompat.lastIndex !== !!regExpCompat.regExp.lastIndex && regExpCompat.lastIndex !== regExpCompat.regExp.lastIndex ){
+        console.log( 'regExpCompat.lastIndex missmatch! RegExpCompat("' + regExpCompat.source + '", "' + regExpCompat.flags + '").' + functionName + '("' + args.join( ',' ) + '") ' +
+        regExpCompat.lastIndex + '/' + regExpCompat.regExp.lastIndex );
+        --RegExpCompat_debugCount;
+    };
+
+    if( !result1 && !result2 ){
+        return;
+    };
+
+    if( !result1 && result2 || result1 && !result2 ){
+        console.log( '[0]Invalid Result! RegExpCompat("' + regExpCompat.source + '", "' + regExpCompat.flags + '").' + functionName + '("' + args.join( ',' ) + '")' );
+        console.dir( result1 );
+        console.dir( result2 );
+        --RegExpCompat_debugCount;
+        return;
+    };
+
+    if( result1.pop && result2.pop ){ // isArray
+        if( result2.length   !== result1.length ||
+            result2.input    !== result1.input  ||
+            result2.index    !== result1.index  ||
+            !!result2.groups !== !!result1.groups
+        ){
+            console.log( '[1]Invalid Result! RegExpCompat("' + regExpCompat.source + '", "' + regExpCompat.flags + '").' + functionName + '("' + args.join( ',' ) + '")' );
+            console.dir( result1 );
+            console.dir( result2 );
+            --RegExpCompat_debugCount;
+        } else {
+            for( var i = 0, l = result2.length; i < l; ++i ){
+                if( result2[ i ] !== result1[ i ] &&
+                    !( result2[ i ] === '' && result1[ i ] === undefined ) // for ie8-
+                ){
+                    console.log( '[2]Invalid Result! RegExpCompat("' + regExpCompat.source + '", "' + regExpCompat.flags + '").' + functionName + '("' + args.join( ',' ) + '")' );
+                    console.dir( result1 );
+                    console.dir( result2 );
+                    --RegExpCompat_debugCount;
+                    break;
+                };
+            };
+        };
+    } else {
+
+    };
+};
 
 /**
  * @param {*} string 
@@ -144,53 +217,18 @@ RegExpCompat.prototype.exec = function( string ){
         pos = this.lastIndex;
     };
     var match = this.program.exec( /** @type {string} */ (string), pos );
+
     if( update ){
         this.lastIndex = match ? match.lastIndex : 0;
     };
 
-    if( !DEFINE_REGEXP_COMPAT__DEBUG || !console || !this.regExp || RegExpCompat_debugCount < 0 ){
-        return match ? match.toArray() : null;
-    };
-    var regExpResult = this.regExp.exec( string );
+    var regExpResultCompat = match ? match.toArray() : null;
 
-    if( !match && !regExpResult ){
-        return null;
+    if( !RegExpCompat_debug( this ) ){
+        return regExpResultCompat;
     };
 
-    // console.dir( this );
-
-    if( !match && regExpResult ){
-        console.log( '[0]Invalid Result! RegExpCompat("' + this.source + '", "' + this.flags + '").exec("' + string + '")' );
-        console.dir( match );
-        console.dir( regExpResult );
-        --RegExpCompat_debugCount;
-        return null;
-    };
-
-    var regExpResultCompat = match.toArray();
-
-    if( regExpResult.length   !== regExpResultCompat.length ||
-        regExpResult.input    !== regExpResultCompat.input  ||
-        regExpResult.index    !== regExpResultCompat.index  ||
-        !!regExpResult.groups !== !!regExpResultCompat.groups
-    ){
-        console.log( '[1]Invalid Result! RegExpCompat("' + this.source + '", "' + this.flags + '").exec("' + string + '")' );
-        console.dir( regExpResultCompat );
-        console.dir( regExpResult );
-        --RegExpCompat_debugCount;
-    } else {
-        for( var i = 0, l = regExpResult.length; i < l; ++i ){
-            if( regExpResult[ i ] !== regExpResultCompat[ i ] &&
-                !( regExpResult[ i ] === '' && regExpResultCompat[ i ] === undefined ) // for ie8-
-            ){
-                console.log( '[2]Invalid Result! RegExpCompat("' + this.source + '", "' + this.flags + '").exec("' + string + '")' );
-                console.dir( regExpResultCompat );
-                console.dir( regExpResult );
-                --RegExpCompat_debugCount;
-                break;
-            };
-        };
-    };
+    RegExpCompat_compare( this, 'exec', regExpResultCompat, this.regExp.exec( string ), [ string ] );
 
     return regExpResultCompat;
 };
@@ -200,50 +238,107 @@ RegExpCompat.prototype.exec = function( string ){
  * @return {boolean}
  */
 RegExpCompat.prototype.test = function( string ){
-    return !!this.exec( string );
+    RegExpCompat_skipCompare = true;
+
+    var result = !!this.exec( string );
+
+    if( !RegExpCompat_debug( this ) ){
+        return result;
+    };
+
+    RegExpCompat_skipCompare = false;
+    RegExpCompat_compare( this, 'test', result, this.regExp.test( string ), [ string ] );
+
+    return result;
+};
+
+if( DEFINE_REGEXP_COMPAT__NODEJS || ( 6 <= DEFINE_REGEXP_COMPAT__CLIENT_MIN_ES_VERSION && global.Symbol ) ){
+    RegExpCompat.prototype[ Symbol.match   ] = function( str ){ return RegExpCompat_match( this, str ); };
+    RegExpCompat.prototype[ Symbol.replace ] = function( str, replacer ){ return RegExpCompat_replace( this, str, replacer ); };
+    RegExpCompat.prototype[ Symbol.search  ] = function( str ){ return RegExpCompat_search( this, str ); };
+    RegExpCompat.prototype[ Symbol['split']] = function( str, limit ){ return RegExpCompat_split( this, str, limit ); };
+} else {
+    String.prototype._matchNativeForRegExpCompat = String.prototype.match;
+    String.prototype.match = function( regExp ){
+        return RegExpCompat_isRegExp( regExp ) ? RegExpCompat_match( /** @type {!RegExp|RegExpCompat} */ (regExp), this ) : this._matchNativeForRegExpCompat( regExp );
+    };
+
+    String.prototype._replaceNativeForRegExpCompat = String.prototype.replace;
+    String.prototype.replace = function( regExp, replacer ){
+        return RegExpCompat_isRegExp( regExp ) ? RegExpCompat_replace( /** @type {!RegExp|RegExpCompat} */ (regExp), this, replacer ) : this._replaceNativeForRegExpCompat( regExp, replacer );
+    };
+
+    String.prototype._searchNativeForRegExpCompat = String.prototype.search;
+    String.prototype.search = function( regExp ){
+        return RegExpCompat_isRegExp( regExp ) ? RegExpCompat_search( /** @type {!RegExp|RegExpCompat} */ (regExp), this ) : this._searchNativeForRegExpCompat( regExp );
+    };
+
+    String.prototype._splitNativeForRegExpCompat = String.prototype.split;
+    /** @type {function(this:(String|string), *=, number=):!Array<string>} */
+    String.prototype.split = function( regExp, limit ){
+        return RegExpCompat_isRegExp( regExp ) ? RegExpCompat_split( /** @type {!RegExp|RegExpCompat} */ (regExp), /** @type {!String} */ (this), limit ) : this._splitNativeForRegExpCompat( regExp, limit );
+    };
 };
 
 /**
- * @param {string} string 
+ * @param {!RegExp|RegExpCompat} regExp
+ * @param {String} string 
  * @return {RegExpResult|Array<string>|null}
  */
-RegExpCompat.prototype[ 'match' ] = function( string ){
-    if( this.global ){
-        this.lastIndex = 0;
-        var result = [];
-        for( var r; r = this.exec( string ) ; ){
+function RegExpCompat_match( regExp, string ){
+    RegExpCompat_skipCompare = true;
+    var result;
+    
+    if( regExp.global ){
+        regExp.lastIndex = 0;
+        result = [];
+        for( var r; r = regExp.exec( string ) ; ){
             result.push( r[ 0 ] );
             if( r[ 0 ] === '' ){
-                this.lastIndex = DEFINE_REGEXP_COMPAT__ES2018 ? advance( string, this.lastIndex, this.unicode ) : advance( string, this.lastIndex );
+                regExp.lastIndex = CONST_SUPPORT_ES2018 ? RegExpCompat_advance( string, regExp.lastIndex, regExp.unicode ) : RegExpCompat_advance( string, regExp.lastIndex );
             };
         };
-        return result.length === 0 ? null : result;
+        result = result.length === 0 ? null : result;
+    } else {
+        result = regExp.exec( string );
     };
-    return this.exec( string );
+    if( !RegExpCompat_debug( regExp ) ){
+        return result;
+    };
+
+    RegExpCompat_skipCompare = false;
+    RegExpCompat_compare( /** @type {RegExpCompat} */ (regExp), 'match', result, string.match( regExp.regExp ), [ string ] );
+
+    return result;
 };
 
 /**
- * @param {string} string 
+ * @param {!RegExp|RegExpCompat} regExp
+ * @param {String} string 
  * @param {Function|string} replacer 
  * @return {string}
  */
-RegExpCompat.prototype[ 'replace' ] = function( string, replacer ){
+function RegExpCompat_replace( regExp, string, replacer ){
+    RegExpCompat_skipCompare = true;
+
     var replacerIsFunction = typeof replacer === 'function';
     var matches = [];
-    if( this.global ){
-        this.lastIndex = 0;
+    var isGlobal = regExp.global;
+
+    if( isGlobal ){
+        regExp.lastIndex = 0;
     };
 
     // Collect matches to replace.
     // It must be done before building result string because
     // the replacer function calls `this.exec` and changes `this.lastIndex` maybe.
-    for( var match; match = this.exec( string ); ){
+    for( var match; match = regExp.exec( string ); ){
         matches.push( match );
-        if( !this.global ){
+        if( !isGlobal ){
             break;
         };
         if( match[ 0 ] === '' ){
-            this.lastIndex = DEFINE_REGEXP_COMPAT__ES2018 ? advance( string, this.lastIndex, this.unicode ) : advance( string, this.lastIndex );
+            regExp.lastIndex = CONST_SUPPORT_ES2018 ? RegExpCompat_advance( string, regExp.lastIndex, regExp.unicode ) : RegExpCompat_advance( string, regExp.lastIndex );
         };
     };
 
@@ -260,7 +355,7 @@ RegExpCompat.prototype[ 'replace' ] = function( string, replacer ){
         if( replacerIsFunction ){
             var args = Array_from( match );
             args.push( match.index, string );
-            if( DEFINE_REGEXP_COMPAT__ES2018 && match.groups ){
+            if( CONST_SUPPORT_ES2018 && match.groups ){
                 args.push( match.groups );
             };
             result[ ++resultIndex ] = '' + replacer.apply( null, args );
@@ -269,7 +364,7 @@ RegExpCompat.prototype[ 'replace' ] = function( string, replacer ){
             for( ;; ){
                 var j = replacer.indexOf( '$', i );
                 if( j === -1 ){
-                    result[ ++resultIndex ] = replacer;
+                    result[ ++resultIndex ] = replacer.slice( i );
                     break;
                 };
                 result[ ++resultIndex ] = replacer.slice( i, j );
@@ -294,9 +389,9 @@ RegExpCompat.prototype[ 'replace' ] = function( string, replacer ){
                     case '<':
                         // https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/String/replace#specifying_a_string_as_a_parameter
                         //   $<Name> 	ここで、Name はキャプチャするグループ名です。... 名前付きキャプチャグループに対応しているブラウザーのバージョンでのみ利用可能です。
-                        if( DEFINE_REGEXP_COMPAT__ES2018 ){
+                        if( CONST_SUPPORT_ES2018 ){
                             var k = replacer.indexOf( '>', j + 2 );
-                            if( this.program.names._size === 0 || k === -1 ){
+                            if( regExp.program.names.length === 0 || k === -1 ){
                                 i = j + 2;
                                 result[ ++resultIndex ] = '$<';
                                 break;
@@ -332,31 +427,55 @@ RegExpCompat.prototype[ 'replace' ] = function( string, replacer ){
     };
 
     result[ ++resultIndex ] = string.slice( pos );
-    return result.join( '' );
+    result = result.join( '' );
+
+    if( !RegExpCompat_debug( regExp ) ){
+        return result;
+    };
+
+    RegExpCompat_skipCompare = true;
+    RegExpCompat_compare( /** @type {RegExpCompat} */ (regExp), 'replace', result, string.replace( regExp.regExp, replacer ), [ string, replacer ] );
+
+    return result;
 };
 
 /**
- * @param {string} string
+ * @param {!RegExp|RegExpCompat} regExp
+ * @param {String} string
  * @return {number}
  */
-RegExpCompat.prototype.search = function( string ){
-    var prevLastIndex = this.lastIndex;
-    this.lastIndex = 0;
-    var m = this.exec( string );
-    this.lastIndex = prevLastIndex;
-    return m ? m.index : -1;
+function RegExpCompat_search( regExp, string ){
+    RegExpCompat_skipCompare = true;
+
+    var prevLastIndex = regExp.lastIndex;
+    regExp.lastIndex = 0;
+    var m = regExp.exec( string );
+    regExp.lastIndex = prevLastIndex;
+    var result = m ? m.index : -1;
+
+    if( !RegExpCompat_debug( regExp ) ){
+        return result;
+    };
+
+    RegExpCompat_skipCompare = false;
+    RegExpCompat_compare( /** @type {RegExpCompat} */ (regExp), 'search', result, regExp.regExp.search( string ), [ string ] );
+
+    return result;
 };
 
 /**
- * @param {string} string
+ * @param {!RegExp|RegExpCompat} regExp
+ * @param {String} string
  * @param {number=} limit
- * @return {Array.<string>}
+ * @return {!Array.<string>}
  */
-RegExpCompat.prototype.split = function( string, limit ){
-    var flags       = this.sticky ? this.flags : this.flags + 'y';
-    var constructor = this.constructor;
+function RegExpCompat_split( regExp, string, limit ){
+    RegExpCompat_skipCompare = true;
+
+    var flags       = regExp.sticky ? regExp.flags : regExp.flags + 'y';
+    var Constructor = regExp.constructor;
     var species     = /* constructor && constructor[Symbol.species] || */ RegExpCompat;
-    var splitter    = new species( this.source, flags );
+    var splitter    = new species( regExp.source, flags ); // TODO .sticky フラグを立てて戻すだけで良さそう?
     limit = ( limit !== undefined ? limit : /* 2 ** 32 */ 4294967296 - 1 ) >>> 0;
 
     var result = [];
@@ -367,59 +486,66 @@ RegExpCompat.prototype.split = function( string, limit ){
     };
 
     // Special case for empty string.
-    if( /* string.length === 0 */ string === '' ){
+    if( /* string.length === 0 */ /** @type {*} */ (string) === '' ){
         match = splitter.exec( string );
         if( !match ){
             result.push( string );
         };
-        return result;
-    };
+    } else {
+        var strLength = string.length;
+        var p = 0;
+        var q = p;
+        var e, i, l;
+        while( q < strLength ){
+            splitter.lastIndex = q;
+            match = splitter.exec( string );
+            if( !match ){
+                q = CONST_SUPPORT_ES2018 ? RegExpCompat_advance( string, q, regExp.unicode ) : RegExpCompat_advance( string, q );
+                continue;
+            };
 
-    var len = string.length;
-    var p = 0;
-    var q = p;
-    var t;
-    while( q < len ){
-        splitter.lastIndex = q;
-        match = splitter.exec( string );
-        if( !match ){
-            q = DEFINE_REGEXP_COMPAT__ES2018 ? advance( string, q, this.unicode ) : advance( string, q );
-            continue;
-        };
+            e = Math.min( splitter.lastIndex, strLength );
+            if( e === p ){
+                q = CONST_SUPPORT_ES2018 ? RegExpCompat_advance( string, q, regExp.unicode ) : RegExpCompat_advance( string, q );
+                continue;
+            };
 
-        var e = Math.min( splitter.lastIndex, len );
-        if( e === p ){
-            q = DEFINE_REGEXP_COMPAT__ES2018 ? advance( string, q, this.unicode ) : advance( string, q );
-            continue;
-        };
-
-        t = string.slice( p, q );
-        result.push( t );
-        if( limit === result.length ){
-            return result;
-        };
-        p = e;
-        for( var i = 1, l = match.length; i < l; ++i ){
-            result.push( match[ i ] );
+            result.push( string.slice( p, q ) );
             if( limit === result.length ){
                 return result;
             };
+            p = e;
+            for( i = 1, l = match.length; i < l; ++i ){
+                result.push( match[ i ] );
+                if( limit === result.length ){
+                    return result;
+                };
+            };
+
+            q = p;
         };
 
-        q = p;
+        result.push( string.slice( p ) );
     };
 
-    t = string.slice( p );
-    result.push( t );
+    if( !RegExpCompat_debug( regExp ) ){
+        return result;
+    };
+
+    RegExpCompat_skipCompare = false;
+    RegExpCompat_compare( /** @type {RegExpCompat} */ (regExp), 'split', result, regExp.regExp.split( string, limit ), [ string, limit ] );
+
     return result;
 };
 
 if( DEFINE_REGEXP_COMPAT__NODEJS ){
-    if( this.module ){
-        this.module.exports = RegExpCompat;
-    };
+    module[ 'exports' ][ 'RegExpCompat' ] = RegExpCompat;
 };
 
 if( DEFINE_REGEXP_COMPAT__EXPORT_BY_RETURN ){
     return RegExpCompat;
+};
+
+if( DEFINE_REGEXP_COMPAT__EXPORT_BY_CALL_REGEXPCOMPAT ){
+    global[ 'RegExpCompat' ]( RegExpCompat );
 };

@@ -10,8 +10,8 @@ var MAX_CODE_POINT = 0x110000;
  * An odd element is begin of a range, and an even element is end of a range.
  * So, this array's size must be even always.
  *
- * ```typescript
- * var set = new CharSet();
+ * ```js
+ * var set = m_createCharSetFromArray([]);
  * set.add(10, 20);
  * set.add(30, 40)
  * console.log(set.data);
@@ -20,21 +20,35 @@ var MAX_CODE_POINT = 0x110000;
  */
 
 /**
- * @constructor
- * @param {Array.<number>=} data
+ * @param {!Array.<number>} data
+ * @return {!CharSet}
  */
-CharSet = function( data ){
-    /**
-     * @type {Array.<number>}
-     */
-    this.data = data || [];
+m_createCharSetFromArray = function( data ){
+    var charSet = {
+        data       : data,
+        add        : CharSet_add,
+        addCharSet : CharSet_addCharSet,
+        invert     : CharSet_invert,
+        clone      : CharSet_clone,
+        has        : CharSet_has
+    };
+
+    if( DEFINE_REGEXP_COMPAT__DEBUG ){
+        charSet.toRegExpPattern = CharSet_toRegExpPattern;
+        charSet.toString        = CharSet_toString;
+        if( DEFINE_REGEXP_COMPAT__NODEJS ){
+            charSet[ Symbol[ 'for' ]( 'nodejs.util.inspect.custom' ) ] = CharSet_inspect;
+        };
+    };
+
+    return /** @type {!CharSet} */ (charSet);
 };
 
 /** Add a range to this.
  * @param {number} begin
  * @param {number=} opt_end
  */
-CharSet.prototype.add = function( begin, opt_end ){
+function CharSet_add( begin, opt_end ){
     var data = this.data;
     var end  = opt_end || begin + 1;
 
@@ -51,9 +65,9 @@ CharSet.prototype.add = function( begin, opt_end ){
 };
 
 /** Add another `CharSet` to this.
- *  @param {CharSet} charSet
+ *  @param {!CharSet} charSet
  */
-CharSet.prototype.addCharSet = function( charSet ){
+function CharSet_addCharSet( charSet ){
     var newData = charSet.data,
         begin, end;
 
@@ -69,9 +83,9 @@ CharSet.prototype.addCharSet = function( charSet ){
  * Note that this method is mutable like `Array.prototype.reverse`.
  * Please clone before this if immutable is desired.
  * 
- * @return {CharSet}
+ * @return {!CharSet}
  */
-CharSet.prototype.invert = function(){
+function CharSet_invert(){
     var data = this.data;
 
     if( data.length === 0 ){
@@ -91,17 +105,17 @@ CharSet.prototype.invert = function(){
 };
 
 /** Clone this set.
- * @return {CharSet}
+ * @return {!CharSet}
  */
-CharSet.prototype.clone = function(){
-    return new CharSet( Array_from( this.data ) );
+function CharSet_clone(){
+    return m_createCharSetFromArray( /** @type {!Array.<number>} */ (Array_from( this.data )) );
 };
 
 /** Check is a code point contained in this set.
  * @param {number} c
  * @return {boolean}
  */
-CharSet.prototype.has = function( c ){
+function CharSet_has( c ){
     var data = this.data;
     var i = CharSet_searchEnd( data, c );
 
@@ -113,45 +127,41 @@ CharSet.prototype.has = function( c ){
     return begin <= c && c < end;
 };
 
-if( DEFINE_REGEXP_COMPAT__DEBUG ){
-    /** Convert this into `RegExp` char-class pattern string.
-     *
-     * @param {boolean=} opt_invert
-     */
-    CharSet.prototype.toRegExpPattern = function( opt_invert ){
-        var s = opt_invert ? '[^' : '[';
+/** Convert this into `RegExp` char-class pattern string.
+ *
+ * @param {boolean=} opt_invert
+ */
+function CharSet_toRegExpPattern( opt_invert ){
+    var s = opt_invert ? '[^' : '[';
 
-        for( var i = -1, data = this.data, l = data.length - 1; i < l; ){
-            var begin = data[ ++i ];
-            var end   = data[ ++i ];
-            s += m_escapeCodePointAsRegExpSpurceChar( begin, true );
-            if( begin !== end - 1 ){
-                s += '-' + m_escapeCodePointAsRegExpSpurceChar( end - 1, true );
-            };
-        };
-
-        return s + ']';
-    };
-
-    CharSet.prototype.toString = function(){
-        return 'CharSet' + this.toRegExpPattern();
-    };
-
-    if( DEFINE_REGEXP_COMPAT__NODEJS ){
-      /**
-       * @param {*} depth 
-       * @param {InspectOptionsStylized} options 
-       * @return {string}
-       */
-        CharSet.prototype[ Symbol[ 'for' ]( 'nodejs.util.inspect.custom' ) ] = function( depth, options ){
-            return options.stylize( 'CharSet', 'special' ) + ' ' +
-                   options.stylize( this.toRegExpPattern(), 'regexp' );
+    for( var i = -1, data = this.data, l = data.length - 1; i < l; ){
+        var begin = data[ ++i ];
+        var end   = data[ ++i ];
+        s += m_escapeCodePointAsRegExpSpurceChar( begin, true );
+        if( begin !== end - 1 ){
+            s += '-' + m_escapeCodePointAsRegExpSpurceChar( end - 1, true );
         };
     };
+
+    return s + ']';
+};
+
+function CharSet_toString(){
+    return 'CharSet' + this.toRegExpPattern();
+};
+
+/**
+ * @param {*} depth 
+ * @param {InspectOptionsStylized} options
+ * @return {string}
+ */
+function CharSet_inspect( depth, options ){
+    return options.stylize( 'CharSet', 'special' ) + ' ' +
+           options.stylize( this.toRegExpPattern(), 'regexp' );
 };
 
 /** Find the least `i` such that satisfy `c <= this.data[i * 2 + 1]`.
- * @param {Array.<number>} data
+ * @param {!Array.<number>} data
  * @param {number} c
  * @return {number}
  */
@@ -171,7 +181,7 @@ function CharSet_searchBegin( data, c ){
 };
 
 /** Find the maximum `j` such that satisfy `this.ranges[j * 2] <= c`.
- * @param {Array.<number>} data
+ * @param {!Array.<number>} data
  * @param {number} c
  * @return {number}
  */
@@ -188,4 +198,8 @@ function CharSet_searchEnd( data, c ){
         };
     };
     return min;
+};
+
+if( DEFINE_REGEXP_COMPAT__NODEJS ){
+    module[ 'exports' ][ 'CharSet' ] = m_createCharSetFromArray;
 };

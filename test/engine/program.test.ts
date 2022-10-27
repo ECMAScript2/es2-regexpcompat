@@ -2,11 +2,9 @@ import util from 'util';
 
 import test from 'ava';
 
-import { Compiler } from '../../src/engine/compiler';
-import { Program } from '../../src/engine/program';
-import { Parser } from '../../src/syntax/parser';
+import { Compiler, Program, Parser } from '../../lib/index.develop.js';
 
-const compile = (source: string, flags: string): Program => {
+const compile = (source: string, flags: string) => {
   const parser = new Parser(source, flags);
   const pattern = parser.parse();
   const compiler = new Compiler(pattern);
@@ -439,11 +437,11 @@ for (const testCase of testCases) {
     const program = compile(source, flags);
 
     for (const s of matches ?? []) {
-      t.not(program.exec(s, pos), null, s);
+      t.not(program.exec(s, pos || 0), null, s);
     }
 
     for (const s of unmatches ?? []) {
-      t.is(program.exec(s, pos), null, s);
+      t.is(program.exec(s, pos || 0), null, s);
     }
   });
 }

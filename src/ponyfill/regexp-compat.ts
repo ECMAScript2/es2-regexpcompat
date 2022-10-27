@@ -325,5 +325,3 @@ export const RegExpCompat = ((): typeof RegExp => {
 
   return klass as any;
 })();
-
-window[ 'RegExpCompat' ] = RegExpCompat;

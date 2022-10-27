@@ -19,7 +19,7 @@ m_loadCategory = function( v ){
     if( !data ){
         return;
     };
-    var set = new CharSet( data );
+    var set = m_createCharSetFromArray( data );
     Unicode_CACHE[ key ] = set;
     return set;
 };
@@ -42,7 +42,7 @@ function loadScript(v){
     if( !data ){
         return;
     };
-    var set = new CharSet( data );
+    var set = m_createCharSetFromArray( data );
     Unicode_CACHE[ key ] = set;
     return set;
 };
@@ -72,7 +72,7 @@ function loadScriptExtensions( v ){
         // throw new Error('BUG: Script_Extensions must contain each value of Script');
     };
 
-    var extSet = new CharSet( data );
+    var extSet = m_createCharSetFromArray( data );
     var set = baseSet.clone();
     set.addCharSet( extSet );
     Unicode_CACHE[ key ] = set;
@@ -103,7 +103,7 @@ m_loadProperty = function( p ){
         return;
     };
 
-    var set = new CharSet( data );
+    var set = m_createCharSetFromArray( data );
     Unicode_CACHE[ p ] = set;
     return set;
 };
@@ -133,4 +133,9 @@ m_loadPropertyValue = function( p, v ){
         case 'Script_Extensions':
             return loadScriptExtensions( v );
     };
+};
+
+if( DEFINE_REGEXP_COMPAT__NODEJS ){
+    module[ 'exports' ][ 'loadProperty'      ] = m_loadProperty;
+    module[ 'exports' ][ 'loadPropertyValue' ] = m_loadPropertyValue;
 };

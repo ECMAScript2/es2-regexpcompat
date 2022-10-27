@@ -11,7 +11,7 @@ var m_unicodeCategory, m_unicodeProperty,
 var m_propertyAliases,
     m_propertyValueAliasesGeneralCategory, m_propertyValueAliasesScript, m_propertyValueAliasesScriptExtensions;
 
-var m_escapeCodePointAsRegExpSpurceChar, CharSet;
+var m_escapeCodePointAsRegExpSpurceChar, m_createCharSetFromArray;
 
 var m_charSetDigit, m_charSetInvertDigit,
     m_charSetWord, m_charSetInvertWord,
@@ -22,7 +22,13 @@ var m_loadCategory, m_loadProperty, m_loadPropertyValue;
 
 var m_nodeToString, m_flagSetToString, m_patternToString;
 
+var m_getCaptureGroupIndexByName;
+
 var RegExpSyntaxError, Parser, Compiler, Program;
 
 /** @typedef {{stylize:Function}} */
 var InspectOptionsStylized;
+
+if( DEFINE_REGEXP_COMPAT__NODEJS ){
+    module[ 'exports' ] = {};
+};

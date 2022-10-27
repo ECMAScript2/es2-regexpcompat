@@ -62,12 +62,12 @@ var OpCode;
 
 if( DEFINE_REGEXP_COMPAT__DEBUG ){
     /** Show op-codes as string.
-     * @param {Array.<OpCode>} codes
+     * @param {!Array.<!OpCode>} codes
      * @return {string}
      */
     codesToString = function( codes ){
         function pc( i ){
-            return String_padStringWithZero( i + '', 3 );
+            return '#' + String_padStringWithZero( i + '', 3 );
         };
         function op( s ){
             return String_padEndWithSpace( s, 13 );
@@ -113,5 +113,9 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
         );
 
         return lines.join( '\n' );
+    };
+
+    if( DEFINE_REGEXP_COMPAT__NODEJS ){
+        module[ 'exports' ][ 'codesToString' ] = codesToString;
     };
 };

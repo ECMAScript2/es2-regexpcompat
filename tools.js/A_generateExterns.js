@@ -47,6 +47,15 @@ module.exports = function(){
     };
 
     return `
+/** @const {!Global} */
+var global;
+
+/** @const {!Module} */
+var module;
+
+String.prototype.search = function(){};
+String.prototype.split  = function(){};
+
 var UnicodeCategory =
     ${JSON.stringify(UnicodeCategory)};
 
