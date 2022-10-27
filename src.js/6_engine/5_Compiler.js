@@ -24,12 +24,13 @@ Compiler = function( pattern ){
  */
 Compiler.prototype.compile = function(){
     var codes0 = Compiler_compileNode( this, this.pattern.child );
-    var codes1 = Compiler_pushFlattenedOpCodesToOpCodeList( [],
-        { op: REGEXP_COMPAT__OPCODE_IS_CAP_BEGIN, index: 0 },
-        /* ... */ /** @type {!Array.<!OpCode>} */ (codes0),
-        { op: REGEXP_COMPAT__OPCODE_IS_CAP_END, index: 0 },
-        { op: REGEXP_COMPAT__OPCODE_IS_MATCH }
-    );
+    var codes1 = [
+            { op: REGEXP_COMPAT__OPCODE_IS_CAP_BEGIN, index: 0 }
+        ].concat(
+            /* ... */ /** @type {!Array.<!OpCode>} */ (codes0),
+            { op: REGEXP_COMPAT__OPCODE_IS_CAP_END, index: 0 },
+            { op: REGEXP_COMPAT__OPCODE_IS_MATCH }
+        );
     return new Program( this.pattern, codes1 );
 };
 
@@ -115,12 +116,13 @@ function Compiler_compileDisjunction( compiler, node ){
     return /** @type {!Array.<!OpCode>} */ (Array_reduceRight( children, toOpCodeArray ));
 
     function toOpCodeArray( codes, codes0 ){
-        return Compiler_pushFlattenedOpCodesToOpCodeList( [],
-            { op: REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes0.length + 1 },
-            /* ... */ /** @type {!Array.<!OpCode>} */ (codes0),
-            { op: REGEXP_COMPAT__OPCODE_IS_JUMP, cont: codes.length },
-            /* ... */ /** @type {!Array.<!OpCode>} */ (codes)
-        );
+        return [
+                { op: REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes0.length + 1 }
+            ].concat(
+                /* ... */ /** @type {!Array.<!OpCode>} */ (codes0),
+                { op: REGEXP_COMPAT__OPCODE_IS_JUMP, cont: codes.length },
+                /* ... */ /** @type {!Array.<!OpCode>} */ (codes)
+            );
     };
 };
 
@@ -179,11 +181,12 @@ function Compiler_compileCapture( compiler, node ){
             throw new Error('BUG: invalid pattern');
         };
     };
-    return Compiler_pushFlattenedOpCodesToOpCodeList( [],
-        { op: compiler.direction === Compiler_DIRECTION_BACKWARD ? REGEXP_COMPAT__OPCODE_IS_CAP_END : REGEXP_COMPAT__OPCODE_IS_CAP_BEGIN, index: current },
-        /* ... */ /** @type {!Array.<!OpCode>} */ (codes0),
-        { op: compiler.direction === Compiler_DIRECTION_BACKWARD ? REGEXP_COMPAT__OPCODE_IS_CAP_BEGIN : REGEXP_COMPAT__OPCODE_IS_CAP_END, index: current }
-    );
+    return [
+            { op: compiler.direction === Compiler_DIRECTION_BACKWARD ? REGEXP_COMPAT__OPCODE_IS_CAP_END : REGEXP_COMPAT__OPCODE_IS_CAP_BEGIN, index: current }
+        ].concat(
+            /* ... */ /** @type {!Array.<!OpCode>} */ (codes0),
+            { op: compiler.direction === Compiler_DIRECTION_BACKWARD ? REGEXP_COMPAT__OPCODE_IS_CAP_BEGIN : REGEXP_COMPAT__OPCODE_IS_CAP_END, index: current }
+        );
 };
 
 /**
@@ -201,11 +204,12 @@ function Compiler_compileNamedCapture( compiler, node ){
             throw new Error('BUG: invalid pattern');
         };
     };
-    return Compiler_pushFlattenedOpCodesToOpCodeList( [],
-        { op: REGEXP_COMPAT__OPCODE_IS_CAP_BEGIN, index : index },
-        /* ... */ /** @type {!Array.<!OpCode>} */ (codes0),
-        { op: REGEXP_COMPAT__OPCODE_IS_CAP_END, index : index }
-    );
+    return [
+            { op: REGEXP_COMPAT__OPCODE_IS_CAP_BEGIN, index : index }
+        ].concat(
+            /* ... */ /** @type {!Array.<!OpCode>} */ (codes0),
+            { op: REGEXP_COMPAT__OPCODE_IS_CAP_END, index : index }
+        );
 };
 
 /**
@@ -219,11 +223,12 @@ function Compiler_compileMany( compiler, node ){
     var codes1 = Compiler_insertCapReset( compiler, from, /** @type {!Array.<!OpCode>} */ (codes0) );
     compiler.advance = false;
 
-    return Compiler_pushFlattenedOpCodesToOpCodeList( [],
-        { op: node.nonGreedy ? REGEXP_COMPAT__OPCODE_IS_FORK_NEXT : REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes1.length + 1 },
-        /* ... */ codes1,
-        { op: REGEXP_COMPAT__OPCODE_IS_JUMP, cont: -1 - codes1.length - 1 }
-    );
+    return [
+            { op: node.nonGreedy ? REGEXP_COMPAT__OPCODE_IS_FORK_NEXT : REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes1.length + 1 }
+        ].concat(
+            /* ... */ codes1,
+            { op: REGEXP_COMPAT__OPCODE_IS_JUMP, cont: -1 - codes1.length - 1 }
+        );
 };
 
 /**
@@ -236,12 +241,11 @@ function Compiler_compileSome( compiler, node ){
     var codes0 = Compiler_compileNode( compiler, node.child );
     var codes1 = Compiler_insertCapReset( compiler, from, Compiler_insertEmptyCheck( compiler, /** @type {!Array.<!OpCode>} */ (codes0 ) ) );
 
-    return Compiler_pushFlattenedOpCodesToOpCodeList( [],
-        /* ... */ /** @type {!Array.<!OpCode>} */ (codes0),
-        { op: node.nonGreedy ? REGEXP_COMPAT__OPCODE_IS_FORK_NEXT : REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes1.length + 1 },
-        /* ... */ codes1,
-        { op: REGEXP_COMPAT__OPCODE_IS_JUMP, cont: -1 - codes1.length - 1 }
-    );
+    return codes0.concat(
+            { op: node.nonGreedy ? REGEXP_COMPAT__OPCODE_IS_FORK_NEXT : REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes1.length + 1 },
+            /* ... */ codes1,
+            { op: REGEXP_COMPAT__OPCODE_IS_JUMP, cont: -1 - codes1.length - 1 }
+        );
 };
 
 /**
@@ -253,10 +257,11 @@ function Compiler_compileOptional( compiler, node ){
     var codes0 = Compiler_compileNode( compiler, node.child );
     compiler.advance = false;
 
-    return Compiler_pushFlattenedOpCodesToOpCodeList( [],
-        { op: node.nonGreedy ? REGEXP_COMPAT__OPCODE_IS_FORK_NEXT : REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes0.length },
-        /* ... */ codes0
-    );
+    return [
+            { op: node.nonGreedy ? REGEXP_COMPAT__OPCODE_IS_FORK_NEXT : REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes0.length }
+        ].concat(
+            /* ... */ codes0
+        );
 };
 
 /**
@@ -268,23 +273,25 @@ function Compiler_compileRepeat( compiler, node ){
     var from = compiler.captureParensIndex;
     var min  = node.min;
     var codes0 = Compiler_compileNode( compiler, node.child );
-    var codes = [];
+    var codes; // = [];
     var codes1;
 
     if( min === 1 ){
-        Compiler_pushFlattenedOpCodesToOpCodeList( codes, /** @type {!Array.<!OpCode>} */ (codes0) );
+        // Compiler_pushFlattenedOpCodesToOpCodeList( codes, /** @type {!Array.<!OpCode>} */ (codes0) );
+        codes = codes0.concat();
         // codes.push(...codes0);
     } else if( min > 1 ){
         codes1 = Compiler_insertCapReset( compiler, from, /** @type {!Array.<!OpCode>} */ (codes0) );
-        Compiler_pushFlattenedOpCodesToOpCodeList(
-            codes,
-            { op: REGEXP_COMPAT__OPCODE_IS_PUSH, value: min },
-            /* ... */ codes1,
-            { op: REGEXP_COMPAT__OPCODE_IS_DEC },
-            { op: REGEXP_COMPAT__OPCODE_IS_LOOP, cont: -1 - codes1.length - 1 },
-            { op: REGEXP_COMPAT__OPCODE_IS_POP }
-        );
+        codes = [
+                { op: REGEXP_COMPAT__OPCODE_IS_PUSH, value: min }
+            ].concat(
+                /* ... */ codes1,
+                { op: REGEXP_COMPAT__OPCODE_IS_DEC },
+                { op: REGEXP_COMPAT__OPCODE_IS_LOOP, cont: -1 - codes1.length - 1 },
+                { op: REGEXP_COMPAT__OPCODE_IS_POP }
+            );
     } else {
+        codes = [];
         compiler.advance = false;
     };
 
@@ -329,11 +336,12 @@ function Compiler_compileRepeat( compiler, node ){
  * @return {!Array.<!OpCode>}
  */
 function Compiler_insertEmptyCheck( compiler, codes0 ){
-    return compiler.advance ? codes0 : Compiler_pushFlattenedOpCodesToOpCodeList( [],
-        { op: REGEXP_COMPAT__OPCODE_IS_PUSH_POS },
-        /* ... */ codes0,
-        { op: REGEXP_COMPAT__OPCODE_IS_EMPTY_CHECK }
-    );
+    return compiler.advance ? codes0 : [
+            { op: REGEXP_COMPAT__OPCODE_IS_PUSH_POS }
+        ].concat(
+            /* ... */ codes0,
+            { op: REGEXP_COMPAT__OPCODE_IS_EMPTY_CHECK }
+        );
 };
 
 /**
@@ -346,10 +354,11 @@ function Compiler_insertCapReset( compiler, from, codes0 ){
     if( from === compiler.captureParensIndex ){
         return codes0;
     };
-    return Compiler_pushFlattenedOpCodesToOpCodeList( [],
-        { op: REGEXP_COMPAT__OPCODE_IS_CAP_RESET, from : from, to: compiler.captureParensIndex },
-        /* ... */ codes0
-    );
+    return [
+            { op: REGEXP_COMPAT__OPCODE_IS_CAP_RESET, from : from, to: compiler.captureParensIndex }
+        ].concat(
+            /* ... */ codes0
+        );
 };
 
 /**
@@ -359,7 +368,7 @@ function Compiler_insertCapReset( compiler, from, codes0 ){
  */
 function Compiler_compileWordBoundary( compiler, node ){
     compiler.advance = false;
-    return [{ op: node.invert ? REGEXP_COMPAT__OPCODE_IS_WORD_BOUNDARY_NOT : REGEXP_COMPAT__OPCODE_IS_WORD_BOUNDARY }];
+    return [ { op: node.invert ? REGEXP_COMPAT__OPCODE_IS_WORD_BOUNDARY_NOT : REGEXP_COMPAT__OPCODE_IS_WORD_BOUNDARY } ];
 };
 
 /**
@@ -416,25 +425,27 @@ function Compiler_compileLookAround( compiler, node ){
     compiler.advance = false;
 
     if( node.negative ){
-        return Compiler_pushFlattenedOpCodesToOpCodeList( [],
-            { op: REGEXP_COMPAT__OPCODE_IS_PUSH_POS },
-            { op: REGEXP_COMPAT__OPCODE_IS_PUSH_PROC },
-            { op: REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes0.length + 2 },
-            /* ... */ /** @type {!Array.<!OpCode>} */ (codes0),
-            { op: REGEXP_COMPAT__OPCODE_IS_REWIND_PROC },
-            { op: REGEXP_COMPAT__OPCODE_IS_FAIL },
-            { op: REGEXP_COMPAT__OPCODE_IS_POP },
-            { op: REGEXP_COMPAT__OPCODE_IS_RESTORE_POS }
-        );
+        return [
+                { op: REGEXP_COMPAT__OPCODE_IS_PUSH_POS },
+                { op: REGEXP_COMPAT__OPCODE_IS_PUSH_PROC },
+                { op: REGEXP_COMPAT__OPCODE_IS_FORK_CONT, next: codes0.length + 2 }
+            ].concat(
+                /* ... */ /** @type {!Array.<!OpCode>} */ (codes0),
+                { op: REGEXP_COMPAT__OPCODE_IS_REWIND_PROC },
+                { op: REGEXP_COMPAT__OPCODE_IS_FAIL },
+                { op: REGEXP_COMPAT__OPCODE_IS_POP },
+                { op: REGEXP_COMPAT__OPCODE_IS_RESTORE_POS }
+            );
     };
 
-    return Compiler_pushFlattenedOpCodesToOpCodeList( [],
-        { op: REGEXP_COMPAT__OPCODE_IS_PUSH_POS },
-        { op: REGEXP_COMPAT__OPCODE_IS_PUSH_PROC },
-        /* ... */ /** @type {!Array.<!OpCode>} */ (codes0),
-        { op: REGEXP_COMPAT__OPCODE_IS_REWIND_PROC },
-        { op: REGEXP_COMPAT__OPCODE_IS_RESTORE_POS }
-    );
+    return [
+            { op: REGEXP_COMPAT__OPCODE_IS_PUSH_POS },
+            { op: REGEXP_COMPAT__OPCODE_IS_PUSH_PROC }
+        ].concat(
+            /* ... */ /** @type {!Array.<!OpCode>} */ (codes0),
+            { op: REGEXP_COMPAT__OPCODE_IS_REWIND_PROC },
+            { op: REGEXP_COMPAT__OPCODE_IS_RESTORE_POS }
+        );
 };
 
 /**
@@ -552,11 +563,12 @@ function Compiler_insertBack( compiler, codes ){
     if( compiler.direction === Compiler_DIRECTION_FORWARD ){
         return codes;
     };
-    return Compiler_pushFlattenedOpCodesToOpCodeList( [],
-        { op: REGEXP_COMPAT__OPCODE_IS_BACK },
-        /* ... */ codes,
-        { op: REGEXP_COMPAT__OPCODE_IS_BACK }
-    );
+    return [
+            { op: REGEXP_COMPAT__OPCODE_IS_BACK }
+        ].concat(
+            /* ... */ codes,
+            { op: REGEXP_COMPAT__OPCODE_IS_BACK }
+        );
 };
 
 /**
@@ -593,7 +605,7 @@ function Compiler_compileNamedBackRef( compiler, node ){
 
 /**
  * @param {!Array.<!OpCode>} targetArray
- * @param {...(OpCode|Array.<OpCode>)} _args
+ * @param {...(!OpCode|!Array.<!OpCode>)} _args
  * @return {!Array.<!OpCode>}
  */
 function Compiler_pushFlattenedOpCodesToOpCodeList( targetArray, _args ){
