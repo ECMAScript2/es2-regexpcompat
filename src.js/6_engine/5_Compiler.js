@@ -428,7 +428,7 @@ function Compiler_compileLookAround( compiler, node ){
         );
     };
 
-    return Compiler_pushFlattenedOpCodesToOpCodeList( [],
+    return Compiler_pushFlattenedOpCodesToOpCodeList( [], // [{},{}].concat(codes0, {}, {})
         { op: REGEXP_COMPAT__OPCODE_IS_PUSH_POS },
         { op: REGEXP_COMPAT__OPCODE_IS_PUSH_PROC },
         /* ... */ /** @type {!Array.<!OpCode>} */ (codes0),

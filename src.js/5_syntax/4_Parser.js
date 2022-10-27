@@ -1344,7 +1344,7 @@ function Parser_parseDigits( parser ){
         s += c;
         ++parser.pos; // skip digit
     };
-    return s === '' ? -1 : /* Number. */ parseInt( s, 10 );
+    return s === '' ? -1 : /* Number. */ parseInt( s, 10 ); // +s
 };
 
 /** Parse hex digits. If parsing is failed, return `-1`.

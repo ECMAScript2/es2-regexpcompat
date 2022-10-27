@@ -1,5 +1,7 @@
 var String_fromCharCode = String.fromCharCode;
-var Math_floor = Math.floor;
+var Math_floor = Math.floor; // function( n ){ return n <= 0x7FFFFFFF ? ( n | 0 ) : Math.floor( n ) };
+
+// Math_min, Math_max
 
 var m_unicodeFoldMap        = [],
     m_unicodeInverseFoldMap = [],
