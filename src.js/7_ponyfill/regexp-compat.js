@@ -405,7 +405,7 @@ function RegExpCompat_replace( regExp, string, replacer ){
                         if( '0' <= c && c <= '9' ){
                             var d = replacer.charAt( j + 2 );
                             var s = '0' <= d && d <= '9' ? c + d : c;
-                            var n = s - 0; // + s <= Number.parseInt( s, 10 );
+                            var n = + s; // <= Number.parseInt( s, 10 );
                             if( 0 < n && n < match.length ){
                                 result[ ++resultIndex ] = match[ n ] || '';
                                 i = j + 1 + s.length;
