@@ -1,8 +1,7 @@
 import test from 'ava';
 
-import { RegExpSyntaxError } from '../../src/syntax/error';
-import { Parser } from '../../src/syntax/parser';
-import { Pattern, patternToString } from '../../src/syntax/pattern';
+import { RegExpSyntaxError, Parser, patternToString } from '../../lib/index.develop.js';
+// import { Pattern } from '../../src/syntax/pattern';
 
 type TestCase =
   | {
@@ -407,7 +406,7 @@ const testCases: TestCase[] = [
   },
 ];
 
-const parse = (source: string, flags: string, additional: boolean): Pattern => {
+const parse = (source: string, flags: string, additional: boolean) => {
   const parser = new Parser(source, flags, additional);
   return parser.parse();
 };

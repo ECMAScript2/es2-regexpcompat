@@ -42,11 +42,11 @@ function classItemToString( n ){
                     return /** @type {SimpleEscapeClass} */ (n).invert ? '\\S' : '\\s';
                 case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_unicode_property :
                     if( CONST_SUPPORT_ES2018 ){
-                        return '\\' + ( /** @type {UnicodePropertyEscapeClass} */ (n).invert ? 'P' : 'p' ) + /** @type {UnicodePropertyEscapeClass} */ (n).property;
+                        return '\\' + ( /** @type {UnicodePropertyEscapeClass} */ (n).invert ? 'P{' : 'p{' ) + /** @type {UnicodePropertyEscapeClass} */ (n).property + '}';
                     };
                 case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_unicode_property_value :
                     if( CONST_SUPPORT_ES2018 ){
-                        return '\\' + ( /** @type {UnicodePropertyValueEscapeClass} */ (n).invert ? 'P' : 'p' ) + /** @type {UnicodePropertyValueEscapeClass} */ (n).property + '=' + n.value;
+                        return '\\' + ( /** @type {UnicodePropertyValueEscapeClass} */ (n).invert ? 'P{' : 'p{' ) + /** @type {UnicodePropertyValueEscapeClass} */ (n).property + '=' + n.value + '}';
                     };
             };
     };
