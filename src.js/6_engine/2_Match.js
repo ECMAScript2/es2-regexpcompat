@@ -120,9 +120,11 @@ Match.prototype.toArray = function(){
 
             // `RegExpExecArray`'s group does not accept `undefined` value, so cast to `any` for now.
             array.groups = groups;
+        } else if( DEFINE_REGEXP_COMPAT__DEBUG ){
+            array.groups = undefined;
         };
-    // } else {
-        // (array).groups = undefined;
+    } else if( DEFINE_REGEXP_COMPAT__DEBUG ){
+        array.groups = undefined;
     };
 
     return /** @type {RegExpResult} */ (array);

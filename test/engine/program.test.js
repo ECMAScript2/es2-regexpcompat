@@ -1,25 +1,17 @@
-import util from 'util';
+const test  = require('ava');
+const util  = require('util');
+const rerejs = require('../../lib/index.develop.js');
+const Compiler = rerejs.Compiler;
+const Parser = rerejs.Parser;
 
-import test from 'ava';
-
-import { Compiler, Program, Parser } from '../../lib/index.develop.js';
-
-const compile = (source: string, flags: string) => {
+const compile = (source, flags) => {
   const parser = new Parser(source, flags);
   const pattern = parser.parse();
   const compiler = new Compiler(pattern);
   return compiler.compile();
 };
 
-type TestCase = {
-  source: string;
-  flags: string;
-  pos?: number; // default: `0`
-  matches?: string[]; // default: `[]`
-  unmatches?: string[]; // default: `[]`
-};
-
-const testCases: TestCase[] = [
+const testCases = [
   {
     source: '',
     flags: '',

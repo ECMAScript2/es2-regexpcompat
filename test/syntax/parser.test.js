@@ -1,23 +1,10 @@
-import test from 'ava';
+const test  = require('ava');
+const rerejs = require('../../lib/index.develop.js');
+const RegExpSyntaxError = rerejs.RegExpSyntaxError;
+const Parser = rerejs.Parser;
+const patternToString = rerejs.patternToString;
 
-import { RegExpSyntaxError, Parser, patternToString } from '../../lib/index.develop.js';
-// import { Pattern } from '../../src/syntax/pattern';
-
-type TestCase =
-  | {
-      source: string;
-      result: 'ok';
-      unicode?: 'same' | 'diff' | 'error'; // default: `'same'`
-      strict?: 'same' | 'diff' | 'error'; // default: `'same'
-    }
-  | {
-      source: string;
-      result: 'error';
-      unicode?: 'ok' | 'error'; // default: `'error'`
-      strict?: 'ok' | 'error'; // default: `'error'`
-    };
-
-const testCases: TestCase[] = [
+const testCases = [
   {
     source: '(?:)',
     result: 'ok',
@@ -406,7 +393,7 @@ const testCases: TestCase[] = [
   },
 ];
 
-const parse = (source: string, flags: string, additional: boolean) => {
+const parse = (source, flags, additional) => {
   const parser = new Parser(source, flags, additional);
   return parser.parse();
 };
@@ -418,7 +405,7 @@ for (const testCase of testCases) {
         const pattern0 = parse(testCase.source, '', true);
         t.snapshot(pattern0, 'default');
         t.is(patternToString(pattern0), `/${testCase.source}/`);
-        for (const variant of ['unicode', 'strict'] as const) {
+        for (const variant of ['unicode', 'strict']) {
           const flags = variant === 'unicode' ? 'u' : '';
           const additional = variant !== 'strict';
           switch (testCase[variant]) {
@@ -457,7 +444,7 @@ for (const testCase of testCases) {
           { instanceOf: RegExpSyntaxError }
         );
         t.snapshot(err0, 'default');
-        for (const variant of ['unicode', 'strict'] as const) {
+        for (const variant of ['unicode', 'strict']) {
           const flags = variant === 'unicode' ? 'u' : '';
           const additional = variant !== 'strict';
           switch (testCase[variant]) {

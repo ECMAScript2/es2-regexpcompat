@@ -46,13 +46,13 @@ function RegExpCompat( source, flags ){
             };
             return new RegExpCompat( source, flags );
         };
-    
-        /* if( source instanceof RegExp || source instanceof RegExpCompat ){
+        if( RegExpCompat_isRegExp( source ) ){
             if( flags === undefined ){
-                flags = source.flags;
+                flags = /** @type {RegExp|RegExpCompat} */ (source).flags;
             };
-            source = source.source;
-        }; */
+            source = /** @type {RegExp|RegExpCompat} */ (source).source;
+        };
+        source += '';
     };
 
     var parser = new Parser( /** @type {string} */ (source), flags, true );
@@ -119,7 +119,7 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
     };
     // RegExpCompat[ Symbol.species ] = RegExpCompat;
     RegExpCompat.prototype.compile = function(){
-        /* return this; */
+        return this;
     };
 
     // if( 6 <= DEFINE_REGEXP_COMPAT__CLIENT_MIN_ES_VERSION && global.Symbol ){

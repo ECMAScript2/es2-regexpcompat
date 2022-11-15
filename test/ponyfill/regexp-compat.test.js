@@ -1,6 +1,5 @@
-import test from 'ava';
-
-import { RegExpCompat } from '../../src/ponyfill/regexp-compat';
+const test  = require('ava');
+const RegExpCompat = require('../../lib/index.develop.js').RegExpCompat;
 
 test('legacy methods', (t) => {
   t.throws(() => RegExpCompat.$1);
@@ -48,16 +47,10 @@ test('constructor', (t) => {
   t.is(r5.flags, 'u');
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  t.is(RegExpCompat(1 as any).source, '1');
+  t.is(RegExpCompat(1).source, '1');
 });
 
-type TestCase = {
-  source: string;
-  flags: string;
-  strings: string[];
-};
-
-const testCases: TestCase[] = [
+const testCases = [
   {
     source: '',
     flags: '',
@@ -183,14 +176,7 @@ for (const testCase of testCases) {
   });
 }
 
-type ReplaceTestCase = {
-  source: string;
-  flags: string;
-  string: string;
-  replacer: string;
-};
-
-const replaceTestCases: ReplaceTestCase[] = [
+const replaceTestCases = [
   {
     source: ' ',
     flags: '',
@@ -281,13 +267,13 @@ for (const testCase of replaceTestCases) {
     const s1 = string.replace(r1, replacer);
     t.is(s1, s0);
 
-    const as0: unknown[][] = [];
-    const as1: unknown[][] = [];
-    string.replace(r0, (...args: unknown[]) => {
+    const as0 = [];
+    const as1 = [];
+    string.replace(r0, (...args) => {
       as0.push(args);
       return '';
     });
-    string.replace(r1, (...args: unknown[]) => {
+    string.replace(r1, (...args) => {
       as1.push(args);
       return '';
     });

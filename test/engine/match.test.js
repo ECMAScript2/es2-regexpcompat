@@ -1,8 +1,6 @@
-import util from 'util';
-
-import test from 'ava';
-
-import { Match } from '../../lib/index.develop.js';
+const test  = require('ava');
+const util  = require('util');
+const Match = require('../../lib/index.develop.js').Match;
 
 test('getters', (t) => {
   const m = new Match('test', [0, 4, -1, -1, 1, 3], ['x' , 2]);
@@ -30,16 +28,16 @@ test('toArray', (t) => {
   const m = new Match('test', [0, 4, -1, -1, 1, 3], ['x' , 2]);
   const a = m.toArray();
 
-  const b: RegExpMatchArray = [];
+  const b = [];
   b[0] = 'test';
   b[2] = 'es';
   b.input = 'test';
   b.index = 0;
-  const groups: { [key: string]: string } = Object.create(null);
+  const groups = {};
   groups['x'] = 'es';
   b.groups = groups;
 
-  t.deepEqual(a, b as RegExpExecArray);
+  t.deepEqual(a, b);
 });
 
 test('toString', (t) => {

@@ -1,6 +1,5 @@
-import test from 'ava';
-
-import { escape } from '../../lib/index.develop.js';
+const test   = require('ava');
+const escape = require('../../lib/index.develop.js').escape;
 
 test('escape', (t) => {
   t.true(new RegExp(escape(0)).test(String.fromCodePoint(0)));

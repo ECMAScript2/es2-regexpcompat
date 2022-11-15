@@ -1,8 +1,8 @@
 {
   "name": "rerejs",
   "version": "0.2.1",
-  "description": "Re-implementation of ECMA-262 (JavaScript) RegExp",
-  "author": "itozyun <make.just.on@gmail.com>",
+  "description": "ReRE.js for ES2.",
+  "author": "itozyun <itozyun@gmail.com>",
   "bugs": "https://github.com/itozyun/rerejs/issues",
   "homepage": "https://github.com/itozyun/rerejs#readme",
   "repository": {
@@ -10,44 +10,16 @@
     "url": "https://github.com/itozyun/rerejs.git"
   },
   "main": "lib/index.js",
-  "module": "lib/index.mjs",
-  "types": "lib/index.d.ts",
-  "files": [
-    "lib"
-  ],
   "scripts": {
-    "bundle": "rollup -c",
-    "ci": "yarn test && nyc report --reporter=text-lcov > coverage.lcov",
-    "lint": "eslint '*.js' './**/*.ts'",
-    "make": "sucrase-node ./tools/make.ts",
-    "prepack": "yarn type-check && yarn bundle",
-    "test": "nyc ava",
-    "type-check": "tsc -p ."
+    "test": "ava"
   },
   "devDependencies": {
-    "@istanbuljs/nyc-config-typescript": "1.0.2",
-    "@rollup/plugin-commonjs": "23.0.2",
-    "@rollup/plugin-node-resolve": "15.0.1",
-    "@rollup/plugin-sucrase": "5.0.1",
-    "@types/node": "16.11.68",
-    "@typescript-eslint/eslint-plugin": "5.40.1",
-    "@typescript-eslint/parser": "5.40.1",
     "ava": "4.2.0",
     "es2-postprocessor": "^0.6.0",
-    "eslint": "8.26.0",
-    "eslint-config-prettier": "8.5.0",
-    "eslint-plugin-import": "2.26.0",
-    "eslint-plugin-prettier": "4.2.1",
     "google-closure-compiler": "^20211107.0.0",
     "gulp": "^4.0.2",
-    "gulp-diamond-princess-zoning": "^0.9.11",
-    "nyc": "15.1.0",
-    "prettier": "2.5.1",
-    "rollup": "3.2.3",
-    "rollup-plugin-dts": "5.0.0",
-    "source-map-support": "0.5.21",
-    "sucrase": "3.28.0",
-    "typescript": "4.8.4",
+    "gulp-diamond-princess-zoning": "^0.9.12",
+    "sucrase": "^3.28.0",
     "unicode-12.0.0": "0.8.0",
     "unicode-match-property-value-ecmascript": "2.0.0",
     "unicode-property-aliases-ecmascript": "2.1.0",
@@ -55,95 +27,10 @@
   },
   "ava": {
     "extensions": [
-      "ts",
       "js"
-    ],
-    "require": [
-      "sucrase/register/ts"
     ],
     "files": [
       "test/**/*"
     ]
-  },
-  "nyc": {
-    "extends": "@istanbuljs/nyc-config-typescript",
-    "all": true,
-    "include": [
-      "src/**/*.ts",
-      "!src/data/*.ts"
-    ],
-    "reporter": [
-      "text",
-      "html"
-    ]
-  },
-  "eslintConfig": {
-    "root": true,
-    "parser": "@typescript-eslint/parser",
-    "plugins": [
-      "@typescript-eslint",
-      "import",
-      "prettier"
-    ],
-    "extends": [
-      "eslint:recommended",
-      "plugin:import/errors",
-      "plugin:import/typescript",
-      "plugin:@typescript-eslint/eslint-recommended",
-      "plugin:@typescript-eslint/recommended",
-      "plugin:prettier/recommended",
-      "prettier"
-    ],
-    "ignorePatterns": [
-      "node_modules/",
-      "out/",
-      "lib/",
-      "src/data/"
-    ],
-    "rules": {
-      "import/no-unresolved": [
-        "error",
-        {
-          "ignore": [
-            "ava"
-          ]
-        }
-      ],
-      "import/order": [
-        "error",
-        {
-          "groups": [
-            "builtin",
-            "external",
-            [
-              "index",
-              "sibling",
-              "parent"
-            ]
-          ],
-          "newlines-between": "always",
-          "alphabetize": {
-            "order": "asc",
-            "caseInsensitive": true
-          }
-        }
-      ],
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        {
-          "argsIgnorePattern": "^_"
-        }
-      ]
-    }
-  },
-  "prettier": {
-    "singleQuote": true,
-    "printWidth": 100
-  },
-  "renovate": {
-    "extends": [
-      "config:base"
-    ],
-    "automerge": true
   }
 }

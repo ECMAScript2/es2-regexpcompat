@@ -96,13 +96,13 @@ gulp.task( '__compile', gulp.series(
             gulpDPZ(
                 {
                     // labelGlobal        : 'global',
-                    labelPackageGlobal : '*',
+                    // labelPackageGlobal : '*',
                     // labelModuleGlobal  : 'moduleGlobal',
                     packageGlobalArgs  : [
                         'global,RegExp,String,Math,Infinity,undefined',
-                        'this,this.RegExp,String,Math,1/0,void 0'
+                        isNodejsLibrary ? 'this,RegExp,String,Math,1/0,void 0' : 'this,this.RegExp,String,Math,1/0,void 0'
                     ],
-                    basePath           : './src.js/',
+                    basePath : './',
                     // wrapAll            : true
                 }
             )
@@ -118,7 +118,7 @@ gulp.task( '__compile', gulp.series(
                         'DEFINE_REGEXP_COMPAT__ES_FEATURE_VERSION='    + ecmaFeatureVersion,
                         'DEFINE_REGEXP_COMPAT__EXPORT_BY_RETURN='      + !isNodejsLibrary
                     ],
-                    compilation_level : strCompileType === 'develop' && clientMinEsVersion !== 2 || isNodejsLibrary ? 'SIMPLE' : 'ADVANCED',
+                    compilation_level : strCompileType === 'develop' && clientMinEsVersion !== 2 ? 'SIMPLE' : 'ADVANCED',
                     // compilation_level : 'WHITESPACE_ONLY',
                     env               : 'CUSTOM',
                     formatting        : strCompileType !== 'release' ? 'PRETTY_PRINT' : 'SINGLE_QUOTES',

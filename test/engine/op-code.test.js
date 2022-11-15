@@ -1,6 +1,5 @@
-import test from 'ava';
-
-import { codesToString } from '../../lib/index.develop.js';
+const test          = require('ava');
+const codesToString = require('../../lib/index.develop.js').codesToString;
 
 test('codesToString', (t) => {
   let s = '';

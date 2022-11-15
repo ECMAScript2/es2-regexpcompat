@@ -1,8 +1,6 @@
-import util from 'util';
-
-import test from 'ava';
-
-import { CharSet } from '../../lib/index.develop.js';
+const util    = require('util');
+const test    = require('ava');
+const CharSet = require('../../lib/index.develop.js').CharSet;
 
 test('simple', (t) => {
   const set = new CharSet([]);

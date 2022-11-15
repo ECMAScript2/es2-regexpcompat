@@ -1,6 +1,7 @@
-import test from 'ava';
-
-import { loadProperty, loadPropertyValue } from '../../lib/index.develop.js';
+const test              = require('ava');
+const ReRE              = require('../../lib/index.develop.js');
+const loadProperty      = ReRE.loadProperty;
+const loadPropertyValue = ReRE.loadPropertyValue;
 
 test('loadProperty', (t) => {
   const ascii = loadProperty('ASCII');
