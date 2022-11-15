@@ -118,6 +118,8 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
         );
     };
     // RegExpCompat[ Symbol.species ] = RegExpCompat;
+
+    /** @return {!RegExpCompat} */
     RegExpCompat.prototype.compile = function(){
         return this;
     };
@@ -126,9 +128,6 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
       // RegExpCompat.prototype[ Symbol.match   ] = function(){ throw "Called Symbol.match!!" };
       // RegExpCompat.prototype[ Symbol.replace ] = function(){ throw "Called Symbol.replace!!" };
     // };
-
-    /** @type {!{log:!Function,dir:!Function}} */
-    var console = global.console;
 };
 
 RegExpCompat.prototype.toString = function(){

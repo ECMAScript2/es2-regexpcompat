@@ -333,7 +333,7 @@ function Compiler_compileRepeat( compiler, node ){
         };
     };
 
-    return codes;
+    return /** @type {!Array.<!OpCode>} */ (codes);
 };
 
 /**

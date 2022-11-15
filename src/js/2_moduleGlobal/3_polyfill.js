@@ -112,15 +112,8 @@ function String_startsWith( str, search, pos ){
  * @param {!Array} array
  * @return {!Array}
  */
-function Array_from( array ){ // TODO .concat
+function Array_from( array ){
     return array.concat();
-    var l = array.length,
-        result = [];
-
-    while( l ){
-        result[ --l ] = array[ l ];
-    };
-    return result;
 };
 
 /**
