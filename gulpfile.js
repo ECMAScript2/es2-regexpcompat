@@ -160,7 +160,8 @@ gulp.task( '__compile', gulp.series(
             require( 'es2-postprocessor' ).gulp(
                 {
                     minIEVersion    : 5,
-                    minOperaVersion : 7
+                    minOperaVersion : 7,
+                    minGeckoVersion : 0.6
                 }
             )
         ).pipe(
