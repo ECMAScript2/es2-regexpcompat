@@ -1,5 +1,6 @@
 const gulp            = require('gulp'),
       ClosureCompiler = require('google-closure-compiler').gulp(),
+      postProcessor   = require('es2-postprocessor'),
       gulpDPZ         = require('gulp-diamond-princess-zoning'),
       tempDir         = require('os').tmpdir() + '/ReRE.js',
       fs              = require( 'fs' ),
@@ -89,8 +90,7 @@ gulp.task( '__compile', gulp.series(
     function(){
         return gulp.src(
             [
-                './src/js/**/*.js',
-               '!./src/js/1_global/2_polyfill.js' // TODO Array の polyfill も必要
+                './src/js/**/*.js'
             ]
         ).pipe(
             gulpDPZ(
@@ -153,11 +153,10 @@ gulp.task( '__compile', gulp.series(
         };
         return gulp.src(
             [
-                './src/js/1_global/2_polyfill.js',
                 tempDir + '/ReRE.es2.js'
             ]
         ).pipe(
-            require( 'es2-postprocessor' ).gulp(
+            postProcessor.gulp(
                 {
                     minIEVersion    : 5,
                     minOperaVersion : 7,
@@ -171,6 +170,13 @@ gulp.task( '__compile', gulp.series(
                     formatting        : strCompileType !== 'release' ? 'PRETTY_PRINT' : 'SINGLE_QUOTES',
                     output_wrapper    : '// ReRE.js for ES2[' + strCompileType + '], Compatible:ES' + ecmaFeatureVersion + ', ' + aboutReREjs + '\n%output%',
                     js_output_file    : 'ReRE.es2.' + ecmaFeatureVersion + '.' + strCompileType + '.js'
+                }
+            )
+        ).pipe(
+            postProcessor.gulp(
+                {
+                    minIEVersion   : 5,
+                    embedPolyfills : true
                 }
             )
         ).pipe( gulp.dest( 'dist/' + strCompileType ) );

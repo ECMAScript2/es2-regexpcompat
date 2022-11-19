@@ -15,7 +15,7 @@
   },
   "devDependencies": {
     "ava": "4.2.0",
-    "es2-postprocessor": "^0.8.0",
+    "es2-postprocessor": "^0.10.0",
     "google-closure-compiler": "^20211107.0.0",
     "gulp": "^4.0.2",
     "gulp-diamond-princess-zoning": "^0.9.12",

@@ -457,7 +457,7 @@ function RegExpCompat_search( regExp, string ){
     };
 
     RegExpCompat_skipCompare = false;
-    RegExpCompat_compare( /** @type {RegExpCompat} */ (regExp), 'search', result, regExp.regExp.search( string ), [ string ] );
+    RegExpCompat_compare( /** @type {RegExpCompat} */ (regExp), 'search', result, string.search( regExp.regExp ), [ string ] );
 
     return result;
 };
@@ -532,7 +532,7 @@ function RegExpCompat_split( regExp, string, limit ){
     };
 
     RegExpCompat_skipCompare = false;
-    RegExpCompat_compare( /** @type {RegExpCompat} */ (regExp), 'split', result, regExp.regExp.split( string, limit ), [ string, limit ] );
+    RegExpCompat_compare( /** @type {RegExpCompat} */ (regExp), 'split', result, string.split( regExp.regExp, limit ), [ string, limit ] );
 
     return result;
 };
