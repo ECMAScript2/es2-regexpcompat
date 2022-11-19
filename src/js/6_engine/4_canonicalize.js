@@ -28,7 +28,7 @@ canonicalize = function( c, unicode ){
  *
  * @param {number} c
  * @param {boolean=} unicode
- * @return {Array.<number>} 
+ * @return {!Array.<number>} 
  */
 uncanonicalize = function( c, unicode ){
     if( CONST_SUPPORT_ES2018 && unicode ){

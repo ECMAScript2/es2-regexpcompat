@@ -44,7 +44,7 @@ var ASTElement;
 /** Type for select pattern `/(a|b)/`.
  * @typedef {{
  *   type: (string|number),
- *   children: !Array.<RegExpPaternNode>,
+ *   children: !Array.<!RegExpPaternNode>,
  *   range: !Array.<number>
  * }}
  */
@@ -53,7 +53,7 @@ var Disjunction;
 /** Type for sequence pattern `/(ab)/`.
  * @typedef {{
  *   type: (string|number),
- *   children: !Array.<RegExpPaternNode>,
+ *   children: !Array.<!RegExpPaternNode>,
  *   range: !Array.<number>
  * }}
  */

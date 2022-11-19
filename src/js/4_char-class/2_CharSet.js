@@ -152,7 +152,7 @@ function CharSet_toString(){
 
 /**
  * @param {*} depth 
- * @param {InspectOptionsStylized} options
+ * @param {!InspectOptionsStylized} options
  * @return {string}
  */
 function CharSet_inspect( depth, options ){

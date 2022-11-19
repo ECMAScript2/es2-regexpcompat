@@ -19,17 +19,17 @@ CharSet.prototype.length;
 CharSet.prototype.add;
 
 /**
- * @type {function(CharSet)}
+ * @type {function(!CharSet)}
  */
 CharSet.prototype.addCharSet;
 
 /**
- * @type {function():CharSet}
+ * @type {function():!CharSet}
  */
 CharSet.prototype.invert;
 
 /**
- * @type {function():CharSet}
+ * @type {function():!CharSet}
  */
 CharSet.prototype.clone;
 

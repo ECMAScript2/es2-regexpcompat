@@ -1,6 +1,6 @@
 /** Check the node is assertion, which means cannot become a child of repetition node.
  * 
- * @param {RegExpPaternNode} n 
+ * @param {!RegExpPaternNode} n 
  * @return {boolean} 
  */
 function isAssertion( n ){
@@ -156,10 +156,10 @@ Parser = function( source, flags, additional ){
     this.additional = additional !== false;
 };
 /** Run this parser.
- * @return {Pattern}
+ * @return {!Pattern}
  */
 Parser.prototype.parse = function(){
-    /** @type {FlagSet} Parsed flags. */
+    /** @type {!FlagSet} Parsed flags. */
     this.flagSet = Parser_preprocessFlags( this.flags );
 
     if( CONST_SUPPORT_ES2018 ){
@@ -196,7 +196,7 @@ Parser.prototype.parse = function(){
 
 /** Parse flags.
  * @param {string} flags
- * @return {FlagSet}
+ * @return {!FlagSet}
  */
 function Parser_preprocessFlags( flags ){
     var flagSet;
@@ -281,7 +281,7 @@ function Parser_preprocessFlags( flags ){
  * This process is needed before parsing because the syntax changes
  * its behavior when a pattern has named captrue.
  * 
- * @param {Parser} parser
+ * @param {!Parser} parser
  */
 function Parser_preprocessCaptures( parser ){
     var len = parser.source.length,
@@ -327,7 +327,7 @@ function Parser_preprocessCaptures( parser ){
 };
 
 /** Skip character class without parsing.
- * @param {Parser} parser
+ * @param {!Parser} parser
  */
 function Parser_skipCharClass( parser ){
     ++parser.pos; // skip '['
@@ -353,8 +353,8 @@ function Parser_skipCharClass( parser ){
  *
  * See https://www.ecma-international.org/ecma-262/10.0/index.html#prod-Disjunction.
  * 
- * @param {Parser} parser
- * @return {Disjunction}
+ * @param {!Parser} parser
+ * @return {!Disjunction}
  */
 function Parser_parseDisjunction( parser ){
     var begin = parser.pos;
@@ -382,8 +382,8 @@ function Parser_parseDisjunction( parser ){
  *
  * See https://www.ecma-international.org/ecma-262/10.0/index.html#prod-Alternative.
  *
- * @param {Parser} parser
- * @return {Sequence}
+ * @param {!Parser} parser
+ * @return {!Sequence}
  */
 function Parser_parseSequence( parser ){
     var begin = parser.pos;
@@ -411,12 +411,12 @@ function Parser_parseSequence( parser ){
  * See https://www.ecma-international.org/ecma-262/10.0/index.html#prod-Quantifier,
  * and https://www.ecma-international.org/ecma-262/10.0/index.html#prod-Term.
  *
- * @param {Parser} parser
- * @return {RegExpPaternNode}
+ * @param {!Parser} parser
+ * @return {!RegExpPaternNode}
  */
 function Parser_parseQuantifier( parser ){
     var begin = parser.pos;
-    var child = /** @type {RegExpPaternNode} */ (Parser_parseAtom( parser ));
+    var child = /** @type {!RegExpPaternNode} */ (Parser_parseAtom( parser ));
 
     if( isAssertion( child ) ){
         if( parser.additional &&
@@ -446,11 +446,11 @@ function Parser_parseQuantifier( parser ){
  *
  * Simple quantifier suffix means quantifiers execpt for `{n,m}`.
  * 
- * @param {Parser} parser
+ * @param {!Parser} parser
  * @param {string|number} type 
  * @param {number} begin 
- * @param {RegExpPaternNode} child 
- * @return {RegExpPaternNode}
+ * @param {!RegExpPaternNode} child 
+ * @return {!RegExpPaternNode}
  */
 function Parser_parseSimpleQuantifier( parser, type, begin, child ){
     ++parser.pos; // skip one of '*', '+', '?'
@@ -459,7 +459,7 @@ function Parser_parseSimpleQuantifier( parser, type, begin, child ){
         ++parser.pos; // skip '?'
         nonGreedy = true;
     };
-    return /** @type {Many|Some|Optional} */ ({ type : type, nonGreedy : nonGreedy, child : child, range : [ begin, parser.pos ] });
+    return /** @type {!Many|!Some|!Optional} */ ({ type : type, nonGreedy : nonGreedy, child : child, range : [ begin, parser.pos ] });
 };
 
 /**
@@ -469,10 +469,10 @@ function Parser_parseSimpleQuantifier( parser, type, begin, child ){
  * it is retryable. And the real parsing is done by
  * `tryParseRepeatQuantifier` method.
  *
- * @param {Parser} parser
+ * @param {!Parser} parser
  * @param {number} begin
- * @param {RegExpPaternNode} child
- * @return {RegExpPaternNode}
+ * @param {!RegExpPaternNode} child
+ * @return {!RegExpPaternNode}
  */
 function Parser_parseRepeat( parser, begin, child ){
     var save = parser.pos;
@@ -519,8 +519,8 @@ function Parser_parseRepeat( parser, begin, child ){
  *
  * When parsing is failed, it does not consume any character and return `null`.
  * 
- * @param {Parser} parser
- * @return {RepeatQuantifier|undefined}
+ * @param {!Parser} parser
+ * @return {!RepeatQuantifier|undefined}
  */
 function Parser_tryParseRepeatQuantifier( parser ){
     var save = parser.pos;
@@ -563,8 +563,8 @@ function Parser_tryParseRepeatQuantifier( parser ){
  * See https://www.ecma-international.org/ecma-262/10.0/index.html#prod-Assertion,
  * and https://www.ecma-international.org/ecma-262/10.0/index.html#prod-Atom.
  *
- * @param {Parser} parser
- * @return {RegExpPaternNode|undefined}
+ * @param {!Parser} parser
+ * @return {!RegExpPaternNode|undefined}
  */
 function Parser_parseAtom( parser ){
     var begin = parser.pos;
@@ -637,8 +637,8 @@ function Parser_parseAtom( parser ){
 
 /** Parse `character class` pattern.
  * 
- * @param {Parser} parser
- * @return {RegExpPaternNode}
+ * @param {!Parser} parser
+ * @return {!RegExpPaternNode}
  */
 function Parser_parseClass( parser ){
     var begin = parser.pos;
@@ -666,23 +666,23 @@ function Parser_parseClass( parser ){
 
 /** Parse an item of `character class` pattern.
  * 
- * @param {Parser} parser
- * @return {ClassItem}
+ * @param {!Parser} parser
+ * @return {!ClassItem}
  */
 function Parser_parseClassItem( parser ){
     var beginPos = parser.pos;
 
     var begin = Parser_parseClassAtom( parser );
     if( Parser_current( parser ) !== '-' ){
-        return /** @type {Char|EscapeClass} */ (begin);
+        return /** @type {!Char|!EscapeClass} */ (begin);
     };
     if( String_startsWith( parser.source, '-]', parser.pos ) ){
-        return /** @type {Char|EscapeClass} */ (begin);
+        return /** @type {!Char|!EscapeClass} */ (begin);
     };
 
     if( begin.type === REGEXP_COMPAT__PATTERN_IS_EscapeClass ){
         if( parser.additional && ( !CONST_SUPPORT_ES2018 || !parser.unicode ) ){
-            return /** @type {EscapeClass} */ (begin);
+            return /** @type {!EscapeClass} */ (begin);
         };
         if( DEFINE_REGEXP_COMPAT__DEBUG ){
             throw new RegExpSyntaxError( 'invalid character class' );
@@ -711,8 +711,8 @@ function Parser_parseClassItem( parser ){
 
 /** Parse an atom of `character class` range.
  * 
- * @param {Parser} parser
- * @return {Char|EscapeClass|undefined}
+ * @param {!Parser} parser
+ * @return {!Char|!EscapeClass|undefined}
  */
 function Parser_parseClassAtom( parser ){
     var begin = parser.pos;
@@ -728,17 +728,17 @@ function Parser_parseClassAtom( parser ){
         if( value === undefined && DEFINE_REGEXP_COMPAT__DEBUG ){
             throw new Error('BUG: invalid character');
         };
-        return /** @type {Char} */ ({ type : REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw : c, range : [ begin, parser.pos ] });
+        return /** @type {!Char} */ ({ type : REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw : c, range : [ begin, parser.pos ] });
     };
 
     if( String_startsWith( parser.source, '\\-', parser.pos ) ){
         parser.pos += 2; // skip '\\-'
-        return /** @type {Char} */ ({ type : REGEXP_COMPAT__PATTERN_IS_Char, value : 0x2d, raw : '\\-', range : [ begin, parser.pos ] });
+        return /** @type {!Char} */ ({ type : REGEXP_COMPAT__PATTERN_IS_Char, value : 0x2d, raw : '\\-', range : [ begin, parser.pos ] });
     };
 
     if( String_startsWith( parser.source, '\\b', parser.pos ) ){
         parser.pos += 2; // skip '\\b'
-        return /** @type {Char} */ ({ type : REGEXP_COMPAT__PATTERN_IS_Char, value : 0x08, raw : '\\b', range : [ begin, parser.pos ] });
+        return /** @type {!Char} */ ({ type : REGEXP_COMPAT__PATTERN_IS_Char, value : 0x08, raw : '\\b', range : [ begin, parser.pos ] });
     };
 
     var escapeClass = Parser_tryParseEscapeClass( parser );
@@ -760,8 +760,8 @@ function Parser_parseClassAtom( parser ){
  * Parse `escape sequence` pattern including `escape sequence character class`,
  * `back reference` and `word boundary assertion` patterns.
  * 
- * @param {Parser} parser
- * @return {RegExpPaternNode|undefined}
+ * @param {!Parser} parser
+ * @return {!RegExpPaternNode|undefined}
  */
 function Parser_parseEscape( parser ){
     var wordBoundary = Parser_tryParseWordBoundary( parser );
@@ -791,8 +791,8 @@ function Parser_parseEscape( parser ){
 
 /** Try to parse `word boundary` pattern.
  * 
- * @param {Parser} parser
- * @return {WordBoundary|undefined}
+ * @param {!Parser} parser
+ * @return {!WordBoundary|undefined}
  */
 function Parser_tryParseWordBoundary( parser ){
     var begin = parser.pos;
@@ -810,8 +810,8 @@ function Parser_tryParseWordBoundary( parser ){
 
 /** Try to parse `back reference` pattern
  * 
- * @param {Parser} parser
- * @return {BackRef|NamedBackRef|undefined}
+ * @param {!Parser} parser
+ * @return {!BackRef|!NamedBackRef|undefined}
  */
 function Parser_tryParseBackRef( parser ){
     var begin = parser.pos;
@@ -852,8 +852,8 @@ function Parser_tryParseBackRef( parser ){
 
 /** Try to parse `escape sequence` pattern.
  * 
- * @param {Parser} parser
- * @return {Char|undefined}
+ * @param {!Parser} parser
+ * @return {!Char|undefined}
  */
 function Parser_tryParseEscape( parser ){
     var begin = parser.pos;
@@ -865,7 +865,7 @@ function Parser_tryParseEscape( parser ){
         if( value === undefined && DEFINE_REGEXP_COMPAT__DEBUG ){
             throw new Error('BUG: invalid character');
         };
-        return /** @type {Char} */ ({
+        return /** @type {!Char} */ ({
             type  : REGEXP_COMPAT__PATTERN_IS_Char,
             value : value,
             raw   : parser.source.slice( begin, parser.pos ),
@@ -963,7 +963,7 @@ function Parser_tryParseEscape( parser ){
         };
         if( octal !== parser.pos ){
             value = /* Number. */ parseInt( parser.source.slice( octal, parser.pos ), 8 );
-            return /** @type {Char} */ ({
+            return /** @type {!Char} */ ({
                 type  : REGEXP_COMPAT__PATTERN_IS_Char,
                 value : value,
                 raw   : parser.source.slice( begin, parser.pos ),
@@ -981,7 +981,7 @@ function Parser_tryParseEscape( parser ){
     if( CONST_SUPPORT_ES2018 && parser.unicode ){
         if( isSyntax( c ) || c === '/' ){
             parser.pos += c.length; // skip any char
-            return /** @type {Char} */ ({ type : REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw : '\\' + c, range : [ begin, parser.pos ] });
+            return /** @type {!Char} */ ({ type : REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw : '\\' + c, range : [ begin, parser.pos ] });
         };
     } else {
         if( parser.additional ){
@@ -990,12 +990,12 @@ function Parser_tryParseEscape( parser ){
             };
             if( CONST_SUPPORT_ES2018 && parser.names.length === 0 || c !== 'k' ){
                 parser.pos += c.length; // skip any char
-                return /** @type {Char} */ ({ type : REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw : '\\' + c, range : [ begin, parser.pos ] });
+                return /** @type {!Char} */ ({ type : REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw : '\\' + c, range : [ begin, parser.pos ] });
             };
         } else {
             if( !charSetIdContinue.has( value ) ){
                 parser.pos += c.length; // skip any char
-                return /** @type {Char} */ ({ type: REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw: '\\' + c, range : [ begin, parser.pos ] });
+                return /** @type {!Char} */ ({ type: REGEXP_COMPAT__PATTERN_IS_Char, value : value, raw: '\\' + c, range : [ begin, parser.pos ] });
             };
         };
     };
@@ -1011,7 +1011,7 @@ function Parser_tryParseEscape( parser ){
  *
  * When it is failed, it returns `''`.
  *
- * @param {Parser} parser
+ * @param {!Parser} parser
  * @param {boolean} lead
  * @return {string}
  */
@@ -1072,8 +1072,8 @@ function Parser_tryParseUnicodeEscape( parser, lead ){
 
 /** Try to parse `escape sequence character class` pattern.
  * 
- * @param {Parser} parser
- * @return {EscapeClass|undefined}
+ * @param {!Parser} parser
+ * @return {!EscapeClass|undefined}
  */
 function Parser_tryParseEscapeClass( parser ){
     var begin = parser.pos;
@@ -1155,7 +1155,7 @@ function Parser_tryParseEscapeClass( parser ){
 
 /** Parse the first component of `\p{XXX=XXX}` escape sequence.
  * 
- * @param {Parser} parser
+ * @param {!Parser} parser
  * @return {string}
  */
 function Parser_parseUnicodePropertyName( parser ){
@@ -1170,7 +1170,7 @@ function Parser_parseUnicodePropertyName( parser ){
 
 /** Parse the second component of `\p{XXX=XXX}` escape sequence.
  * 
- * @param {Parser} parser
+ * @param {!Parser} parser
  * @return {string}
  */
 function Parser_parseUnicodePropertyValue( parser ){
@@ -1185,8 +1185,8 @@ function Parser_parseUnicodePropertyValue( parser ){
 
 /** Parse grouping pattern by paren.
  * 
- * @param {Parser} parser
- * @return {Capture|Group|LookAhead|LookBehind|NamedCapture|undefined}
+ * @param {!Parser} parser
+ * @return {!Capture|!Group|!LookAhead|!LookBehind|!NamedCapture|undefined}
  */
 function Parser_parseParen( parser ){
     var begin = parser.pos;
@@ -1282,7 +1282,7 @@ function Parser_parseParen( parser ){
  *
  * This method is used by `preprocessParens`, `tryParseBackRef` and `parseParen`.
  *
- * @param {Parser} parser
+ * @param {!Parser} parser
  * @return {string}
  */
 function Parser_parseCaptureName( parser ){
@@ -1319,7 +1319,7 @@ function Parser_parseCaptureName( parser ){
  *
  * Unicode escape sequences are used as capture name character.
  *
- * @param {Parser} parser
+ * @param {!Parser} parser
  * @return {string}
  */
 function Parser_parseCaptureNameChar( parser ){
@@ -1334,7 +1334,7 @@ function Parser_parseCaptureNameChar( parser ){
 
 /** Parse digits. If parsing is failed, return `-1`.
  *
- * @param {Parser} parser
+ * @param {!Parser} parser
  * @return {number}
  */
 function Parser_parseDigits( parser ){
@@ -1349,7 +1349,7 @@ function Parser_parseDigits( parser ){
 
 /** Parse hex digits. If parsing is failed, return `-1`.
  *
- * @param {Parser} parser
+ * @param {!Parser} parser
  * @return {number}
  */
 function Parser_parseHexDigits( parser ){
@@ -1364,7 +1364,7 @@ function Parser_parseHexDigits( parser ){
 
 /** Try to parse `n` characters of hex digits.  If parsing is faield, return `-1`.
  *
- * @param {Parser} parser
+ * @param {!Parser} parser
  * @param {number} n
  * @return {number}
  */
@@ -1385,7 +1385,7 @@ function Parser_tryParseHexDigitsN( parser, n ){
 
 /** Return the current character.
  * 
- * @param {Parser} parser
+ * @param {!Parser} parser
  * @return {string}
  */
 function Parser_current( parser ){

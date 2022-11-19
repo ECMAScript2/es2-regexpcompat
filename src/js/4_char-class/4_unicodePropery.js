@@ -3,7 +3,7 @@ var Unicode_CACHE = {};
 
 /** Load `CharSet` corresponding to Unicode `General_Category` value.
  * @param {string} v
- * @return {CharSet|undefined}
+ * @return {!CharSet|undefined}
  */
 m_loadCategory = function( v ){
     // Canonicalize value name.
@@ -26,7 +26,7 @@ m_loadCategory = function( v ){
 
 /** Load `CharSet` corresponding to Unicode `Script` value.
  * @param {string} v
- * @return {CharSet|undefined}
+ * @return {!CharSet|undefined}
  */
 function loadScript(v){
     // Canonicalize value name.
@@ -50,7 +50,7 @@ function loadScript(v){
 /** Load `CharSet` corresponding to Unicode `Script_Extensions` value.
  *
  * @param {string} v
- * @return {CharSet|undefined}
+ * @return {!CharSet|undefined}
  */
 function loadScriptExtensions( v ){
     // Canonicalize value name.
@@ -87,7 +87,7 @@ function loadScriptExtensions( v ){
  * See https://www.ecma-international.org/ecma-262/10.0/index.html#sec-runtime-semantics-unicodematchproperty-p.
  *
  * @param {string} p
- * @return {CharSet|undefined}
+ * @return {!CharSet|undefined}
  */
 m_loadProperty = function( p ){
     // Canonicalize property name.
@@ -116,7 +116,7 @@ m_loadProperty = function( p ){
  * See https://www.ecma-international.org/ecma-262/10.0/index.html#sec-runtime-semantics-unicodematchpropertyvalue-p-v.
  * @param {string} p
  * @param {string} v
- * @return {CharSet|undefined}
+ * @return {!CharSet|undefined}
  */
 m_loadPropertyValue = function( p, v ){
     // Canonicalize property name.

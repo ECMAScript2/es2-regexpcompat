@@ -3,7 +3,7 @@ var Compiler_DIRECTION_FORWARD  = DEFINE_REGEXP_COMPAT__MINIFY ? 1 : 'forward',
 
 /** `Compiler` is a compiler for `Pattern` to `Program`.
  * @constructor
- * @param {Pattern} pattern 
+ * @param {!Pattern} pattern 
  */
 Compiler = function( pattern ){
     this.advance            = false;
@@ -20,7 +20,7 @@ Compiler = function( pattern ){
 
 /** Run compiler and return compiled `Program`.
  * 
- * @return {Program}
+ * @return {!Program}
  */
 Compiler.prototype.compile = function(){
     var codes0 = Compiler_compileNode( this, this.pattern.child );
@@ -35,64 +35,64 @@ Compiler.prototype.compile = function(){
 };
 
 /**
- * @param {Compiler} compiler
- * @param {RegExpPaternNode} node 
- * @return {Array.<OpCode>|undefined}
+ * @param {!Compiler} compiler
+ * @param {!RegExpPaternNode} node 
+ * @return {!Array.<!OpCode>|undefined}
  */
 function Compiler_compileNode( compiler, node ){
     switch( node.type ){
         case REGEXP_COMPAT__PATTERN_IS_Disjunction :
-            return Compiler_compileDisjunction( compiler, /** @type {Disjunction} */ (node) );
+            return Compiler_compileDisjunction( compiler, /** @type {!Disjunction} */ (node) );
         case REGEXP_COMPAT__PATTERN_IS_Sequence :
-            return Compiler_compileSequence( compiler, /** @type {Sequence} */ (node) );
+            return Compiler_compileSequence( compiler, /** @type {!Sequence} */ (node) );
         case REGEXP_COMPAT__PATTERN_IS_Capture :
-            return Compiler_compileCapture( compiler, /** @type {Capture} */ (node) );
+            return Compiler_compileCapture( compiler, /** @type {!Capture} */ (node) );
         case REGEXP_COMPAT__PATTERN_IS_Group :
-            return Compiler_compileGroup( compiler, /** @type {Group} */ (node) );
+            return Compiler_compileGroup( compiler, /** @type {!Group} */ (node) );
         case REGEXP_COMPAT__PATTERN_IS_Many :
-            return Compiler_compileMany( compiler, /** @type {Many} */ (node) );
+            return Compiler_compileMany( compiler, /** @type {!Many} */ (node) );
         case REGEXP_COMPAT__PATTERN_IS_Some :
-            return Compiler_compileSome( compiler, /** @type {Some} */ (node) );
+            return Compiler_compileSome( compiler, /** @type {!Some} */ (node) );
         case REGEXP_COMPAT__PATTERN_IS_Optional :
-            return Compiler_compileOptional( compiler, /** @type {Optional} */ (node) );
+            return Compiler_compileOptional( compiler, /** @type {!Optional} */ (node) );
         case REGEXP_COMPAT__PATTERN_IS_Repeat :
-            return Compiler_compileRepeat( compiler, /** @type {Repeat} */ (node) );
+            return Compiler_compileRepeat( compiler, /** @type {!Repeat} */ (node) );
         case REGEXP_COMPAT__PATTERN_IS_WordBoundary :
-            return Compiler_compileWordBoundary( compiler, /** @type {WordBoundary} */ (node) );
+            return Compiler_compileWordBoundary( compiler, /** @type {!WordBoundary} */ (node) );
         case REGEXP_COMPAT__PATTERN_IS_LineBegin :
             return Compiler_compileLineBegin( compiler /* node */ );
         case REGEXP_COMPAT__PATTERN_IS_LineEnd :
             return Compiler_compileLineEnd( compiler /* node */ );
         case REGEXP_COMPAT__PATTERN_IS_LookAhead :
-            return Compiler_compileLookAhead( compiler, /** @type {LookAhead} */ (node) );
+            return Compiler_compileLookAhead( compiler, /** @type {!LookAhead} */ (node) );
         case REGEXP_COMPAT__PATTERN_IS_Char:
-            return Compiler_compileChar( compiler, /** @type {Char} */ (node) );
+            return Compiler_compileChar( compiler, /** @type {!Char} */ (node) );
         case REGEXP_COMPAT__PATTERN_IS_EscapeClass:
-            return Compiler_compileEscapeClass( compiler, /** @type {EscapeClass} */ (node) );
+            return Compiler_compileEscapeClass( compiler, /** @type {!EscapeClass} */ (node) );
         case REGEXP_COMPAT__PATTERN_IS_Class :
-            return Compiler_compileClass( compiler, /** @type {Class} */ (node) );
+            return Compiler_compileClass( compiler, /** @type {!Class} */ (node) );
         case REGEXP_COMPAT__PATTERN_IS_Dot :
             return Compiler_compileDot( compiler /* node */ );
         case REGEXP_COMPAT__PATTERN_IS_BackRef :
-            return Compiler_compileBackRef( compiler, /** @type {BackRef} */ (node) );
+            return Compiler_compileBackRef( compiler, /** @type {!BackRef} */ (node) );
         case REGEXP_COMPAT__PATTERN_IS_NamedBackRef :
             if( CONST_SUPPORT_ES2018 ){
-                return Compiler_compileNamedBackRef( compiler, /** @type {NamedBackRef} */ (node) );
+                return Compiler_compileNamedBackRef( compiler, /** @type {!NamedBackRef} */ (node) );
             };
         case REGEXP_COMPAT__PATTERN_IS_NamedCapture :
             if( CONST_SUPPORT_ES2018 ){
-                return Compiler_compileNamedCapture( compiler, /** @type {NamedCapture} */ (node) );
+                return Compiler_compileNamedCapture( compiler, /** @type {!NamedCapture} */ (node) );
             };
         case REGEXP_COMPAT__PATTERN_IS_LookBehind :
             if( CONST_SUPPORT_ES2018 ){
-                return Compiler_compileLookBehind( compiler, /** @type {LookBehind} */ (node) );
+                return Compiler_compileLookBehind( compiler, /** @type {!LookBehind} */ (node) );
             };
     };
 };
 
 /**
- * @param {Compiler} compiler
- * @param {Disjunction} node 
+ * @param {!Compiler} compiler
+ * @param {!Disjunction} node 
  * @return {!Array.<!OpCode>}
  */
 function Compiler_compileDisjunction( compiler, node ){
@@ -127,8 +127,8 @@ function Compiler_compileDisjunction( compiler, node ){
 };
 
 /**
- * @param {Compiler} compiler
- * @param {Sequence} node 
+ * @param {!Compiler} compiler
+ * @param {!Sequence} node 
  * @return {!Array.<!OpCode>}
  */
 function Compiler_compileSequence( compiler, node ){
@@ -136,14 +136,6 @@ function Compiler_compileSequence( compiler, node ){
 
     if( compiler.direction === Compiler_DIRECTION_BACKWARD ){
         children.reverse(); // Array.prototype.reverse IE4+
-        /* if( false && children.reverse ){ // 
-            children.reverse();
-        } else {
-            for( var i = 1, child, l = children.length; i < l; ++i ){ // for ie5
-                child = children.pop();
-                children.unshift( child );
-            };
-        }; */
     };
 
     var codes = [];
@@ -166,8 +158,8 @@ function Compiler_compileSequence( compiler, node ){
 };
 
 /**
- * @param {Compiler} compiler
- * @param {Group} node 
+ * @param {!Compiler} compiler
+ * @param {!Group} node 
  * @return {!Array.<!OpCode>}
  */
 function Compiler_compileGroup( compiler, node ){
@@ -175,8 +167,8 @@ function Compiler_compileGroup( compiler, node ){
 };
 
 /**
- * @param {Compiler} compiler
- * @param {Capture} node 
+ * @param {!Compiler} compiler
+ * @param {!Capture} node 
  * @return {!Array.<!OpCode>}
  */
 function Compiler_compileCapture( compiler, node ){
@@ -197,8 +189,8 @@ function Compiler_compileCapture( compiler, node ){
 };
 
 /**
- * @param {Compiler} compiler
- * @param {NamedCapture} node 
+ * @param {!Compiler} compiler
+ * @param {!NamedCapture} node 
  * @return {!Array.<!OpCode>}
  */
 function Compiler_compileNamedCapture( compiler, node ){
@@ -220,8 +212,8 @@ function Compiler_compileNamedCapture( compiler, node ){
 };
 
 /**
- * @param {Compiler} compiler
- * @param {Many} node 
+ * @param {!Compiler} compiler
+ * @param {!Many} node 
  * @return {!Array.<!OpCode>}
  */
 function Compiler_compileMany( compiler, node ){
@@ -239,8 +231,8 @@ function Compiler_compileMany( compiler, node ){
 };
 
 /**
- * @param {Compiler} compiler
- * @param {Some} node 
+ * @param {!Compiler} compiler
+ * @param {!Some} node 
  * @return {!Array.<!OpCode>}
  */
 function Compiler_compileSome( compiler, node ){
@@ -256,8 +248,8 @@ function Compiler_compileSome( compiler, node ){
 };
 
 /**
- * @param {Compiler} compiler
- * @param {Optional} node 
+ * @param {!Compiler} compiler
+ * @param {!Optional} node 
  * @return {!Array.<!OpCode>}
  */
 function Compiler_compileOptional( compiler, node ){
@@ -272,8 +264,8 @@ function Compiler_compileOptional( compiler, node ){
 };
 
 /**
- * @param {Compiler} compiler
- * @param {Repeat} node 
+ * @param {!Compiler} compiler
+ * @param {!Repeat} node 
  * @return {!Array.<!OpCode>}
  */
 function Compiler_compileRepeat( compiler, node ){
@@ -337,7 +329,7 @@ function Compiler_compileRepeat( compiler, node ){
 };
 
 /**
- * @param {Compiler} compiler
+ * @param {!Compiler} compiler
  * @param {!Array.<!OpCode>} codes0 
  * @return {!Array.<!OpCode>}
  */
@@ -351,7 +343,7 @@ function Compiler_insertEmptyCheck( compiler, codes0 ){
 };
 
 /**
- * @param {Compiler} compiler
+ * @param {!Compiler} compiler
  * @param {number} from
  * @param {!Array.<!OpCode>} codes0 
  * @return {!Array.<!OpCode>}
@@ -368,8 +360,8 @@ function Compiler_insertCapReset( compiler, from, codes0 ){
 };
 
 /**
- * @param {Compiler} compiler
- * @param {WordBoundary} node 
+ * @param {!Compiler} compiler
+ * @param {!WordBoundary} node 
  * @return {!Array.<!OpCode>}
  */
 function Compiler_compileWordBoundary( compiler, node ){
@@ -378,7 +370,7 @@ function Compiler_compileWordBoundary( compiler, node ){
 };
 
 /**
- * @param {Compiler} compiler
+ * @param {!Compiler} compiler
  * @return {!Array.<!OpCode>}
  */
 function Compiler_compileLineBegin( compiler ){
@@ -387,7 +379,7 @@ function Compiler_compileLineBegin( compiler ){
 };
 
 /**
- * @param {Compiler} compiler
+ * @param {!Compiler} compiler
  * @return {!Array.<!OpCode>}
  */
 function Compiler_compileLineEnd( compiler ){
@@ -396,8 +388,8 @@ function Compiler_compileLineEnd( compiler ){
 };
 
 /**
- * @param {Compiler} compiler
- * @param {LookAhead} node 
+ * @param {!Compiler} compiler
+ * @param {!LookAhead} node 
  * @return {!Array.<!OpCode>}
  */
 function Compiler_compileLookAhead( compiler, node ){
@@ -409,8 +401,8 @@ function Compiler_compileLookAhead( compiler, node ){
 };
 
 /**
- * @param {Compiler} compiler
- * @param {LookBehind} node 
+ * @param {!Compiler} compiler
+ * @param {!LookBehind} node 
  * @return {!Array.<!OpCode>}
  */
 function Compiler_compileLookBehind( compiler, node ){
@@ -422,8 +414,8 @@ function Compiler_compileLookBehind( compiler, node ){
 };
 
 /**
- * @param {Compiler} compiler
- * @param {LookAhead|LookBehind} node 
+ * @param {!Compiler} compiler
+ * @param {!LookAhead|!LookBehind} node 
  * @return {!Array.<!OpCode>}
  */
 function Compiler_compileLookAround( compiler, node ){
@@ -455,8 +447,8 @@ function Compiler_compileLookAround( compiler, node ){
 };
 
 /**
- * @param {Compiler} compiler
- * @param {Char} node 
+ * @param {!Compiler} compiler
+ * @param {!Char} node 
  * @return {!Array.<!OpCode>}
  */
 function Compiler_compileChar( compiler, node ){
@@ -469,8 +461,8 @@ function Compiler_compileChar( compiler, node ){
 };
 
 /**
- * @param {Compiler} compiler
- * @param {EscapeClass} node 
+ * @param {!Compiler} compiler
+ * @param {!EscapeClass} node 
  * @return {!Array.<!OpCode>}
  */
 function Compiler_compileEscapeClass( compiler, node ){
@@ -480,21 +472,21 @@ function Compiler_compileEscapeClass( compiler, node ){
 };
 
 /**
- * @param {Compiler} compiler
- * @param {Class} node 
+ * @param {!Compiler} compiler
+ * @param {!Class} node 
  * @return {!Array.<!OpCode>}
  */
 function Compiler_compileClass( compiler, node ){
     var set = m_createCharSetFromArray( [] ),
         classItemList = node.children;
 
-    for( var /** @type {ClassItem} */ item, i = -1; item = classItemList[ ++i ]; ){
+    for( var /** @type {!ClassItem} */ item, i = -1; item = classItemList[ ++i ]; ){
         switch( item.type ){
             case REGEXP_COMPAT__PATTERN_IS_Char :
                 set.add( item.value, item.value + 1 );
                 break;
             case REGEXP_COMPAT__PATTERN_IS_EscapeClass :
-                set.addCharSet( Compiler_escapeClassToSet( compiler, /** @type {EscapeClass} */ (item) ) );
+                set.addCharSet( Compiler_escapeClassToSet( compiler, /** @type {!EscapeClass} */ (item) ) );
                 break;
             case REGEXP_COMPAT__PATTERN_IS_ClassRange :
                 set.add( item.children[ 0 ].value, item.children[ 1 ].value + 1 );
@@ -506,19 +498,19 @@ function Compiler_compileClass( compiler, node ){
 };
 
 /**
- * @param {Compiler} compiler
- * @param {EscapeClass} _node 
- * @return {CharSet|undefined}
+ * @param {!Compiler} compiler
+ * @param {!EscapeClass} _node 
+ * @return {!CharSet|undefined}
  */
 function Compiler_escapeClassToSet( compiler, _node ){
     var node;
 
     switch( _node.kind ){
         case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_digit :
-            node = /** @type {SimpleEscapeClass} */ ( _node );
+            node = /** @type {!SimpleEscapeClass} */ ( _node );
             return node.invert ? m_charSetInvertDigit : m_charSetDigit;
         case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_word :
-            node = /** @type {SimpleEscapeClass} */ ( _node );
+            node = /** @type {!SimpleEscapeClass} */ ( _node );
             if( CONST_SUPPORT_ES2018 ){
                 if( compiler.unicode && compiler.ignoreCase ){
                     return node.invert ? m_charSetInvertUnicodeWord : m_charSetUnicodeWord;
@@ -526,11 +518,11 @@ function Compiler_escapeClassToSet( compiler, _node ){
             };
             return node.invert ? m_charSetInvertWord : m_charSetWord;
         case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_space :
-            node = /** @type {SimpleEscapeClass} */ ( _node );
+            node = /** @type {!SimpleEscapeClass} */ ( _node );
             return node.invert ? m_charSetInvertSpace : m_charSetSpace;
         case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_unicode_property :
             if( CONST_SUPPORT_ES2018 ){
-                node = /** @type {UnicodePropertyEscapeClass} */ ( _node );
+                node = /** @type {!UnicodePropertyEscapeClass} */ ( _node );
                 var set = m_loadCategory( node.property ) || m_loadProperty( node.property );
                 
                 if( !set && DEFINE_REGEXP_COMPAT__DEBUG ){
@@ -540,7 +532,7 @@ function Compiler_escapeClassToSet( compiler, _node ){
             };
         case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_unicode_property_value :
             if( CONST_SUPPORT_ES2018 ){
-                node = /** @type {UnicodePropertyValueEscapeClass} */ ( _node );
+                node = /** @type {!UnicodePropertyValueEscapeClass} */ ( _node );
                 var set = m_loadPropertyValue( node.property, node.value );
 
                 if( !set && DEFINE_REGEXP_COMPAT__DEBUG ){
@@ -552,7 +544,7 @@ function Compiler_escapeClassToSet( compiler, _node ){
 };
 
 /**
- * @param {Compiler} compiler
+ * @param {!Compiler} compiler
  * @return {!Array.<!OpCode>}
  */
 function Compiler_compileDot( compiler ){
@@ -561,7 +553,7 @@ function Compiler_compileDot( compiler ){
 };
 
 /**
- * @param {Compiler} compiler
+ * @param {!Compiler} compiler
  * @param {!Array.<!OpCode>} codes 
  * @return {!Array.<!OpCode>}
  */
@@ -578,8 +570,8 @@ function Compiler_insertBack( compiler, codes ){
 };
 
 /**
- * @param {Compiler} compiler
- * @param {BackRef} node 
+ * @param {!Compiler} compiler
+ * @param {!BackRef} node 
  * @return {!Array.<!OpCode>}
  */
 function Compiler_compileBackRef( compiler, node ){
@@ -593,8 +585,8 @@ function Compiler_compileBackRef( compiler, node ){
 };
 
 /**
- * @param {Compiler} compiler
- * @param {NamedBackRef} node
+ * @param {!Compiler} compiler
+ * @param {!NamedBackRef} node
  * @return {!Array.<!OpCode>}
  */
 function Compiler_compileNamedBackRef( compiler, node ){

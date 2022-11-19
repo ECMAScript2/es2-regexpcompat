@@ -4,7 +4,7 @@
  *
  * @param {string} input 
  * @param {!Array.<number>} caps 
- * @param {!Array<string|number>=} names 
+ * @param {!Array.<string|number>=} names 
  */
 Match = function( input, caps, names ){
     /** An input string of this matching.
@@ -91,7 +91,7 @@ function Match_resolve( match, k ){
 };
 
 /** Convert this into `RegExp`'s result array.
- * @return {RegExpResult}
+ * @return {!RegExpResult}
  */
 Match.prototype.toArray = function(){
     // In TypeScript definition, `RegExpExecArray` extends `string[]`.
@@ -127,7 +127,7 @@ Match.prototype.toArray = function(){
         array.groups = undefined;
     };
 
-    return /** @type {RegExpResult} */ (array);
+    return /** @type {!RegExpResult} */ (array);
 };
 
 if( DEFINE_REGEXP_COMPAT__DEBUG ){
@@ -143,7 +143,7 @@ if( DEFINE_REGEXP_COMPAT__DEBUG ){
     if( DEFINE_REGEXP_COMPAT__NODEJS ){
       /**
        * @param {*} depth 
-       * @param {InspectOptionsStylized} options 
+       * @param {!InspectOptionsStylized} options 
        * @return {string}
        */
         Match.prototype[ Symbol[ 'for' ]( 'nodejs.util.inspect.custom' ) ] = function( depth, options ){

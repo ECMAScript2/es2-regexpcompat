@@ -33,7 +33,7 @@ function RegExpCompat_advance( s, i, unicode ){
 /**
  * @constructor
  * @extends RegExp
- * @param {string|RegExp|RegExpCompat} source 
+ * @param {string|!RegExp|!RegExpCompat} source 
  * @param {string=} flags
  */
 function RegExpCompat( source, flags ){
@@ -48,9 +48,9 @@ function RegExpCompat( source, flags ){
         };
         if( RegExpCompat_isRegExp( source ) ){
             if( flags === undefined ){
-                flags = /** @type {RegExp|RegExpCompat} */ (source).flags;
+                flags = /** @type {!RegExp|!RegExpCompat} */ (source).flags;
             };
-            source = /** @type {RegExp|RegExpCompat} */ (source).source;
+            source = /** @type {!RegExp|!RegExpCompat} */ (source).source;
         };
         source += '';
     };
@@ -59,13 +59,13 @@ function RegExpCompat( source, flags ){
     var pattern = parser.parse();
 
     if( DEFINE_REGEXP_COMPAT__DEBUG ){
-        /** @type {Pattern} */
+        /** @type {!Pattern|undefined} */
         this.pattern = pattern;
     };
 
     var compiler = new Compiler( pattern );
 
-    /** @type {Program} */
+    /** @type {!Program} */
     this.program = compiler.compile();
 
     var n = m_nodeToString( pattern.child );
@@ -147,11 +147,11 @@ function RegExpCompat_debug( regExp ){
 
 /**
  * 
- * @param {RegExpCompat} regExpCompat 
+ * @param {!RegExpCompat} regExpCompat 
  * @param {string} functionName 
  * @param {*} result1 
  * @param {*} result2 
- * @param {Array} args
+ * @param {!Array} args
  */
 function RegExpCompat_compare( regExpCompat, functionName, result1, result2, args ){
     if( RegExpCompat_skipCompare ){
@@ -206,7 +206,7 @@ function RegExpCompat_compare( regExpCompat, functionName, result1, result2, arg
 
 /**
  * @param {*} string 
- * @return {RegExpResult|null}
+ * @return {!RegExpResult|null}
  */
 RegExpCompat.prototype.exec = function( string ){
     var update = this.global || this.sticky;
@@ -282,7 +282,7 @@ if( DEFINE_REGEXP_COMPAT__NODEJS || ( 6 <= DEFINE_REGEXP_COMPAT__CLIENT_MIN_ES_V
 /**
  * @param {!RegExp|RegExpCompat} regExp
  * @param {String} string 
- * @return {RegExpResult|Array<string>|null}
+ * @return {!RegExpResult|!Array.<string>|null}
  */
 function RegExpCompat_match( regExp, string ){
     RegExpCompat_skipCompare = true;
@@ -306,7 +306,7 @@ function RegExpCompat_match( regExp, string ){
     };
 
     RegExpCompat_skipCompare = false;
-    RegExpCompat_compare( /** @type {RegExpCompat} */ (regExp), 'match', result, string.match( regExp.regExp ), [ string ] );
+    RegExpCompat_compare( /** @type {!RegExpCompat} */ (regExp), 'match', result, string.match( regExp.regExp ), [ string ] );
 
     return result;
 };
@@ -314,7 +314,7 @@ function RegExpCompat_match( regExp, string ){
 /**
  * @param {!RegExp|RegExpCompat} regExp
  * @param {String} string 
- * @param {Function|string} replacer 
+ * @param {!function(string, ...?): *|null|string} replacer 
  * @return {string}
  */
 function RegExpCompat_replace( regExp, string, replacer ){
@@ -433,7 +433,7 @@ function RegExpCompat_replace( regExp, string, replacer ){
     };
 
     RegExpCompat_skipCompare = true;
-    RegExpCompat_compare( /** @type {RegExpCompat} */ (regExp), 'replace', result, string.replace( regExp.regExp, replacer ), [ string, replacer ] );
+    RegExpCompat_compare( /** @type {!RegExpCompat} */ (regExp), 'replace', result, string.replace( regExp.regExp, replacer ), [ string, replacer ] );
 
     return result;
 };
@@ -457,7 +457,7 @@ function RegExpCompat_search( regExp, string ){
     };
 
     RegExpCompat_skipCompare = false;
-    RegExpCompat_compare( /** @type {RegExpCompat} */ (regExp), 'search', result, string.search( regExp.regExp ), [ string ] );
+    RegExpCompat_compare( /** @type {!RegExpCompat} */ (regExp), 'search', result, string.search( regExp.regExp ), [ string ] );
 
     return result;
 };
@@ -532,7 +532,7 @@ function RegExpCompat_split( regExp, string, limit ){
     };
 
     RegExpCompat_skipCompare = false;
-    RegExpCompat_compare( /** @type {RegExpCompat} */ (regExp), 'split', result, string.split( regExp.regExp, limit ), [ string, limit ] );
+    RegExpCompat_compare( /** @type {!RegExpCompat} */ (regExp), 'split', result, string.split( regExp.regExp, limit ), [ string, limit ] );
 
     return result;
 };

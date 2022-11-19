@@ -22,38 +22,38 @@ function escapeRaw( raw ){
 
 /** Show class item as string.
  *
- * @param {ClassItem} n
+ * @param {!ClassItem} n
  * @return {string|undefined}
  */
 function classItemToString( n ){
     switch( n.type ){
         case REGEXP_COMPAT__PATTERN_IS_Char :
-            return escapeRaw( /** @type {Char} */ (n).raw );
+            return escapeRaw( /** @type {!Char} */ (n).raw );
         // The above `switch-case` is exhaustive and it is checked by `tsc`, so `eslint` rule is disabled.
         case REGEXP_COMPAT__PATTERN_IS_ClassRange :
-            return escapeRaw( /** @type {ClassRange} */ (n).children[ 0 ].raw ) + '-' + escapeRaw( /** @type {ClassRange} */ (n).children[ 1 ].raw );
+            return escapeRaw( /** @type {!ClassRange} */ (n).children[ 0 ].raw ) + '-' + escapeRaw( /** @type {!ClassRange} */ (n).children[ 1 ].raw );
         case REGEXP_COMPAT__PATTERN_IS_EscapeClass :
             switch( n.kind ){
                 case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_digit :
-                    return /** @type {SimpleEscapeClass} */ (n).invert ? '\\D' : '\\d';
+                    return /** @type {!SimpleEscapeClass} */ (n).invert ? '\\D' : '\\d';
                 case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_word :
-                    return /** @type {SimpleEscapeClass} */ (n).invert ? '\\W' : '\\w';
+                    return /** @type {!SimpleEscapeClass} */ (n).invert ? '\\W' : '\\w';
                 case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_space :
-                    return /** @type {SimpleEscapeClass} */ (n).invert ? '\\S' : '\\s';
+                    return /** @type {!SimpleEscapeClass} */ (n).invert ? '\\S' : '\\s';
                 case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_unicode_property :
                     if( CONST_SUPPORT_ES2018 ){
-                        return '\\' + ( /** @type {UnicodePropertyEscapeClass} */ (n).invert ? 'P{' : 'p{' ) + /** @type {UnicodePropertyEscapeClass} */ (n).property + '}';
+                        return '\\' + ( /** @type {!UnicodePropertyEscapeClass} */ (n).invert ? 'P{' : 'p{' ) + /** @type {!UnicodePropertyEscapeClass} */ (n).property + '}';
                     };
                 case REGEXP_COMPAT__ESCAPE_CLASS_KIND_IS_unicode_property_value :
                     if( CONST_SUPPORT_ES2018 ){
-                        return '\\' + ( /** @type {UnicodePropertyValueEscapeClass} */ (n).invert ? 'P{' : 'p{' ) + /** @type {UnicodePropertyValueEscapeClass} */ (n).property + '=' + n.value + '}';
+                        return '\\' + ( /** @type {!UnicodePropertyValueEscapeClass} */ (n).invert ? 'P{' : 'p{' ) + /** @type {!UnicodePropertyValueEscapeClass} */ (n).property + '=' + n.value + '}';
                     };
             };
     };
 };
 
 /**
- * @param {RegExpPaternNode} n
+ * @param {!RegExpPaternNode} n
  * @return {string|undefined}
  */
 m_nodeToString = function( n ){
@@ -95,7 +95,7 @@ m_nodeToString = function( n ){
             return c === '/' ? '\\/' : c;
         };
         case REGEXP_COMPAT__PATTERN_IS_EscapeClass :
-            return classItemToString( /** @type {ClassItem} */ (n) );
+            return classItemToString( /** @type {!ClassItem} */ (n) );
         case REGEXP_COMPAT__PATTERN_IS_Class :
             return '[' + ( n.invert ? '^' : '' ) + Array_map( n.children, classItemToString ).join('') + ']';
         case REGEXP_COMPAT__PATTERN_IS_Dot :
@@ -119,7 +119,7 @@ m_nodeToString = function( n ){
 
 /** Show flag set as string.
  *
- * @param {FlagSet} flagSet
+ * @param {!FlagSet} flagSet
  * @return {string}
  */
 m_flagSetToString = function( flagSet ){
@@ -148,7 +148,7 @@ m_flagSetToString = function( flagSet ){
 
 /** Show pattern as string.
  * 
- * @param {Pattern} p
+ * @param {!Pattern} p
  * @return {string}
  */
 m_patternToString = function( p ){
