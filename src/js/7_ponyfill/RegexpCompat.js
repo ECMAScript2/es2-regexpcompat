@@ -539,12 +539,8 @@ function RegExpCompat_split( regExp, string, limit ){
 
 if( DEFINE_REGEXP_COMPAT__NODEJS ){
     module[ 'exports' ][ 'RegExpCompat' ] = RegExpCompat;
-};
-
-if( DEFINE_REGEXP_COMPAT__EXPORT_BY_RETURN ){
+} else if( DEFINE_REGEXP_COMPAT__EXPORT_BY_RETURN ){
     return RegExpCompat;
-};
-
-if( DEFINE_REGEXP_COMPAT__EXPORT_BY_CALL_REGEXPCOMPAT ){
+} else if( DEFINE_REGEXP_COMPAT__EXPORT_BY_CALL_REGEXPCOMPAT ){
     global[ 'RegExpCompat' ]( RegExpCompat );
 };
