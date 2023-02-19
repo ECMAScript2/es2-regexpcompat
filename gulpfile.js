@@ -1,6 +1,7 @@
 const gulp            = require('gulp'),
       ClosureCompiler = require('google-closure-compiler').gulp(),
       postProcessor   = require('es2-postprocessor'),
+      es2toEs3        = require('es2-to-es3'),
       gulpDPZ         = require('gulp-diamond-princess-zoning'),
       tempDir         = require('os').tmpdir() + '/ReRE.js',
       fs              = require( 'fs' ),
@@ -140,12 +141,37 @@ gulp.task( '__compile', gulp.series(
                         ),
                     js_output_file    : isNodejsLibrary ?
                                             'index' + ( strCompileType !== 'release' ? '.' + strCompileType : '' ) + '.js' :
-                                        clientMinEsVersion !== 2 ?
+                                        5 <= clientMinEsVersion ?
                                             'ReRE.es' + clientMinEsVersion + '.' + ecmaFeatureVersion + '.' + strCompileType + '.js' :
-                                            'ReRE.es2.js'
+                                            'ReRE.es' + clientMinEsVersion + '.js'
                 }
             )
-        ).pipe( gulp.dest( isNodejsLibrary ? 'lib' : clientMinEsVersion !== 2 ? 'dist/' + strCompileType : tempDir ) );
+        ).pipe( gulp.dest( isNodejsLibrary ? 'lib' : 5 <= clientMinEsVersion ? 'dist/' + strCompileType : tempDir ) );
+    },
+    function( cb ){
+        if( clientMinEsVersion !== 3 || isNodejsLibrary ){
+            return cb();
+        };
+        return gulp.src(
+            [
+                tempDir + '/ReRE.es3.js'
+            ]
+        ).pipe(
+            es2toEs3.gulp(
+                {
+                    minIEVersion : 7 // Embed Array.prototype.indexOf polyfill
+                }
+            )
+        ).pipe(
+            ClosureCompiler(
+                {
+                    compilation_level : 'WHITESPACE_ONLY',
+                    formatting        : strCompileType !== 'release' ? 'PRETTY_PRINT' : 'SINGLE_QUOTES',
+                    output_wrapper    : '// ReRE.js for ES3[' + strCompileType + '], Compatible:ES' + ecmaFeatureVersion + ', ' + aboutReREjs + '\n%output%',
+                    js_output_file    : 'ReRE.es3.' + ecmaFeatureVersion + '.' + strCompileType + '.js'
+                }
+            )
+        ).pipe( gulp.dest( 'dist/' + strCompileType ) );
     },
     function( cb ){
         if( clientMinEsVersion !== 2 || isNodejsLibrary ){
@@ -173,10 +199,9 @@ gulp.task( '__compile', gulp.series(
                 }
             )
         ).pipe(
-            postProcessor.gulp(
+            es2toEs3.gulp(
                 {
-                    minIEVersion   : 5,
-                    embedPolyfills : true
+                    minIEVersion : 5
                 }
             )
         ).pipe( gulp.dest( 'dist/' + strCompileType ) );
