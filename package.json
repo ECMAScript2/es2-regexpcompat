@@ -1,13 +1,13 @@
 {
-  "name": "rerejs",
+  "name": "es2-regexpcompat",
   "version": "0.2.1",
-  "description": "ReRE.js for ES2.",
+  "description": "Implementation of RegExp for browsers supporting ECMAScript 2.",
   "author": "itozyun <itozyun@gmail.com>",
-  "bugs": "https://github.com/itozyun/rerejs/issues",
-  "homepage": "https://github.com/itozyun/rerejs#readme",
+  "bugs": "https://github.com/ECMAScript2/es2-regexpcompat/issues",
+  "homepage": "https://github.com/ECMAScript2/es2-regexpcompat#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/itozyun/rerejs.git"
+    "url": "https://github.com/ECMAScript2/es2-regexpcompat.git"
   },
   "main": "lib/index.js",
   "scripts": {

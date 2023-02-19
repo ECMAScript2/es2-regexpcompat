@@ -1,150 +1,40 @@
-# ReRE.js for ECMAScript 2
+# ES2 RegExpCompat
 
-makenowjust 氏による `RegExp` の Javascript 再実装 [ReRE.js](https://github.com/makenowjust/rerejs/) を書き換えて、ES2 相当(Internet Exproler 4.0, JScript 3.0, JavaScript 1.3)のブラウザでの動作を目指しています。
+Implementation of `RegExp` for browsers up to ECMAScript 2(Internet Exproler 4.0, JScript 3.0, JavaScript 1.3).
 
-複数のビルドオプションを備えていて、必要な ECMAScript Version の機能を備えたコンパクトな JavaScript を提供します。
+This project is based on [ReRE.js](https://github.com/makenowjust/rerejs/) by [makenowjust](https://github.com/makenowjust).
 
-## About
+## Closure Compiler `@define` s
 
-ReRE.js is a framework for processing [ECMA-262][] (JavaScript standard) `RegExp`.
-It provides:
+| Variable Name                                       | Data Type    | Default Value | Options                                | Description                   |
+|:----------------------------------------------------|:-------------|:--------------|:---------------------------------------|:------------------------------|
+| `DEFINE_REGEXP_COMPAT__DEBUG`                       | `boolean`    | `false`       |                                        | Set `true` for debug build.   |
+| `DEFINE_REGEXP_COMPAT__MINIFY`                      | `boolean`    | `false`       |                                        | Set `true` for minimum build. |
+| `DEFINE_REGEXP_COMPAT__NODEJS`                      | `boolean`    | `false`       |                                        | Set `true` for node.js        |
+| `DEFINE_REGEXP_COMPAT__CLIENT_MIN_ES_VERSION`       | `number`     | `2`           | `2`, `3`, `5`, `6`, `2015`(=6), `2018` | Target ES Version             |
+| `DEFINE_REGEXP_COMPAT__ES_FEATURE_VERSION`          | `number`     | `2018`        |      `3`, `5`, `6`, `2015`(=6), `2018` | ES fuature version            |
+| `DEFINE_REGEXP_COMPAT__EXPORT_BY_RETURN`            | `boolean`    | `false`       |                                        |                               |
+| `DEFINE_REGEXP_COMPAT__EXPORT_BY_CALL_REGEXPCOMPAT` | `boolean`    | `false`       |                                        |                               |
 
-- **parser** which constructs AST nodes from a `RegExp` pattern string,
-- **engine** which executes `RegExp` matching against an input string, and
-- **ponyfill** (or **shim**) which is complete and full-featured alternative of `RegExp` class.
+## Build
 
-ReRE.js supports the latest `RegExp` features:
+~~~
+gulp dist
+~~~
 
-- look-behind assertion (`(?<=...)`),
-- named capture group, named back reference (`(?<foo>...)` and `\k<foo>`), and
-- Unicode property class (`\p{ASCII}`).
+## Test
 
-Moreover, ReRE.js supports ["Additional ECMAScript Features for Web Browsers"][] for `RegExp`.
-It means robust, so it can parse some terrible real-world `RegExp` patterns correctly.
+~~~
+npm test
+~~~
 
-[ECMA-262]: https://www.ecma-international.org/ecma-262/10.0/index.html
-["Additional ECMAScript Features for Web Browsers"]: https://www.ecma-international.org/ecma-262/10.0/index.html#sec-regular-expressions-patterns
+## Links
 
-## Getting Started
-
-Install ReRE.js as dependency:
-
-```console
-$ npm install rerejs
-```
-
-Then, you can start:
-
-```javascript
-import {
-  // A parser for `RegExp` pattern.
-  Parser,
-  // A compiler for parsed `RegExp` pattern node.
-  Compiler,
-  // A ponyfill of `RegExp`.
-  RegExpCompat
-} from './index';
-
-/*
- * Usage of `Parser`.
- */
-
-// `new Parser` with parsing pattern source and flags,
-// then call `parse` method to execute parsing.
-const parser = new Parser('a+', 'u');
-const pattern = parser.parse();
-
-console.log(pattern);
-// => {
-//     type: 'Pattern',
-//     flagSet: {
-//       global: false,
-//       ignoreCase: false,
-//       multiline: false,
-//       unicode: true,
-//       dotAll: false,
-//       sticky: false
-//     },
-//     captureParens: 0,
-//     names: Map(0) {},
-//     child: {
-//       type: 'Some',
-//       nonGreedy: false,
-//       child: { type: 'Char', value: 97, raw: 'a', range: [ 0, 1 ] },
-//       range: [ 0, 2 ]
-//     },
-//     range: [ 0, 2 ]
-//   }
-
-/*
- * Usage of `Compiler`.
- */
-
-// `new Compiler` with pattern node, then call `compile` to get `program`.
-const compiler = new Compiler(pattern);
-const program = compiler.compile();
-
-// `program` is compiled regular expression pattern.
-// To execute matching, invoke `exec` method.
-// Note that `program` is not `RegExpCompat` instance,
-// and `exec` method result is not the same as `RegExp.prototype.exec`.
-console.log(program.exec('bbaaabb'));
-// => Match [
-//      0 [0:0] => '',
-//    ]
-
-/*
- * Usage of `RegExpCompat`.
- */
-
-// You cau use `RegExpCompat` like `RegExp` very.
-const re = new RegExpCompat('a+', 'u');
-
-console.log(re.exec('bbaaabb'));
-// => [ 'aaa', index: 2, input: 'bbaaabb', groups: undefined ]
-
-// Also, you can pass `RegExpCompat` instance to
-// `String.prototype.match`, `String.prototype.replace`
-// and other methods accepts `RegExp` instance.
-console.log('bbaaabb'.match(re));
-// => [ 'aaa', index: 2, input: 'bbaaabb', groups: undefined ]
-console.log('bbaaabb'.replace(re, 'ccc'));
-// => bbcccbb
-
-// You can write `global.RegExp = RegExpCompat;`,
-// however it does not work as you expected because
-// it does not override `RegExp` literals construction.
-```
-
-## Contributing
-
-ReRE.js is *alpha quality* project for now, so there are many bugs and problems.
-If you found something, please open an issue.
-
-Especially such reports are needed:
-
-- "There is a different behavior between the browser and ReRE.js."
-- "`RegExp` matching goes on infinite-loop. VM Bug?"
-- "A typo in comment or  error message is found."
-
-Pull Requests are also welcome.
-
-However I concentrate improving ReRE.js ECMA-262 compatibility for now.
-So, I cannot accept a feature request as soon.
-Notably, it is out of targets of this project that extending `RegExp` syntax.
-(e.g. support `x` flag like  `Perl` regular expression)
-
-## Documents for Developer
-
-There are few documents for now. Sorry.
-
-- [docs/canonicalize.md](docs/canonicalize.md): the explanation of `src/canonicalize.ts`.
-- [docs/vm.md](docs/vm.md): the explanation for the VM using ReRE.js on matching.
+1. [es2-code-prettify](https://github.com/ECMAScript2/es2-code-prettify)
+   * Dynamically adds `RegExpCompat` only to the required environments (IE <5.5, Gecko <0.9, Opera <8). This is the usage envisioned by this project.
 
 ## License
 
-ReRE.js is licensed under MIT license.
+ES2 RegExpCompat is licensed under [MIT License](https://opensource.org/licenses/MIT).
 
-(C) 2020-2022 TSUYUSATO "[MakeNowJust][]" Kitsune
-
-[MakeNowJust]: https://github.com/MakeNowJust
+(C) 2022-2023 [itozyun](https://github.com/itozyun)([outcloud.blogspot.com](//outcloud.blogspot.com/))
