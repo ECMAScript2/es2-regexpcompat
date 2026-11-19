@@ -152,12 +152,12 @@ const SCRIPT = [
     // However V8 accepts this... (e.g. `/\p{Script=Zzzz}/u.exec('\uFFFF')` matches.)
 ];
 
-module.exports = function(){
+module.exports = function( path ){
     const matchPropertyValue = require( 'unicode-match-property-value-ecmascript' );
-    const CharSet = require( './0_util.js' ).CharSet;
+    const CharSet            = require( path ).CharSet;
 
     // Generate output data.
-    const script = {};
+    const script           = {};
     const scriptExtensions = {};
 
     for( const name of SCRIPT ){
@@ -181,8 +181,15 @@ module.exports = function(){
             scriptExtensions[ canonical ] = extSet.data;
         };
     };
-    return 'm_unicodeScript = ' + JSON.stringify( script, null, '    ' ) + ';\n' +
-           'm_unicodeScriptExtensions = ' + JSON.stringify( scriptExtensions, null, '    ' ) + ';\n';
+    return `
+goog.provide( 'vm.unicodeScript' );
+goog.provide( 'vm.unicodeScriptExtensions' );
+
+` +
+           '/** @package @const {!Object.<string, !Array.<number>>} */\n' +
+           'vm.unicodeScript = ' + JSON.stringify( script, null, '    ' ) + ';\n' +
+           '/** @package @const {!Object.<string, !Array.<number>>} */\n' +
+           'vm.unicodeScriptExtensions = ' + JSON.stringify( scriptExtensions, null, '    ' ) + ';\n';
 };
 
 module.exports.SCRIPT = SCRIPT;

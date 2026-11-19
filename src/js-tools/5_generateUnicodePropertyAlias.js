@@ -6,5 +6,10 @@ module.exports = function(){
       objPropertyAliases[ c ] = d;
     };
 
-    return 'm_propertyAliases = ' + JSON.stringify( objPropertyAliases, null, '    ' ) + ';';
+    return `
+goog.provide( 'vm.propertyAliases' );
+
+/** @package @const {!Object.<string, string>} */
+` +
+    'vm.propertyAliases = ' + JSON.stringify( objPropertyAliases, null, '    ' ) + ';';
 };

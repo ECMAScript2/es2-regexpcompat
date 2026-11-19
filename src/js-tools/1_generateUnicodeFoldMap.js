@@ -1,5 +1,5 @@
 module.exports = function(){
-    const hex    = require( './0_util.js' ).hex;
+    const hex                                = require( './0_util.js' ).hex;
     const common /* : Map<number, number> */ = require('unicode-12.0.0/Case_Folding/C/code-points.js');
     const simple /* : Map<number, number> */ = require('unicode-12.0.0/Case_Folding/S/code-points.js');
 
@@ -15,17 +15,27 @@ module.exports = function(){
 
     // Generate output data.
     let src =
-`CONST_SUPPORT_ES2018 && (function( caseFoldingCodePoints ){
+`
+goog.provide( 'vm.unicodeFoldMap' );
+goog.provide( 'vm.unicodeInverseFoldMap' );
+
+/** @package @const {!Array.<number>} */
+vm.unicodeFoldMap = [];
+
+/** @package @const {!Array.<!Array.<number>>} */
+vm.unicodeInverseFoldMap = [];
+
+vm.SUPPORT_ES2018 && (function( caseFoldingCodePoints ){
     var i = -1, codePoint0, codePoint1;
 
     for( ; codePoint0 = caseFoldingCodePoints[ ++i ]; ){
         codePoint1 = caseFoldingCodePoints[ ++i ];
-        m_unicodeFoldMap[ codePoint0 ] = codePoint1;
+        vm.unicodeFoldMap[ codePoint0 ] = codePoint1;
 
-        if( !m_unicodeInverseFoldMap[ codePoint1 ] ){
-            m_unicodeInverseFoldMap[ codePoint1 ] = [];
+        if( !vm.unicodeInverseFoldMap[ codePoint1 ] ){
+            vm.unicodeInverseFoldMap[ codePoint1 ] = [];
         };
-        m_unicodeInverseFoldMap[ codePoint1 ].push( codePoint0 );
+        vm.unicodeInverseFoldMap[ codePoint1 ].push( codePoint0 );
     };
 })( [
 `;

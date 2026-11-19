@@ -55,12 +55,12 @@ const PROPERTY = [
     'XIDS'
 ];
 
-module.exports = function(){
+module.exports = function( path ){
     const propertyAliases = require( 'unicode-property-aliases-ecmascript' );
-    const CharSet = require( './0_util.js' ).CharSet;
+    const CharSet         = require( path ).CharSet;
 
     // Generate output data.
-    var property = {};
+    const property = {};
 
     for( const name of PROPERTY ){
         const canonical = propertyAliases.get(name) ?? name;
@@ -72,7 +72,12 @@ module.exports = function(){
         };
         property[ canonical ] = set.data;
     };
-    return 'm_unicodeProperty =\n' + JSON.stringify( property, null, '    ' ) + ';\n';
+    return `
+goog.provide( 'vm.unicodeProperty' );
+
+/** @const {!Object.<string, !Array.<number>>} */
+` +
+    'vm.unicodeProperty =\n' + JSON.stringify( property, null, '    ' ) + ';\n';
 };
 
 module.exports.PROPERTY = PROPERTY;

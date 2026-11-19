@@ -1,8 +1,8 @@
-module.exports = function(){
-    const CharSet = require( './0_util.js' ).CharSet;
-
-    const mapIdStart = require( 'unicode-12.0.0/Binary_Property/ID_Start/code-points.js' );
+module.exports = function( path ){
+    const CharSet        = require( path ).CharSet;
+    const mapIdStart     = require( 'unicode-12.0.0/Binary_Property/ID_Start/code-points.js' );
     const charSetIdStart = new CharSet();
+
     for( const c of mapIdStart ){
       charSetIdStart.add( c, c + 1 );
     };
@@ -13,18 +13,28 @@ module.exports = function(){
         charSetIdContinue.add( c, c + 1 );
     };
     return `
-if( DEFINE_REGEXP_COMPAT__DEBUG ){
-    charSetIdStart = m_createCharSetFromArray(
-        CONST_SUPPORT_ES2018 ?
-            m_unicodeProperty[ 'ID_Start' ]
+goog.provide( 'vm.charSet.ID_Start' );
+goog.provide( 'vm.charSet.ID_Continue' );
+
+goog.requireType( 'vm.d.CharSet' );
+goog.require( 'vm.DEFINE.DEBUG' );
+goog.require( 'vm.createCharSet' );
+goog.require( 'vm.SUPPORT_ES2018' );
+goog.require( 'vm.unicodeProperty' );
+
+if( vm.DEFINE.DEBUG ){
+    /** @package @const {!vm.d.CharSet} */
+    vm.charSet.ID_Start = vm.createCharSet(
+        vm.SUPPORT_ES2018 ?
+            vm.unicodeProperty[ 'ID_Start' ]
             :
             [${charSetIdStart.data.join( ', ' )}]
     );
 };
-
-charSetIdContinue = m_createCharSetFromArray(
-    CONST_SUPPORT_ES2018 ?
-        m_unicodeProperty[ 'ID_Continue' ]
+/** @package @const {!vm.d.CharSet} */
+vm.charSet.ID_Continue = vm.createCharSet(
+    vm.SUPPORT_ES2018 ?
+        vm.unicodeProperty[ 'ID_Continue' ]
         :
         [${charSetIdContinue.data.join( ', ' )}]
 );

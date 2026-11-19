@@ -6,15 +6,12 @@ This project is based on [ReRE.js](https://github.com/makenowjust/rerejs/) by [m
 
 ## Closure Compiler `@define` s
 
-| Variable Name                                       | Data Type    | Default Value | Options                                | Description                   |
-|:----------------------------------------------------|:-------------|:--------------|:---------------------------------------|:------------------------------|
-| `DEFINE_REGEXP_COMPAT__DEBUG`                       | `boolean`    | `false`       |                                        | Set `true` for debug build.   |
-| `DEFINE_REGEXP_COMPAT__MINIFY`                      | `boolean`    | `false`       |                                        | Set `true` for minimum build. |
-| `DEFINE_REGEXP_COMPAT__NODEJS`                      | `boolean`    | `false`       |                                        | Set `true` for node.js        |
-| `DEFINE_REGEXP_COMPAT__CLIENT_MIN_ES_VERSION`       | `number`     | `2`           | `2`, `3`, `5`, `6`, `2015`(=6), `2018` | Target ES Version             |
-| `DEFINE_REGEXP_COMPAT__ES_FEATURE_VERSION`          | `number`     | `2018`        |      `3`, `5`, `6`, `2015`(=6), `2018` | ES fuature version            |
-| `DEFINE_REGEXP_COMPAT__EXPORT_BY_RETURN`            | `boolean`    | `false`       |                                        |                               |
-| `DEFINE_REGEXP_COMPAT__EXPORT_BY_CALL_REGEXPCOMPAT` | `boolean`    | `false`       |                                        |                               |
+| Variable Name                     | Data Type    | Default Value | Options                                | Description                   |
+|:----------------------------------|:-------------|:--------------|:---------------------------------------|:------------------------------|
+| `vm.DEFINE.DEBUG`                 | `boolean`    | `false`       |                                        | Set `true` for debug build.   |
+| `vm.DEFINE.MINIFY`                | `boolean`    | `true`        |                                        | Set `true` for minimum build. |
+| `vm.DEFINE.CLIENT_MIN_ES_VERSION` | `number`     | `2`           | `2`, `3`, `5`, `6`, `2015`(=6), `2018` | Target ES Version             |
+| `vm.DEFINE.ES_FEATURE_VERSION`    | `number`     | `2018`        |      `3`, `5`, `6`, `2015`(=6), `2018` | ES fuature version            |
 
 ## Build
 
@@ -37,4 +34,4 @@ npm test
 
 ES2 RegExpCompat is licensed under [MIT License](https://opensource.org/licenses/MIT).
 
-(C) 2022-2023 [itozyun](https://github.com/itozyun)([outcloud.blogspot.com](//outcloud.blogspot.com/))
+(C) 2022-2026 [itozyun](https://github.com/itozyun)([outcloud.blogspot.com](//outcloud.blogspot.com/))

@@ -18,8 +18,16 @@ module.exports = function(){
     for( const [ c, d ] of mapScriptExtensions ){
         objScriptExtensions[ c ] = d;
     };
-    return '' +
-        'm_propertyValueAliasesGeneralCategory = '  + JSON.stringify( objGeneralCategory , null, '    ' ) + ';\n' +
-        'm_propertyValueAliasesScript = '           + JSON.stringify( objScript          , null, '    ' ) + ';\n' +
-        'm_propertyValueAliasesScriptExtensions = ' + JSON.stringify( objScriptExtensions, null, '    ' ) + ';\n';
+    return `
+goog.provide( 'vm.propertyValueAliasesGeneralCategory' );
+goog.provide( 'vm.propertyValueAliasesScript' );
+goog.provide( 'vm.propertyValueAliasesScriptExtensions' );
+
+` +
+        '/** @package @const {!Object.<string, string>} */\n' +
+        'vm.propertyValueAliasesGeneralCategory = '  + JSON.stringify( objGeneralCategory , null, '    ' ) + ';\n' +
+        '/** @package @const {!Object.<string, string>} */\n' +
+        'vm.propertyValueAliasesScript = '           + JSON.stringify( objScript          , null, '    ' ) + ';\n' +
+        '/** @package @const {!Object.<string, string>} */\n' +
+        'vm.propertyValueAliasesScriptExtensions = ' + JSON.stringify( objScriptExtensions, null, '    ' ) + ';\n';
 };

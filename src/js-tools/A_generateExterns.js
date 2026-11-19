@@ -47,14 +47,21 @@ module.exports = function(){
     };
 
     return `
+/** @externs */
+
+/** @type {*} */
+var __export__;
+
 /** @const {!Global} */
 var global;
 
 /** @const {!Object} */
 var module = {};
+/** @const {!Object} */
+module.exports = {};
 
-String.prototype.search = function(){};
-String.prototype.split  = function(){};
+String.prototype.search = function(regexp){};
+String.prototype.split  = function(regexp, limit){};
 
 var UnicodeCategory =
     ${JSON.stringify(UnicodeCategory)};

@@ -1,8 +1,8 @@
-module.exports = function(){
-    const common /* : Map<number, number> */ = require('unicode-12.0.0/Case_Folding/C/code-points.js');
-    const simple /* : Map<number, number> */ = require('unicode-12.0.0/Case_Folding/S/code-points.js');
+module.exports = function( path ){
+    const common /* : Map<number, number> */        = require('unicode-12.0.0/Case_Folding/C/code-points.js');
+    const simple /* : Map<number, number> */        = require('unicode-12.0.0/Case_Folding/S/code-points.js');
     const spaceSeparatorCodePoints /* : number[] */ = require( 'unicode-12.0.0/General_Category/Space_Separator/code-points.js' );
-    const CharSet = require( './0_util.js' ).CharSet;
+    const CharSet                                   = require( path ).CharSet;
 
     // Merge C and S mappings.
     const foldMap = new Map()/* <number, number> */;
@@ -52,30 +52,49 @@ module.exports = function(){
     return `
 // See https://www.ecma-international.org/ecma-262/10.0/index.html#sec-characterclassescape.
 
-/** A CharSet which contains ASCII digits. */
-m_charSetDigit = m_createCharSetFromArray(
+goog.provide( 'vm.charSet.Digit' );
+goog.provide( 'vm.charSet.InvertDigit' );
+goog.provide( 'vm.charSet.Word' );
+goog.provide( 'vm.charSet.InvertWord' );
+goog.provide( 'vm.charSet.UnicodeWord' );
+goog.provide( 'vm.charSet.InvertUnicodeWord' );
+goog.provide( 'vm.charSet.Space' );
+goog.provide( 'vm.charSet.InvertSpace' );
+
+goog.requireType( 'vm.d.CharSet' );
+goog.require( 'vm.createCharSet' );
+goog.require( 'vm.SUPPORT_ES2018' );
+
+/** A CharSet which contains ASCII digits. 
+ * @const {!vm.d.CharSet} */
+vm.charSet.Digit = vm.createCharSet(
     [ 0x30, 0x39 + 1 ] // 0..9
 );
 
-/** A CharSet which does not contain ASCII digits. */
-m_charSetInvertDigit = m_charSetDigit.clone().invert();
+/** A CharSet which does not contain ASCII digits.
+ * @const {!vm.d.CharSet} */
+vm.charSet.InvertDigit = vm.charSet.Digit.clone().invert();
 
-/** A CharSet which contains ASCII word characters. */
-m_charSetWord = m_createCharSetFromArray( [ ${charSetWord.data.join( ', ' )} ] );
+/** A CharSet which contains ASCII word characters.
+ * @const {!vm.d.CharSet} */
+vm.charSet.Word = vm.createCharSet( [ ${charSetWord.data.join( ', ' )} ] );
 
-/** A CharSet which does not contain ASCII word characters. */
-m_charSetInvertWord = m_charSetWord.clone().invert();
+/** A CharSet which does not contain ASCII word characters.
+ * @const {!vm.d.CharSet} */
+vm.charSet.InvertWord = vm.charSet.Word.clone().invert();
 
-if( CONST_SUPPORT_ES2018 ){
-/**
- * A CharSet which contains Unicode word characters.
- *
- * See https://www.ecma-international.org/ecma-262/10.0/index.html#sec-runtime-semantics-wordcharacters-abstract-operation.
- */
-    m_charSetUnicodeWord = m_createCharSetFromArray( [ ${charSetUnicodeWord.data.join( ', ' )} ] );
+if( vm.SUPPORT_ES2018 ){
+    /**
+     * A CharSet which contains Unicode word characters.
+     *
+     * See https://www.ecma-international.org/ecma-262/10.0/index.html#sec-runtime-semantics-wordcharacters-abstract-operation.
+     * 
+     * @const {!vm.d.CharSet} */
+    vm.charSet.UnicodeWord = vm.createCharSet( [ ${charSetUnicodeWord.data.join( ', ' )} ] );
 
-/** A CharSet which does not contain Unicode word characters. */
-    m_charSetInvertUnicodeWord = m_charSetUnicodeWord.clone().invert();
+    /** A CharSet which does not contain Unicode word characters.
+     * @const {!vm.d.CharSet} */
+    vm.charSet.InvertUnicodeWord = vm.charSet.UnicodeWord.clone().invert();
 };
 
 /**
@@ -83,10 +102,11 @@ if( CONST_SUPPORT_ES2018 ){
  *
  * See https://www.ecma-international.org/ecma-262/10.0/index.html#prod-WhiteSpace
  * and https://www.ecma-international.org/ecma-262/10.0/index.html#prod-LineTerminator.
- */
-m_charSetSpace = m_createCharSetFromArray( [ ${charSetSpace.data.join( ', ' )} ] );
+ * @const {!vm.d.CharSet} */
+vm.charSet.Space = vm.createCharSet( [ ${charSetSpace.data.join( ', ' )} ] );
 
-/** A CharSet which does not contain space characters. */
-m_charSetInvertSpace = m_charSetSpace.clone().invert();
+/** A CharSet which does not contain space characters.
+ * @const {!vm.d.CharSet} */
+vm.charSet.InvertSpace = vm.charSet.Space.clone().invert();
 `;
 };

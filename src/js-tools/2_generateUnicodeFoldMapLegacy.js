@@ -12,8 +12,6 @@
  * See https://www.ecma-international.org/ecma-262/10.0/index.html#sec-runtime-semantics-canonicalize-ch.
  */
 module.exports = function(){
-    const hex = require( './0_util.js' ).hex;
-
     function canonicalize( c ){
         const u = String.fromCharCode( c ).toUpperCase();
         if( u.length >= 2 ){
@@ -25,7 +23,9 @@ module.exports = function(){
         };
         return d;
     };
-    
+
+    const hex = require( './0_util.js' ).hex;
+
     // Build `foldMap` table which is map from a character to its canonicalized.
     const foldMap = new Map;
     for( let c = 0; c < 0xffff; c++ ){
@@ -67,7 +67,13 @@ module.exports = function(){
     let src = '';
 
     for( const [ c, d ] of inverseFoldMap ){
-        src += 'm_legacyFoldMap[ ' + hex( c ) + ' ] = [ ' + d.map( hex ).join( ', ' ) + ' ];\n';
+        src += 'vm.legacyFoldMap[ ' + hex( c ) + ' ] = [ ' + d.map( hex ).join( ', ' ) + ' ];\n';
     };
-    return src;
+    return `
+goog.provide( 'vm.legacyFoldMap' );
+
+/** @package @const {!Array.<!Array.<number>>} */
+vm.legacyFoldMap = [];
+
+` + src;
 };

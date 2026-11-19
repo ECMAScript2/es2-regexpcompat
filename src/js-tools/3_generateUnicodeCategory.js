@@ -40,12 +40,12 @@ const CATEGORY = [
     'Lu'
 ];
   
-module.exports = function(){
+module.exports = function( path ){
     const matchPropertyValue = require( 'unicode-match-property-value-ecmascript' );
-    const CharSet    = require( './0_util.js' ).CharSet;
+    const CharSet            = require( path ).CharSet;
 
     // Generate output data.
-    var category = {};
+    const category = {};
 
     for( const name of CATEGORY ){
         const canonical = matchPropertyValue( 'General_Category', name );
@@ -57,7 +57,11 @@ module.exports = function(){
         };
         category[ canonical ] = set.data;
     };
-    return 'm_unicodeCategory =\n' + JSON.stringify( category, null, '    ' ) + ';\n';
+    return `
+goog.provide( 'vm.unicodeCategory' );
+
+/** @package @const {!Object.<string, !Array.<number>>} */
+` + 'vm.unicodeCategory =\n' + JSON.stringify( category, null, '    ' ) + ';\n';
 };
 
 module.exports.CATEGORY = CATEGORY;
